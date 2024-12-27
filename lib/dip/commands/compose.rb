@@ -19,7 +19,7 @@ module Dip
       end
 
       def execute
-        # puts "Dip.Commands.Compose#execute >>>>>>>"
+        puts "Dip.Commands.Compose#execute >>>>>>>" if Dip.debug?
         Dip.env["DIP_DNS"] ||= find_dns
 
         set_infra_env

@@ -10,6 +10,15 @@ module Dip
       @config ||= Dip::Config.new
     end
 
+    def self.logger
+      @logger ||= Logger.new(STDOUT).tap do |log|
+        log.level = Logger::INFO
+        log.formatter = proc do |severity, datetime, progname, msg|
+          "[#{datetime}] #{severity}: #{msg}\n"
+        end
+      end
+    end
+
     def env
       @env ||= Dip::Environment.new(config.exist? ? config.environment : {})
     end

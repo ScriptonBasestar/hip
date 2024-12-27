@@ -39,7 +39,7 @@ interaction:
     user: "33:33"
     # user: 33:33
     service: app
-    command: /bin/bash
+    command: /bin/bash -c
 
   bash2:
     description: Open the Bash - root user

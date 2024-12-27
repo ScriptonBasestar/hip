@@ -20,12 +20,11 @@ module Dip
       end
 
       def start(argv)
-        puts "Dip.CLI.start >>>>>>>>>>"
+        puts "Dip.CLI#start >>>>>>>>>>" if Dip.debug?
         argv = Dip::RunVars.call(argv, ENV)
 
         cmd = argv.first
-
-        puts "cmd: #{cmd}"
+        puts "Dip.CLI#start cmd: #{cmd}" if Dip.debug?
 
         if cmd && !TOP_LEVEL_COMMANDS.include?(cmd) && Dip.config.exist? && Dip.config.interaction.key?(cmd.to_sym)
           argv.unshift("run")
@@ -116,8 +115,9 @@ module Dip
     def provision(*argv)
       if options[:help]
         invoke :help, ["provision"]
-      elsif argv.empty?
-        require_relative "commands/provision"
+      # elsif argv.empty?
+      #   require_relative "commands/provision"
+      #   Dip::Commands::Provision.new.execute
       else
         require_relative "commands/provision"
         Dip::Commands::Provision.new.execute
