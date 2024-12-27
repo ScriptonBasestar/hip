@@ -3,21 +3,23 @@
 require "dip/errors"
 require "dip/config"
 require "dip/environment"
+require 'logger'
 
 module Dip
+  def self.logger
+    @logger ||= Logger.new(STDOUT).tap do |log|
+      log.level = Logger::INFO
+      log.formatter = proc do |severity, datetime, progname, msg|
+        "[#{datetime}] #{severity}: #{msg}\n"
+      end
+    end
+  end
+
   class << self
     def config
       @config ||= Dip::Config.new
     end
 
-    def self.logger
-      @logger ||= Logger.new(STDOUT).tap do |log|
-        log.level = Logger::INFO
-        log.formatter = proc do |severity, datetime, progname, msg|
-          "[#{datetime}] #{severity}: #{msg}\n"
-        end
-      end
-    end
 
     def env
       @env ||= Dip::Environment.new(config.exist? ? config.environment : {})

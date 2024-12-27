@@ -20,11 +20,11 @@ module Dip
       end
 
       def start(argv)
-        puts "Dip.CLI#start >>>>>>>>>>" if Dip.debug?
+        Dip.logger.debug "Dip.CLI#start >>>>>>>>>>"
         argv = Dip::RunVars.call(argv, ENV)
 
         cmd = argv.first
-        puts "Dip.CLI#start cmd: #{cmd}" if Dip.debug?
+        Dip.logger.debug "Dip.CLI#start cmd: #{cmd}"
 
         if cmd && !TOP_LEVEL_COMMANDS.include?(cmd) && Dip.config.exist? && Dip.config.interaction.key?(cmd.to_sym)
           argv.unshift("run")
@@ -107,12 +107,13 @@ module Dip
       end
     end
 
-    # puts Dip.config.provision
     # TODO use desc in schema.json ??
     desc "provision", "Execute commands within provision section"
     method_option :help, aliases: "-h", type: :boolean,
       desc: "Display usage information"
     def provision(*argv)
+      Dip.logger.debug "Dip.CLI#provision >>>>>>>>>>"
+      Dip.logger.debug "Dip.CLI#provision argv: #{argv}"
       if options[:help]
         invoke :help, ["provision"]
       # elsif argv.empty?

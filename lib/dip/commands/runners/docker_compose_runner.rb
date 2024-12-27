@@ -8,10 +8,10 @@ module Dip
     module Runners
       class DockerComposeRunner < Base
         def execute
-          puts "Dip.Commands.Runners.DockerComposeRunner#execute >>>>>>>>>>" if Dip.debug?
-          puts "Dip.Commands.Runners.DockerComposeRunner#execute command: #{command}" if Dip.debug?
-          puts "Dip.Commands.Runners.DockerComposeRunner#execute compose_profiles: #{compose_profiles}" if Dip.debug?
-          puts "Dip.Commands.Runners.DockerComposeRunner#execute compose_arguments: #{compose_arguments}" if Dip.debug?
+          Dip.logger.debug "Dip.Commands.Runners.DockerComposeRunner#execute >>>>>>>>>>"
+          Dip.logger.debug "Dip.Commands.Runners.DockerComposeRunner#execute command: #{command}"
+          Dip.logger.debug "Dip.Commands.Runners.DockerComposeRunner#execute compose_profiles: #{compose_profiles}"
+          Dip.logger.debug "Dip.Commands.Runners.DockerComposeRunner#execute compose_arguments: #{compose_arguments}"
           Commands::Compose.new(
             *compose_profiles,
             command[:compose][:method],
@@ -36,16 +36,16 @@ module Dip
           compose_argv = command[:compose][:run_options].dup
 
           if command[:compose][:method] == "run"
-            puts "Dip.Commands.Runners.DockerComposeRunner#compose_arguments - if run" if Dip.debug?
+            Dip.logger.debug "Dip.Commands.Runners.DockerComposeRunner#compose_arguments - if run"
             compose_argv.concat(run_vars)
             compose_argv.concat(published_ports)
             compose_argv << "--rm"
           elsif command[:compose][:method] == "exec"
             # default exec
-            puts "Dip.Commands.Runners.DockerComposeRunner#compose_arguments - elsif exec" if Dip.debug?
+            Dip.logger.debug "Dip.Commands.Runners.DockerComposeRunner#compose_arguments - elsif exec"
           else
             # none
-            puts "Dip.Commands.Runners.DockerComposeRunner#compose_arguments - else none" if Dip.debug?
+            Dip.logger.debug "Dip.Commands.Runners.DockerComposeRunner#compose_arguments - else none"
           end
 
           compose_argv << "--user #{command.fetch(:user)}" if command[:user]

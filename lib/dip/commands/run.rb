@@ -36,7 +36,7 @@ module Dip
       attr_reader :command, :argv, :options
 
       def lookup_runner
-        puts "Dip.Commands.Run#lookup_runner command: #{command}" if Dip.debug?
+        Dip.logger.debug "Dip.Commands.Run#lookup_runner command: #{command}"
         if (runner = command[:runner])
           camelized_runner = runner.split("_").collect(&:capitalize).join
           Runners.const_get("#{camelized_runner}Runner")

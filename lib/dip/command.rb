@@ -10,15 +10,15 @@ module Dip
 
     class ProgramRunner
       def self.call(cmdline, env: {}, **options)
-        puts "Dip.Command.ProgramRunner#self.call >>>>>>>>>>" if Dip.debug?
-        puts "Dip.Command.ProgramRunner#self.call cmdline: #{cmdline}" if Dip.debug?
-        puts "Dip.Command.ProgramRunner#self.call env: #{env}" if Dip.debug?
-        puts "Dip.Command.ProgramRunner#self.call options: #{options}" if Dip.debug?
+        Dip.logger.debug "Dip.Command.ProgramRunner#self.call >>>>>>>>>>"
+        Dip.logger.debug "Dip.Command.ProgramRunner#self.call cmdline: #{cmdline}"
+        Dip.logger.debug "Dip.Command.ProgramRunner#self.call env: #{env}"
+        Dip.logger.debug "Dip.Command.ProgramRunner#self.call options: #{options}"
         if cmdline.is_a?(Array)
-          puts "Dip.Command.ProgramRunner#self.call if" if Dip.debug?
+          Dip.logger.debug "Dip.Command.ProgramRunner#self.call if"
           ::Kernel.exec(env, cmdline[0], *cmdline.drop(1), **options)
         else
-          puts "Dip.Command.ProgramRunner#self.call else" if Dip.debug?
+          Dip.logger.debug "Dip.Command.ProgramRunner#self.call else"
           # provision 오류시 뭘 할 수 있나?
           ::Kernel.exec(env, cmdline, **options)
         end
@@ -27,8 +27,8 @@ module Dip
 
     class SubprocessRunner
       def self.call(cmdline, env: {}, panic: true, **options)
-        puts "Dip.Command.SubprocessRunner#self.call >>>>>>>>>>" if Dip.debug?
-        puts "Dip.Command.SubprocessRunner#self.call cmdline: #{cmdline}" if Dip.debug?
+        Dip.logger.debug "Dip.Command.SubprocessRunner#self.call >>>>>>>>>>"
+        Dip.logger.debug "Dip.Command.SubprocessRunner#self.call cmdline: #{cmdline}"
         status = ::Kernel.system(env, cmdline, **options)
 
         if !status && panic
@@ -51,19 +51,19 @@ module Dip
       private
 
       def run(runner, cmd, argv = [], shell: true, **options)
-        puts "Dip.Command#run >>>>>>>>>>" if Dip.debug?
+        Dip.logger.debug "Dip.Command#run >>>>>>>>>>"
         cmd = Dip.env.interpolate(cmd)
         argv = [argv] if argv.is_a?(String)
         argv = argv.map { |arg| Dip.env.interpolate(arg) }
         cmdline = [cmd, *argv].compact
         cmdline = cmdline.join(" ").strip if shell
-        puts "Dip.Command#run cmdline: #{cmdline}"
+        Dip.logger.debug "Dip.Command#run cmdline: #{cmdline}"
 
-        puts "=====================================" if Dip.debug?
-        puts "=====================================" if Dip.debug?
-        puts [Dip.env.vars, cmdline].inspect if Dip.debug?
-        puts "=====================================" if Dip.debug?
-        puts "=====================================" if Dip.debug?
+        Dip.logger.debug "====================================="
+        Dip.logger.debug "====================================="
+        Dip.logger.debug [Dip.env.vars, cmdline].inspect
+        Dip.logger.debug "====================================="
+        Dip.logger.debug "====================================="
 
         runner.call(cmdline, env: Dip.env.vars, **options)
       end
