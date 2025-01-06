@@ -1,3 +1,7 @@
+# Hip
+
+hip으로 개명함. 한손으로 칠 수 있도록
+
 [![Gem Version](https://badge.fury.io/rb/dip.svg)](https://badge.fury.io/rb/dip)
 [![Build Status](https://github.com/bibendi/dip/actions/workflows/ci.yml/badge.svg)](https://github.com/bibendi/dip/actions/workflows/ci.yml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/d0dca854f0930502f7b3/maintainability)](https://codeclimate.com/github/bibendi/dip/maintainability)
