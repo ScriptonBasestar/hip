@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 
-require_relative '../lib/dip/version'
-#require 'dip/version'
+require_relative '../lib/hip/version'
+#require 'hip/version'
 
-puts Dip::VERSION
+puts Hip::VERSION
 
-system("gem build dip.gemspec")
+system("gem build hip.gemspec")
 
-system("gem install dip-#{Dip::VERSION}.gem --user-install")
+system("gem install hip-#{Hip::VERSION}.gem --user-install")

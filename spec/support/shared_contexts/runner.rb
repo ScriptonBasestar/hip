@@ -5,8 +5,8 @@ shared_context "dip command", :runner do
   let(:exec_subprocess_runner) { spy("exec_subprocess runner") }
 
   before do
-    stub_const("Dip::Command::ProgramRunner", exec_program_runner)
-    stub_const("Dip::Command::SubprocessRunner", exec_subprocess_runner)
+    stub_const("Hip::Command::ProgramRunner", exec_program_runner)
+    stub_const("Hip::Command::SubprocessRunner", exec_subprocess_runner)
   end
 end
 

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-06/schema#",
-  "title": "Dip Configuration Schema",
-  "description": "Schema for the dip.yml configuration file",
+  "title": "Hip Configuration Schema",
+  "description": "Schema for the hip.yml configuration file",
   "type": "object",
   "additionalProperties": false,
   "definitions": {
@@ -129,7 +129,7 @@
   "properties": {
     "version": {
       "type": "string",
-      "description": "Specifies the minimum required version of Dip",
+      "description": "Specifies the minimum required version of Hip",
       "examples": ["8.1.0"]
     },
     "compose": {
@@ -186,12 +186,12 @@
       "examples": [
         {
           "default": [
-            "dip compose down --volumes",
-            "dip compose build",
+            "hip compose down --volumes",
+            "hip compose build",
             "dip rails db:migrate"
           ],
           "reset": [
-            "dip compose down --volumes",
+            "hip compose down --volumes",
             "rm -rf Gemfile.lock",
             "dip bundle install"
           ]

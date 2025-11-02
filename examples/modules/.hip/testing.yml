@@ -1,0 +1,81 @@
+# Testing Module
+# This module provides comprehensive testing tools
+#
+# Provided commands:
+# - dip rspec         # Run RSpec tests
+# - dip minitest      # Run Minitest tests
+# - dip coverage      # Generate coverage report
+# - dip ci            # Run full CI test suite
+
+version: '8.2.8'
+
+interaction:
+  # RSpec - Behavior-driven testing framework
+  rspec:
+    description: Run RSpec tests
+    service: web
+    command: bundle exec rspec
+    environment:
+      RAILS_ENV: test
+      COVERAGE: "true"
+    compose:
+      run_options:
+        - rm
+    subcommands:
+      fast:
+        description: Run tests without coverage
+        command: bundle exec rspec
+        environment:
+          RAILS_ENV: test
+          COVERAGE: "false"
+      unit:
+        description: Run unit tests only
+        command: bundle exec rspec spec/models spec/lib
+      integration:
+        description: Run integration tests only
+        command: bundle exec rspec spec/requests spec/features
+
+  # Minitest - Alternative testing framework
+  minitest:
+    description: Run Minitest tests
+    service: web
+    command: bundle exec rake test
+    environment:
+      RAILS_ENV: test
+    compose:
+      run_options:
+        - rm
+
+  # SimpleCov - Coverage report
+  coverage:
+    description: Generate and open coverage report
+    service: web
+    command: bundle exec rspec && open coverage/index.html
+    environment:
+      RAILS_ENV: test
+      COVERAGE: "true"
+
+  # Parallel tests for faster CI
+  parallel-tests:
+    description: Run tests in parallel
+    service: web
+    command: bundle exec parallel_rspec spec/
+    environment:
+      RAILS_ENV: test
+
+provision:
+  # Setup test environment
+  test-setup:
+    - RAILS_ENV=test dip bundle install
+    - RAILS_ENV=test dip rails db:create db:schema:load
+    - echo "✅ Test environment ready"
+
+  # Run full CI test suite
+  ci:
+    - hip provision test-setup
+    - dip rspec
+    - echo "✅ CI tests complete"
+
+  # Reset test database
+  test-reset:
+    - RAILS_ENV=test dip rails db:drop db:create db:schema:load

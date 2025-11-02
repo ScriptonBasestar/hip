@@ -6,8 +6,8 @@
 #           subcommands, multiple runners, compose profiles, and infra management
 #
 # Usage:
-#   dip provision              # Run default setup
-#   dip provision reset        # Reset and rebuild
+#   hip provision              # Run default setup
+#   hip provision reset        # Reset and rebuild
 #   dip rails console          # Start Rails console
 #   dip rails db:migrate       # Run migrations
 #   dip npm install            # Install Node packages
@@ -139,22 +139,22 @@ interaction:
 
 provision:
   default:
-    - dip compose down --volumes
-    - dip compose build
+    - hip compose down --volumes
+    - hip compose build
     - dip rails db:create
     - dip rails db:migrate
     - dip rails db:seed
     - dip npm install
     - dip validate
   reset:
-    - dip compose down --volumes
+    - hip compose down --volumes
     - rm -rf tmp/ log/*.log
-    - dip compose build --no-cache
+    - hip compose build --no-cache
     - dip rails db:drop db:create db:migrate db:seed
   seed:
     - dip rails db:seed
   deploy:
-    - dip compose build
+    - hip compose build
     - dip rails db:migrate
     - dip rails assets:precompile
 

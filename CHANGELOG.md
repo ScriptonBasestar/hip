@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### 🚨 BREAKING CHANGES - Complete Rebranding from "dip" to "hip"
+
+This is a major breaking release that completely renames the project from "dip" to "hip" (Handy Infrastructure Provisioner).
+
+#### What Changed
+- **Binary name**: `dip` → `hip`
+- **Module namespace**: `Dip::` → `Hip::`
+- **Config files**: `dip.yml` → `hip.yml`, `dip.override.yml` → `hip.override.yml`
+- **Module directory**: `.dip/` → `.hip/`
+- **Home directory**: `~/.dip` → `~/.hip`
+- **Environment variables**: All `DIP_*` → `HIP_*`
+  - `DIP_FILE` → `HIP_FILE`
+  - `DIP_HOME` → `HIP_HOME`
+  - `DIP_ENV` → `HIP_ENV`
+  - `DIP_SHELL` → `HIP_SHELL`
+  - `DIP_SKIP_VALIDATION` → `HIP_SKIP_VALIDATION`
+  - And more...
+
+#### Migration Guide
+
+**Option 1: Use the migration script** (Recommended)
+```bash
+gem install hip
+./bin/migrate-from-dip  # or with --dry-run to preview
+```
+
+**Option 2: Manual migration**
+```bash
+# Rename config files
+mv dip.yml hip.yml
+mv dip.override.yml hip.override.yml  # if exists
+mv .dip .hip  # if exists
+
+# Migrate home directory
+mv ~/.dip ~/.hip  # if exists
+
+# Update shell configuration
+# Change: eval "$(dip console)"
+# To:     eval "$(hip console)"
+
+# Update environment variables in scripts/CI
+# All DIP_* → HIP_*
+```
+
+**Why this change?**
+This project is a fork of the original "dip" gem, renamed for easier one-handed typing on Korean keyboards and to establish a clear identity as "Hip" (Handy Infrastructure Provisioner).
+
+### Added
+- Migration script: `bin/migrate-from-dip` to help users transition from dip to hip
+- Comprehensive documentation updates reflecting the new "hip" branding
+- Simplified CLAUDE.md focusing on hip instead of detailing original dip
+
 ## [8.2.8] - 2025-01-02
 
 ### Fixed

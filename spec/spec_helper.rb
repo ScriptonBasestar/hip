@@ -2,7 +2,7 @@
 
 require "bundler/setup"
 
-ENV["DIP_ENV"] = "test"
+ENV["HIP_ENV"] = "test"
 
 require "simplecov"
 SimpleCov.start do
@@ -10,8 +10,8 @@ SimpleCov.start do
 end
 
 require "pry-byebug"
-require "dip"
-require "dip/run_vars"
+require "hip"
+require "hip/run_vars"
 
 require "fakefs/safe"
 
@@ -33,20 +33,20 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-  config.define_derived_metadata(file_path: %r{/spec/lib/dip/commands}) do |metadata|
+  config.define_derived_metadata(file_path: %r{/spec/lib/hip/commands}) do |metadata|
     metadata[:runner] = true
   end
 
   config.around do |ex|
-    orig = ENV["DIP_FILE"]
-    ENV["DIP_FILE"] = fixture_path("empty", "dip.yml")
+    orig = ENV["HIP_FILE"]
+    ENV["HIP_FILE"] = fixture_path("empty", "hip.yml")
     ex.run
-    ENV["DIP_FILE"] = orig
+    ENV["HIP_FILE"] = orig
   end
 
   config.before do
-    Dip.reset!
-    Dip::RunVars.env.clear
+    Hip.reset!
+    Hip::RunVars.env.clear
   end
 
   Kernel.srand config.seed

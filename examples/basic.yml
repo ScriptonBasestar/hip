@@ -5,7 +5,7 @@
 # Features: Essential commands (shell, rails, bundle, rake), simple provision
 #
 # Usage:
-#   dip provision          # Set up the project for the first time
+#   hip provision          # Set up the project for the first time
 #   dip shell              # Start a bash shell in the container
 #   dip rails console      # Start Rails console
 #   dip rake db:migrate    # Run database migrations
@@ -66,8 +66,8 @@ interaction:
 provision:
   # Default setup - run this for first-time setup
   default:
-    - dip compose down --volumes
-    - dip compose up -d db
+    - hip compose down --volumes
+    - hip compose up -d db
     - dip bundle install
     - dip rails db:create
     - dip rails db:migrate

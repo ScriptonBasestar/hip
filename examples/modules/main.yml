@@ -58,6 +58,6 @@ interaction:
 
 provision:
   default:
-    - dip compose up -d db
+    - hip compose up -d db
     - dip bundle install
     - dip rails db:create db:migrate db:seed

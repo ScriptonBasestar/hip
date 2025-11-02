@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-shared_context "dip config", :config do
+shared_context "hip config", :config do
   before do
-    Dip.config.to_h.merge!(config)
+    Hip.config.to_h.merge!(config)
   end
 end

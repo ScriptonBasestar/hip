@@ -5,7 +5,7 @@
 # Features: npm/yarn commands, multiple services, development/production modes
 #
 # Usage:
-#   dip provision              # Setup project
+#   hip provision              # Setup project
 #   dip npm install            # Install dependencies
 #   dip npm run dev            # Start development server
 #   dip npm run build          # Build for production
@@ -116,15 +116,15 @@ interaction:
 provision:
   # Default setup
   default:
-    - dip compose down --volumes
-    - dip compose up -d mongo redis
+    - hip compose down --volumes
+    - hip compose up -d mongo redis
     - dip npm install
     - dip npm run build
     - echo "✅ Setup complete! Run 'dip npm run dev' to start"
 
   # Clean install
   reset:
-    - dip compose down --volumes
+    - hip compose down --volumes
     - rm -rf node_modules package-lock.json
     - dip npm install
     - dip npm run build

@@ -1,14 +1,15 @@
 # Hip
 
-> **Fork Notice**: This is a fork of [dip](https://github.com/bibendi/dip) by [bibendi](https://github.com/bibendi).
-> Renamed to "hip" for one-handed typing convenience (한손으로 칠 수 있도록).
+> **Hip** (Handy Infrastructure Provisioner) - A CLI dev-tool for streamlined Docker and Kubernetes workflows.
+>
+> Forked from [bibendi/dip](https://github.com/bibendi/dip) and renamed for easier one-handed typing (한손으로 칠 수 있도록).
 
 [![Original Project](https://img.shields.io/badge/forked%20from-bibendi%2Fdip-blue)](https://github.com/bibendi/dip)
 [![Gem Version](https://badge.fury.io/rb/hip.svg)](https://badge.fury.io/rb/hip)
 
-<img src="https://raw.githubusercontent.com/bibendi/dip/master/.github/logo.png" alt="dip logo" height="140" />
+<img src="https://raw.githubusercontent.com/bibendi/dip/master/.github/logo.png" alt="hip logo" height="140" />
 
-Hip is a CLI dev-tool that provides native-like interaction with a Dockerized application. It gives the feeling that you are working without using mind-blowing commands to run containers.
+Hip is a CLI dev-tool that provides native-like interaction with a Dockerized application. It gives the feeling that you are working without using complex commands to run containers.
 
 **Original project** by Evil Martians:
 <a href="https://github.com/bibendi/dip">
@@ -21,7 +22,7 @@ Hip is a CLI dev-tool that provides native-like interaction with a Dockerized ap
 - Dockerized Node.js application: [one](https://github.com/bibendi/twinkle.js), [two](https://github.com/bibendi/yt-graphql-react-event-booking-api)
 - [Dockerized Ruby gem](https://github.com/bibendi/schked)
 - [Dockerizing Ruby and Rails development](https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development)
-- [Reusable development containers with Docker Compose and Dip](https://evilmartians.com/chronicles/reusable-development-containers-with-docker-compose-and-dip)
+- [Reusable development containers with Docker Compose and Hip](https://evilmartians.com/chronicles/reusable-development-containers-with-docker-compose-and-dip)
 
 ### 📚 Configuration Examples
 
@@ -52,7 +53,7 @@ Dip can be injected into the current shell (ZSH or Bash).
 eval "$(dip console)"
 ```
 
-**IMPORTANT**: Beware of possible collisions with local tools. One particular example is supporting both local and Docker frontend build tools, such as Yarn. If you want some developer to run `yarn` locally and other to use Docker for that, you should either avoid adding the `yarn` command to the `dip.yml` or avoid using the shell integration for hybrid development.
+**IMPORTANT**: Beware of possible collisions with local tools. One particular example is supporting both local and Docker frontend build tools, such as Yarn. If you want some developer to run `yarn` locally and other to use Docker for that, you should either avoid adding the `yarn` command to the `hip.yml` or avoid using the shell integration for hybrid development.
 
 After that we can type commands without `dip` prefix. For example:
 
@@ -64,7 +65,7 @@ ktl *any-kubectl-arg
 provision
 ```
 
-When we change the current directory, all shell aliases will be automatically removed. But when we enter back into a directory with a `dip.yml` file, then shell aliases will be renewed.
+When we change the current directory, all shell aliases will be automatically removed. But when we enter back into a directory with a `hip.yml` file, then shell aliases will be renewed.
 
 Also, in shell mode Dip is trying to determine manually passed environment variables. For example:
 
@@ -82,11 +83,11 @@ dip --help
 dip SUBCOMMAND --help
 ```
 
-### dip.yml
+### hip.yml
 
-The configuration is loaded from `dip.yml` file. It may be located in a working directory, or it will be found in the nearest parent directory up to the file system root. If nearby places `dip.override.yml` file, it will be merged into the main config.
+The configuration is loaded from `hip.yml` file. It may be located in a working directory, or it will be found in the nearest parent directory up to the file system root. If nearby places `hip.override.yml` file, it will be merged into the main config.
 
-Also, in some cases, you may want to change the default config path by providing an environment variable `DIP_FILE`.
+Also, in some cases, you may want to change the default config path by providing an environment variable `HIP_FILE`.
 
 Below is an example of a real config.
 Config file reference will be written soon.
@@ -104,7 +105,7 @@ compose:
   files:
     - docker/docker-compose.yml
     - docker/docker-compose.$COMPOSE_EXT.yml
-    - docker/docker-compose.$DIP_OS.yml
+    - docker/docker-compose.$HIP_OS.yml
   project_name: bear
 
 kubectl:
@@ -200,26 +201,26 @@ provision:
 
 ### Predefined environment variables
 
-#### $DIP_OS
+#### $HIP_OS
 
 Current OS architecture (e.g. `linux`, `darwin`, `freebsd`, and so on). Sometime it may be useful to have one common `docker-compose.yml` and OS-dependent Compose configs.
 
-#### $DIP_WORK_DIR_REL_PATH
+#### $HIP_WORK_DIR_REL_PATH
 
 Relative path from the current directory to the nearest directory where a Dip's config is found. It is useful when you need to mount a specific local directory to a container along with ability to change its working dir. For example:
 
 ```
 - project_root
-  |- dip.yml (1)
+  |- hip.yml (1)
   |- docker-compose.yml (2)
   |- sub-project-dir
      |- your current directory is here <<<
 ```
 
 ```yml
-# dip.yml (1)
+# hip.yml (1)
 environment:
-  WORK_DIR: /app/${DIP_WORK_DIR_REL_PATH}
+  WORK_DIR: /app/${HIP_WORK_DIR_REL_PATH}
 ```
 
 ```yml
@@ -236,14 +237,14 @@ dip run bash -c pwd
 
 returned is `/app/sub-project-dir`.
 
-#### $DIP_CURRENT_USER
+#### $HIP_CURRENT_USER
 
 Exposes the current user ID (UID). It is useful when you need to run a container with the same user as the host machine. For example:
 
 ```yml
-# dip.yml (1)
+# hip.yml (1)
 environment:
-  UID: ${DIP_CURRENT_USER}
+  UID: ${HIP_CURRENT_USER}
 ```
 
 ```yml
@@ -258,7 +259,7 @@ The container will run using the same user ID as your host machine.
 
 ### Modules
 
-Modules are defined as array in `modules` section of dip.yml, modules are stored in `.dip` subdirectory of dip.yml directory.
+Modules are defined as array in `modules` section of hip.yml, modules are stored in `.dip` subdirectory of hip.yml directory.
 
 The main purpose of modules is to improve maintainability for a group of projects.
 Imagine having multiple gems which are managed with dip, each of them has the same commands, so to change one command in dip you need to update all gems individualy.
@@ -268,7 +269,7 @@ With `modules` you can define a group of modules for dip.
 For example having setup as this:
 
 ```yml
-# ./dip.yml
+# ./hip.yml
 modules:
  - sasts
  - rails
@@ -277,7 +278,7 @@ modules:
 ```
 
 ```yml
-# ./.dip/sasts.yml
+# ./.hip/sasts.yml
 interaction:
   brakeman:
     description: Check brakeman sast
@@ -285,7 +286,7 @@ interaction:
 ```
 
 ```yml
-# ./.dip/rails.yml
+# ./.hip/rails.yml
 interaction:
   annotate:
     description: Run annotate command
@@ -309,10 +310,10 @@ interaction:
 
 Imagine `.dip` to be a submodule so it can be managed only in one place.
 
-If you want to override module command, you can redefine it in dip.yml
+If you want to override module command, you can redefine it in hip.yml
 
 ```yml
-# ./dip.yml
+# ./hip.yml
 modules:
  - sasts
 
@@ -323,7 +324,7 @@ interaction:
 ```
 
 ```yml
-# ./.dip/sasts.yml
+# ./.hip/sasts.yml
 interaction:
   brakeman:
     description: Check brakeman sast
@@ -344,7 +345,7 @@ Nested modules are not supported.
 
 ### dip run
 
-Run commands defined within the `interaction` section of dip.yml
+Run commands defined within the `interaction` section of hip.yml
 
 A command will be executed by specified runner. Dip has three types of them:
 
@@ -369,15 +370,15 @@ You can pass in a custom environment variable into a container:
 dip VERSION=12352452 rake db:rollback
 ```
 
-Use options `-p, --publish=[]` if you need to additionally publish a container's port(s) to the host unless this behaviour is not configured at dip.yml:
+Use options `-p, --publish=[]` if you need to additionally publish a container's port(s) to the host unless this behaviour is not configured at hip.yml:
 
 ```sh
 dip run -p 3000:3000 bundle exec rackup config.ru
 ```
 
-You can also override docker compose command by passing `DIP_COMPOSE_COMMAND` if you wish. For example if you want to use [`mutagen-compose`](https://mutagen.io/documentation/orchestration/compose) run `DIP_COMPOSE_COMMAND=mutagen-compose dip run`.
+You can also override docker compose command by passing `HIP_COMPOSE_COMMAND` if you wish. For example if you want to use [`mutagen-compose`](https://mutagen.io/documentation/orchestration/compose) run `HIP_COMPOSE_COMMAND=mutagen-compose dip run`.
 
-If you want to persist that change you can specify command in `compose` section of dip.yml :
+If you want to persist that change you can specify command in `compose` section of hip.yml :
 
 ```yml
 compose:
@@ -399,11 +400,11 @@ rails s  # Run Rails server at http://localhost:3000
 
 ### dip provision
 
-Run commands each by each from `provision` section of dip.yml
+Run commands each by each from `provision` section of hip.yml
 
 ### dip compose
 
-Run Docker Compose commands that are configured according to the application's dip.yml:
+Run Docker Compose commands that are configured according to the application's hip.yml:
 
 ```sh
 dip compose COMMAND [OPTIONS]
@@ -416,12 +417,12 @@ dip compose up -d redis
 Runs shared Docker Compose services that are used by the current application. Useful for microservices.
 
 There are several official infrastructure services available:
-- [dip-postgres](https://github.com/bibendi/dip-postgres)
-- [dip-kafka](https://github.com/bibendi/dip-kafka)
-- [dip-nginx](https://github.com/bibendi/dip-nginx)
+- [dip-postgres](https://github.com/bibendi/dip (original project)-postgres)
+- [dip-kafka](https://github.com/bibendi/dip (original project)-kafka)
+- [dip-nginx](https://github.com/bibendi/dip (original project)-nginx)
 
 ```yaml
-# dip.yml
+# hip.yml
 infra:
   foo:
     git: https://github.com/owner/foo.git
@@ -430,7 +431,7 @@ infra:
     path: ~/path/to/bar
 ```
 
-Repositories will be pulled to a `~/.dip/infra` folder. For example, for the `foo` service it would be like this: `~/.dip/infra/foo/latest` and clonned with the following command: `git clone -b <ref> --single-branch <git> --depth 1`.
+Repositories will be pulled to a `~/.hip/infra` folder. For example, for the `foo` service it would be like this: `~/.hip/infra/foo/latest` and clonned with the following command: `git clone -b <ref> --single-branch <git> --depth 1`.
 
 Available CLI commands:
 
@@ -442,7 +443,7 @@ Available CLI commands:
 
 ### dip ktl
 
-Run kubectl commands that are configured according to the application's dip.yml:
+Run kubectl commands that are configured according to the application's hip.yml:
 
 ```sh
 dip ktl COMMAND [OPTIONS]
@@ -492,7 +493,7 @@ services:
 
 ### dip validate
 
-Validates your dip.yml configuration against the JSON schema. The schema validation helps ensure your configuration is correct and follows the expected format.
+Validates your hip.yml configuration against the JSON schema. The schema validation helps ensure your configuration is correct and follows the expected format.
 
 ```sh
 dip validate
@@ -507,19 +508,19 @@ The validator will check:
 
 If validation fails, you'll get detailed error messages indicating what needs to be fixed.
 
-You can skip validation by setting `DIP_SKIP_VALIDATION` environment variable.
+You can skip validation by setting `HIP_SKIP_VALIDATION` environment variable.
 
-Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json` to the top of your dip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
+Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip (original project)/refs/heads/master/schema.json` to the top of your hip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
 
 ## 📖 Documentation
 
 - **[Configuration Examples](examples/README.md)** - Comprehensive examples for various use cases
 - **[Development Roadmap](docs/ROADMAP.md)** - Future plans and Ruby 3.2+ migration strategy
 - **[Schema Reference](schema.json)** - Configuration schema for validation
-- **[Original Project](https://github.com/bibendi/dip)** - Evil Martians' original dip project
+- **[Original Project](https://github.com/bibendi/dip (original project))** - Evil Martians' original dip project
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-Original project releases: https://github.com/bibendi/dip/releases
+Original project releases: https://github.com/bibendi/dip (original project)/releases

@@ -74,7 +74,7 @@ Users upgrading from 8.x to 9.0 will need to:
    ```
 
 3. **No configuration changes required**
-   - dip.yml format remains compatible
+   - hip.yml format remains compatible
    - All commands work the same way
 
 #### Timeline

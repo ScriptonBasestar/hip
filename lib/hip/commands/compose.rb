@@ -1,0 +1,92 @@
+# frozen_string_literal: true
+
+require "pathname"
+
+require_relative "../command"
+require_relative "dns"
+
+module Hip
+  module Commands
+    class Compose < Hip::Command
+      DOCKER_EMBEDDED_DNS = "127.0.0.11"
+
+      attr_reader :argv, :config, :shell
+
+      def initialize(*argv, shell: true)
+        @argv = argv.compact
+        @shell = shell
+        @config = ::Hip.config.compose || {}
+      end
+
+      def execute
+        Hip.logger.debug "Dip.Commands.Compose#execute >>>>>>>"
+        Hip.env["DIP_DNS"] ||= find_dns
+
+        set_infra_env
+
+        compose_argv = Array(find_files) + Array(cli_options) + argv
+
+        if (override_command = compose_command_override)
+          override_command, *override_args = override_command.split(" ")
+          exec_program(override_command, override_args.concat(compose_argv), shell: shell)
+        else
+          exec_program("docker", compose_argv.unshift("compose"), shell: shell)
+        end
+      end
+
+      private
+
+      def find_files
+        return unless (files = config[:files])
+
+        if files.is_a?(Array)
+          files.each_with_object([]) do |file_path, memo|
+            file_path = ::Hip.env.interpolate(file_path)
+            file_path = Pathname.new(file_path)
+            file_path = Hip.config.file_path.parent.join(file_path).expand_path if file_path.relative?
+            next unless file_path.exist?
+
+            memo << "--file"
+            memo << Shellwords.escape(file_path.to_s)
+          end
+        end
+      end
+
+      def cli_options
+        %i[project_name project_directory].flat_map do |name|
+          next unless (value = config[name])
+          next unless value.is_a?(String)
+
+          value = ::Hip.env.interpolate(value)
+          ["--#{name.to_s.tr("_", "-")}", value]
+        end.compact
+      end
+
+      def find_dns
+        name = Hip.env["DNSDOCK_CONTAINER"] || "dnsdock"
+        net = Hip.env["FRONTEND_NETWORK"] || "frontend"
+
+        IO.pipe do |r, w|
+          Hip::Commands::DNS::IP
+            .new(name: name, net: net)
+            .execute(out: w, err: File::NULL, panic: false)
+
+          w.close_write
+          ip = r.readlines[0].to_s.strip
+          ip.empty? ? DOCKER_EMBEDDED_DNS : ip
+        end
+      end
+
+      def compose_command_override
+        Hip.env["DIP_COMPOSE_COMMAND"] || config[:command]
+      end
+
+      def set_infra_env
+        Hip.config.infra.each do |name, params|
+          service = Commands::Infra::Service.new(name, **params)
+          Hip.env[service.network_env_var] = service.network_name
+        end
+      end
+    end
+  end
+end

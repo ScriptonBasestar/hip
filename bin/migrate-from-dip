@@ -1,0 +1,100 @@
+#!/bin/bash
+# migrate-from-dip: Migrate dip configuration to hip
+# Usage: ./bin/migrate-from-dip [--dry-run]
+
+set -e
+
+DRY_RUN=false
+if [[ "$1" == "--dry-run" ]]; then
+  DRY_RUN=true
+  echo "🔍 DRY RUN MODE - No changes will be made"
+  echo ""
+fi
+
+function maybe_run() {
+  if [[ "$DRY_RUN" == "true" ]]; then
+    echo "[DRY RUN] Would execute: $*"
+  else
+    "$@"
+  fi
+}
+
+echo "🔄 Migrating dip configuration to hip..."
+echo ""
+
+# Track changes
+CHANGES_MADE=false
+
+# Rename config files in current directory
+if [ -f dip.yml ]; then
+  maybe_run mv dip.yml hip.yml
+  echo "✅ Renamed dip.yml → hip.yml"
+  CHANGES_MADE=true
+fi
+
+if [ -f dip.override.yml ]; then
+  maybe_run mv dip.override.yml hip.override.yml
+  echo "✅ Renamed dip.override.yml → hip.override.yml"
+  CHANGES_MADE=true
+fi
+
+if [ -d .dip ]; then
+  maybe_run mv .dip .hip
+  echo "✅ Renamed .dip/ → .hip/"
+  CHANGES_MADE=true
+fi
+
+# Migrate home directory
+if [ -d ~/.dip ]; then
+  if [ -d ~/.hip ]; then
+    echo "⚠️  Warning: ~/.hip already exists. Skipping home directory migration."
+    echo "   Please manually merge ~/.dip into ~/.hip if needed."
+  else
+    maybe_run mv ~/.dip ~/.hip
+    echo "✅ Migrated ~/.dip → ~/.hip"
+    CHANGES_MADE=true
+  fi
+fi
+
+echo ""
+
+if [[ "$CHANGES_MADE" == "false" ]]; then
+  echo "ℹ️  No dip configuration files found to migrate."
+  echo ""
+  echo "If you're setting up hip for the first time:"
+  echo "  - Create hip.yml instead of dip.yml"
+  echo "  - Use .hip/ directory for modules instead of .dip/"
+  echo "  - Use HIP_* environment variables instead of DIP_*"
+  exit 0
+fi
+
+if [[ "$DRY_RUN" == "true" ]]; then
+  echo ""
+  echo "✨ Dry run complete! Run without --dry-run to apply changes."
+  exit 0
+fi
+
+echo "✨ Migration complete!"
+echo ""
+echo "📝 Next steps:"
+echo ""
+echo "1. Update your shell configuration (.bashrc, .zshrc):"
+echo "   OLD: eval \"\$(dip console)\""
+echo "   NEW: eval \"\$(hip console)\""
+echo ""
+echo "2. Update environment variables in your scripts/CI:"
+echo "   DIP_FILE → HIP_FILE"
+echo "   DIP_HOME → HIP_HOME"
+echo "   DIP_ENV → HIP_ENV"
+echo "   DIP_SHELL → HIP_SHELL"
+echo "   DIP_SKIP_VALIDATION → HIP_SKIP_VALIDATION"
+echo ""
+echo "3. Update any scripts that reference 'dip' command:"
+echo "   dip compose → hip compose"
+echo "   dip provision → hip provision"
+echo "   etc."
+echo ""
+echo "4. Test your configuration:"
+echo "   hip --version"
+echo "   hip list"
+echo ""
