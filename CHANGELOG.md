@@ -1,0 +1,86 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [8.2.8] - 2025-01-02
+
+### Fixed
+- **Provision Schema Validation**: Changed provision schema from array to object type with named profiles support
+  - Old format: `provision: [commands...]` ❌
+  - New format: `provision: { default: [commands...], reset: [...] }` ✅
+- **Provision Command**: Fixed argv handling to properly receive arguments from CLI
+  - Now correctly supports `dip provision [profile-name]`
+  - Gracefully handles empty provision configurations
+- **ROADMAP Documentation**: Corrected dependency classification
+  - Separated Runtime Dependencies from Development Tools
+  - Removed bundler from "Key Dependencies" (it's a development tool)
+
+### Changed
+- **Bundler Dependency**: Updated from `~> 2.5` to `>= 2.5` for better compatibility
+  - Allows bundler 2.5, 2.6, 2.7+ (more flexible)
+  - Aligns with conservative compatibility approach
+
+### Added
+- **Comprehensive Example Files**:
+  - `examples/basic.yml` - Simple Rails starter for beginners
+  - `examples/full-stack.yml` - Production-ready Rails + Node.js setup (renamed from dip.yml)
+  - `examples/kubernetes.yml` - Kubernetes environment with kubectl runner
+  - `examples/nodejs.yml` - Node.js/Express projects with MongoDB
+  - `examples/provision-profiles.yml` - Provision profiles demonstration
+  - `examples/modules/` - Module system examples:
+    - `main.yml` - Main configuration with module imports
+    - `.dip/sast.yml` - Static analysis and security tools module
+    - `.dip/testing.yml` - Testing frameworks module
+- **Documentation**:
+  - `examples/README.md` - Comprehensive examples documentation with:
+    - Quick start guide
+    - Use case categorization
+    - Feature-based examples
+    - Configuration structure reference
+    - Common patterns and best practices
+    - Validation instructions
+  - `docs/ROADMAP.md` - Future planning and Ruby 3.2+ migration roadmap
+  - `CHANGELOG.md` - This file!
+- **README Improvements**:
+  - Updated version from 8.0 to 8.2.8
+  - Added Configuration Examples section with links to all examples
+  - Added Documentation section with links to guides and references
+
+### Documentation
+- All example files now include detailed headers with:
+  - Use case description
+  - Features list
+  - Usage instructions
+  - yaml-language-server schema reference
+- Provision profiles now support multiple named scenarios:
+  - `default` - Initial project setup
+  - `reset` - Clean rebuild
+  - `seed` - Database seeding
+  - `test` - Test environment setup
+  - `ci` - Continuous integration
+  - `deploy` - Production deployment preparation
+- Schema validation passing for all examples
+
+### Technical Details
+- **Test Coverage**: 94.78% (1452/1532 lines)
+- **Schema Version**: JSON Schema Draft-06
+- **Supported Ruby**: >= 2.7
+- **Runtime Dependencies**: json-schema ~> 5, thor >= 0.20 < 2, public_suffix >= 2.0.2 < 6.0
+
+---
+
+## [8.2.7] - Previous Release
+
+See original project releases: https://github.com/bibendi/dip/releases
+
+---
+
+## About This Fork
+
+This is a fork of [bibendi/dip](https://github.com/bibendi/dip), renamed to "hip" for one-handed typing convenience.
+
+**Original Project** by Evil Martians
+**Fork Maintainer**: archmagece

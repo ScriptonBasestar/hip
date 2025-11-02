@@ -23,6 +23,19 @@ Hip is a CLI dev-tool that provides native-like interaction with a Dockerized ap
 - [Dockerizing Ruby and Rails development](https://evilmartians.com/chronicles/ruby-on-whales-docker-for-ruby-rails-development)
 - [Reusable development containers with Docker Compose and Dip](https://evilmartians.com/chronicles/reusable-development-containers-with-docker-compose-and-dip)
 
+### 📚 Configuration Examples
+
+Check out our [comprehensive examples](examples/) covering various use cases:
+
+- **[Basic Setup](examples/basic.yml)** - Perfect for beginners starting with Rails
+- **[Full-Stack Application](examples/full-stack.yml)** - Rails + Node.js production setup
+- **[Kubernetes](examples/kubernetes.yml)** - K8s development environment with kubectl runner
+- **[Node.js](examples/nodejs.yml)** - Node.js/Express projects with MongoDB
+- **[Provision Profiles](examples/provision-profiles.yml)** - Advanced automation patterns
+- **[Module System](examples/modules/)** - Modular configurations for large projects
+
+See [examples/README.md](examples/README.md) for detailed documentation and usage instructions.
+
 [![asciicast](https://asciinema.org/a/210236.svg)](https://asciinema.org/a/210236)
 
 ## Installation
@@ -81,7 +94,7 @@ Also, you can check out examples at the top.
 
 ```yml
 # Required minimum dip version
-version: '8.0'
+version: '8.2.8'
 
 environment:
   COMPOSE_EXT: development
@@ -498,6 +511,15 @@ You can skip validation by setting `DIP_SKIP_VALIDATION` environment variable.
 
 Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json` to the top of your dip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
 
+## 📖 Documentation
+
+- **[Configuration Examples](examples/README.md)** - Comprehensive examples for various use cases
+- **[Development Roadmap](docs/ROADMAP.md)** - Future plans and Ruby 3.2+ migration strategy
+- **[Schema Reference](schema.json)** - Configuration schema for validation
+- **[Original Project](https://github.com/bibendi/dip)** - Evil Martians' original dip project
+
 ## Changelog
 
-https://github.com/bibendi/dip/releases
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+Original project releases: https://github.com/bibendi/dip/releases
