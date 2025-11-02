@@ -5,16 +5,17 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "dip/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "dip"
+  spec.name = "hip"
   spec.license = "MIT"
   spec.version = Dip::VERSION
-  spec.authors = ["bibendi"]
-  spec.email = ["merkushin.m.s@gmail.com"]
+  spec.authors = ["archmagece"]
+  spec.email = ["archmagece@gmail.com"]
 
-  spec.summary = "Ruby gem CLI tool for better interacting Docker Compose files."
-  spec.description = "DIP - Docker Interaction Process." \
-                       "CLI tool for better development experience when interacting with docker and Docker Compose."
-  spec.homepage = "https://github.com/bibendi/dip"
+  spec.summary = "Fork of dip: CLI tool for easier Docker/Kubernetes development interaction"
+  spec.description = "Hip (formerly dip) - Docker Interaction Process. " \
+                       "A fork of bibendi/dip, renamed for one-handed typing convenience. " \
+                       "CLI tool for better development experience with Docker and Kubernetes."
+  spec.homepage = "https://github.com/archmagece/hip"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.

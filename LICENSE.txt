@@ -1,6 +1,7 @@
 The MIT License (MIT)
 
-Copyright (c) 2016 Mikhail Merkushin aka bibendi
+Original Copyright (c) 2016 Mikhail Merkushin aka bibendi
+Fork Copyright (c) 2025 archmagece
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

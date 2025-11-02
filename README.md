@@ -1,17 +1,18 @@
 # Hip
 
-hip으로 개명함. 한손으로 칠 수 있도록
+> **Fork Notice**: This is a fork of [dip](https://github.com/bibendi/dip) by [bibendi](https://github.com/bibendi).
+> Renamed to "hip" for one-handed typing convenience (한손으로 칠 수 있도록).
 
-[![Gem Version](https://badge.fury.io/rb/dip.svg)](https://badge.fury.io/rb/dip)
-[![Build Status](https://github.com/bibendi/dip/actions/workflows/ci.yml/badge.svg)](https://github.com/bibendi/dip/actions/workflows/ci.yml)
-[![Maintainability](https://api.codeclimate.com/v1/badges/d0dca854f0930502f7b3/maintainability)](https://codeclimate.com/github/bibendi/dip/maintainability)
+[![Original Project](https://img.shields.io/badge/forked%20from-bibendi%2Fdip-blue)](https://github.com/bibendi/dip)
+[![Gem Version](https://badge.fury.io/rb/hip.svg)](https://badge.fury.io/rb/hip)
 
 <img src="https://raw.githubusercontent.com/bibendi/dip/master/.github/logo.png" alt="dip logo" height="140" />
 
-The dip is a CLI dev–tool that provides native-like interaction with a Dockerized application. It gives the feeling that you are working without using mind-blowing commands to run containers.
+Hip is a CLI dev-tool that provides native-like interaction with a Dockerized application. It gives the feeling that you are working without using mind-blowing commands to run containers.
 
-<a href="https://evilmartians.com/?utm_source=dip">
-<img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg" alt="Sponsored by Evil Martians" height="80" /></a>
+**Original project** by Evil Martians:
+<a href="https://github.com/bibendi/dip">
+<img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg" alt="Original by Evil Martians" height="60" /></a>
 
 ## Presentations and examples
 
@@ -27,7 +28,7 @@ The dip is a CLI dev–tool that provides native-like interaction with a Dockeri
 ## Installation
 
 ```sh
-gem install dip
+gem install hip
 ```
 
 ### Integration with shell
