@@ -8,7 +8,11 @@ This document outlines planned features, improvements, and breaking changes for 
 
 - **Current**: 8.2.8 (January 2025)
 - **Ruby Support**: >= 2.7
-- **Key Dependencies**: json-schema ~> 5, bundler ~> 2.7
+- **Runtime Dependencies**:
+  - json-schema ~> 5
+  - thor >= 0.20, < 2
+  - public_suffix >= 2.0.2, < 6.0
+- **Development Tools**: bundler >= 2.5, rspec ~> 3.13, standard ~> 1.0
 
 ---
 
