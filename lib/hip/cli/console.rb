@@ -7,7 +7,7 @@ require_relative "../commands/console"
 module Hip
   class CLI
     class Console < Base
-      desc "start", "Integrate Dip into current shell"
+      desc "start", "Integrate Hip into current shell"
       method_option :help, aliases: "-h", type: :boolean,
         desc: "Display usage information"
       def start

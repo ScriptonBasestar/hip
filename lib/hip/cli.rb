@@ -143,7 +143,7 @@ module Hip
     subcommand :infra, Hip::CLI::Infra
 
     require_relative "cli/console"
-    desc "console", "Integrate Dip commands into shell (only ZSH and Bash are supported)"
+    desc "console", "Integrate Hip commands into shell (only ZSH and Bash are supported)"
     subcommand :console, Hip::CLI::Console
   end
 end
