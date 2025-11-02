@@ -14,4 +14,4 @@ interaction:
       start:
         command: exec start
 
-provision: []
+provision: {}

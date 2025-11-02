@@ -8,13 +8,13 @@ describe Dip::Commands::Provision, :config do
   let(:cli) { Dip::CLI }
 
   context "when has no any commands" do
-    let(:commands) { [] }
+    let(:commands) { {} }
 
     it { expect { cli.start ["provision"] }.not_to raise_error }
   end
 
   context "when has some commands" do
-    let(:commands) { ["dip bundle install"] }
+    let(:commands) { {default: ["dip bundle install"]} }
 
     before { cli.start ["provision"] }
 

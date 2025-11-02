@@ -121,7 +121,7 @@ module Dip
       #   Dip::Commands::Provision.new.execute
       else
         require_relative "commands/provision"
-        Dip::Commands::Provision.new.execute
+        Dip::Commands::Provision.new(argv).execute
       end
     end
 

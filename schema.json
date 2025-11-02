@@ -172,24 +172,31 @@
     },
     "provision": {
       "type": "object",
-      "description": "Execute commands within provision section",
-      "properties": {
-        "commands": {
+      "description": "Execute commands within provision section. Keys represent provision profiles (e.g., 'default', 'reset'), each containing an array of shell commands to execute.",
+      "patternProperties": {
+        "^[\\w\\-.:/\\s]+$": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Lists the commands to be executed for provisioning",
-          "examples": [
-            [
-              "dip compose down --volumes",
-              "dip compose build",
-              "dip rails db:migrate",
-              "dip npm install"
-            ]
+          "description": "Array of shell commands to execute for this provision profile"
+        }
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "default": [
+            "dip compose down --volumes",
+            "dip compose build",
+            "dip rails db:migrate"
+          ],
+          "reset": [
+            "dip compose down --volumes",
+            "rm -rf Gemfile.lock",
+            "dip bundle install"
           ]
         }
-      }
+      ]
     },
     "environment": {
       "$ref": "#/definitions/environment_vars"
