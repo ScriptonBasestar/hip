@@ -1,0 +1,125 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+#
+# Example: Provision Profiles Configuration
+# Use Case: Demonstrates the power of provision profiles for different scenarios
+# Features: Multiple named provision profiles for setup, reset, testing, deployment
+#
+# Usage:
+#   dip provision              # Run default setup (alias for 'default' profile)
+#   dip provision default      # Full project setup from scratch
+#   dip provision reset        # Clean rebuild of everything
+#   dip provision seed         # Re-seed database only
+#   dip provision test         # Setup test environment
+#   dip provision ci           # CI/CD pipeline setup
+#   dip provision deploy       # Production deployment preparation
+#
+# Learn more: https://github.com/bibendi/dip
+
+version: '8.2.8'
+
+environment:
+  RAILS_ENV: development
+
+compose:
+  files:
+    - docker-compose.yml
+
+interaction:
+  shell:
+    description: Start a shell
+    service: web
+    command: /bin/bash
+
+  rails:
+    description: Run Rails commands
+    service: web
+    command: bundle exec rails
+
+  bundle:
+    description: Run bundle commands
+    service: web
+    command: bundle
+
+  rake:
+    description: Run Rake tasks
+    service: web
+    command: bundle exec rake
+
+  rspec:
+    description: Run RSpec tests
+    service: web
+    command: bundle exec rspec
+    environment:
+      RAILS_ENV: test
+
+provision:
+  # Default: Full setup for new developers
+  default:
+    - dip compose down --volumes
+    - dip compose up -d db redis
+    - dip bundle install
+    - dip rails db:create
+    - dip rails db:migrate
+    - dip rails db:seed
+    - echo "✅ Setup complete! Run 'dip rails server' to start the app"
+
+  # Reset: Nuclear option - rebuild everything from scratch
+  reset:
+    - dip compose down --volumes --remove-orphans
+    - rm -rf tmp/ log/*.log
+    - dip compose build --no-cache
+    - dip bundle install
+    - dip rails db:drop db:create db:migrate db:seed
+    - dip rails assets:clobber assets:precompile
+    - echo "✅ Complete reset done!"
+
+  # Seed: Re-seed database without destroying data
+  seed:
+    - dip rails db:seed
+    - echo "✅ Database seeded"
+
+  # Update: Pull latest changes and update dependencies
+  update:
+    - git pull origin main
+    - dip compose pull
+    - dip bundle install
+    - dip rails db:migrate
+    - dip rails assets:precompile
+    - echo "✅ Updated to latest version"
+
+  # Test: Setup test environment
+  test:
+    - dip compose up -d db redis
+    - RAILS_ENV=test dip bundle install
+    - RAILS_ENV=test dip rails db:create db:migrate
+    - echo "✅ Test environment ready. Run 'dip rspec' to run tests"
+
+  # CI: Continuous Integration setup
+  ci:
+    - dip compose up -d db redis
+    - dip bundle install --jobs 4 --retry 3
+    - dip rails db:create db:schema:load
+    - dip rails assets:precompile
+    - echo "✅ CI environment ready"
+
+  # Deploy: Production deployment preparation
+  deploy:
+    - dip compose build
+    - dip rails db:migrate
+    - dip rails assets:precompile
+    - dip rails assets:clean
+    - echo "✅ Ready for deployment"
+
+  # Quick: Fast setup for minor updates
+  quick:
+    - dip bundle install
+    - dip rails db:migrate
+    - echo "✅ Quick setup complete"
+
+  # Clean: Clean up temporary files and caches
+  clean:
+    - rm -rf tmp/cache/*
+    - rm -rf public/assets
+    - rm -rf log/*.log
+    - dip rails tmp:clear
+    - echo "✅ Cleaned up temporary files"

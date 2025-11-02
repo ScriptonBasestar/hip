@@ -1,0 +1,147 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+#
+# Example: Node.js Dip Configuration
+# Use Case: Node.js/Express application with MongoDB and Redis
+# Features: npm/yarn commands, multiple services, development/production modes
+#
+# Usage:
+#   dip provision              # Setup project
+#   dip npm install            # Install dependencies
+#   dip npm run dev            # Start development server
+#   dip npm run build          # Build for production
+#   dip yarn add lodash        # Add a package
+#   dip mongo                  # Connect to MongoDB shell
+#
+# Learn more: https://github.com/bibendi/dip
+
+version: '8.2.8'
+
+environment:
+  NODE_ENV: development
+  MONGODB_URL: mongodb://mongo:27017/myapp_development
+  REDIS_URL: redis://redis:6379/0
+  PORT: ${PORT:-3000}
+
+compose:
+  files:
+    - docker-compose.yml
+  project_name: myapp_node
+
+interaction:
+  # Node.js shell
+  shell:
+    description: Start a shell in the node container
+    service: node
+    command: /bin/bash
+
+  # npm commands
+  npm:
+    description: Run npm commands
+    service: node
+    command: npm
+    compose:
+      run_options:
+        - rm
+    subcommands:
+      install:
+        description: Install dependencies
+        command: install
+      run:
+        description: Run npm scripts
+        command: run
+        subcommands:
+          dev:
+            description: Start development server
+            command: run dev
+          build:
+            description: Build for production
+            command: run build
+          test:
+            description: Run tests
+            command: run test
+      audit:
+        description: Check for vulnerabilities
+        command: audit
+
+  # yarn commands
+  yarn:
+    description: Run yarn commands
+    service: node
+    command: yarn
+    compose:
+      run_options:
+        - rm
+
+  # Node.js REPL
+  node:
+    description: Start Node.js REPL
+    service: node
+    command: node
+
+  # MongoDB shell
+  mongo:
+    description: Connect to MongoDB shell
+    service: mongo
+    command: mongosh myapp_development
+
+  # Redis CLI
+  redis:
+    description: Connect to Redis CLI
+    service: redis
+    command: redis-cli
+
+  # Run tests
+  test:
+    description: Run tests with Jest
+    service: node
+    command: npm test
+    environment:
+      NODE_ENV: test
+    compose:
+      run_options:
+        - rm
+
+  # Linting
+  lint:
+    description: Run ESLint
+    service: node
+    command: npm run lint
+
+  # Type checking (for TypeScript projects)
+  typecheck:
+    description: Run TypeScript type checking
+    service: node
+    command: npm run typecheck
+
+provision:
+  # Default setup
+  default:
+    - dip compose down --volumes
+    - dip compose up -d mongo redis
+    - dip npm install
+    - dip npm run build
+    - echo "✅ Setup complete! Run 'dip npm run dev' to start"
+
+  # Clean install
+  reset:
+    - dip compose down --volumes
+    - rm -rf node_modules package-lock.json
+    - dip npm install
+    - dip npm run build
+
+  # Update dependencies
+  update:
+    - dip npm update
+    - dip npm audit fix
+    - dip npm run build
+
+  # Production build
+  production:
+    - dip npm ci
+    - dip npm run build
+    - dip npm prune --production
+
+  # Test setup
+  test:
+    - NODE_ENV=test dip npm install
+    - NODE_ENV=test dip npm run build

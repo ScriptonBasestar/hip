@@ -1,6 +1,21 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+#
+# Example: Full-Stack Dip Configuration
+# Use Case: Rails + Node.js + PostgreSQL + Redis full-stack application
+# Features: Demonstrates all major dip features including provision profiles,
+#           subcommands, multiple runners, compose profiles, and infra management
+#
+# Usage:
+#   dip provision              # Run default setup
+#   dip provision reset        # Reset and rebuild
+#   dip rails console          # Start Rails console
+#   dip rails db:migrate       # Run migrations
+#   dip npm install            # Install Node packages
+#   dip rspec                  # Run tests
+#
+# Learn more: https://github.com/bibendi/dip
 
-version: '8.1.0'
+version: '8.2.8'
 
 environment:
   RAILS_ENV: development
@@ -40,9 +55,6 @@ interaction:
     entrypoint: /docker-entrypoint.sh
     runner: docker_compose
     pod: web
-    compose_run_options:
-      - service-ports
-      - rm
     subcommands:
       console:
         description: Start Rails console
@@ -126,13 +138,25 @@ interaction:
     command: bundle exec rake
 
 provision:
-  - dip compose down --volumes
-  - dip compose build
-  - dip rails db:create
-  - dip rails db:migrate
-  - dip rails db:seed
-  - dip npm install
-  - dip validate
+  default:
+    - dip compose down --volumes
+    - dip compose build
+    - dip rails db:create
+    - dip rails db:migrate
+    - dip rails db:seed
+    - dip npm install
+    - dip validate
+  reset:
+    - dip compose down --volumes
+    - rm -rf tmp/ log/*.log
+    - dip compose build --no-cache
+    - dip rails db:drop db:create db:migrate db:seed
+  seed:
+    - dip rails db:seed
+  deploy:
+    - dip compose build
+    - dip rails db:migrate
+    - dip rails assets:precompile
 
 kubectl:
   namespace: myapp-development

@@ -1,0 +1,102 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+#
+# Example: Kubernetes Dip Configuration
+# Use Case: Development against Kubernetes cluster using kubectl runner
+# Features: kubectl runner, namespace configuration, pod targeting
+#
+# Prerequisites:
+#   - kubectl configured and authenticated
+#   - Active Kubernetes context set
+#   - Pods running in the target namespace
+#
+# Usage:
+#   dip k8s get pods                 # List all pods
+#   dip rails console                # Start Rails console in the web pod
+#   dip logs                         # Stream logs from web pod
+#   dip bash                         # Open bash shell in web pod
+#   dip port-forward                 # Forward local port 3000 to pod
+#
+# Learn more: https://github.com/bibendi/dip
+
+version: '8.2.8'
+
+# Kubernetes configuration
+kubectl:
+  namespace: myapp-development
+
+interaction:
+  # Direct kubectl commands
+  k8s:
+    description: Run kubectl commands
+    command: kubectl
+    runner: kubectl
+    shell: false
+
+  # Rails console in Kubernetes
+  rails:
+    description: Run Rails commands in the web pod
+    command: bundle exec rails
+    runner: kubectl
+    pod: web
+    subcommands:
+      console:
+        description: Start Rails console
+        command: console
+
+  # Bash shell in pod
+  bash:
+    description: Start bash shell in the web pod
+    command: /bin/bash
+    runner: kubectl
+    pod: web
+
+  # Stream logs
+  logs:
+    description: Stream logs from the web pod
+    command: kubectl logs -f
+    runner: kubectl
+    pod: web
+
+  # Port forwarding
+  port-forward:
+    description: Forward local port 3000 to the web pod
+    command: kubectl port-forward pod/web 3000:3000
+    runner: kubectl
+
+  # Database operations
+  psql:
+    description: Connect to PostgreSQL in the database pod
+    command: psql -U user myapp_development
+    runner: kubectl
+    pod: postgres
+    environment:
+      PGPASSWORD: password
+
+  # Worker pod commands
+  worker:
+    description: Run commands in the worker pod
+    command: bundle exec
+    runner: kubectl
+    pod: worker
+    subcommands:
+      sidekiq:
+        description: Check Sidekiq status
+        command: bundle exec sidekiqctl status
+
+provision:
+  # Deploy new version
+  deploy:
+    - kubectl set image deployment/web web=myapp:latest
+    - kubectl rollout status deployment/web
+    - dip rails db:migrate
+
+  # Rollback deployment
+  rollback:
+    - kubectl rollout undo deployment/web
+    - kubectl rollout status deployment/web
+
+  # Check status
+  status:
+    - kubectl get pods
+    - kubectl get services
+    - kubectl get deployments
