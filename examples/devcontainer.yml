@@ -1,0 +1,94 @@
+# Example hip.yml with DevContainer integration
+# This demonstrates how to configure DevContainer integration in Hip
+
+version: '8.2.8'
+
+# Docker Compose configuration (shared with devcontainer)
+compose:
+  files:
+    - docker-compose.yml
+  project_name: myapp
+
+# DevContainer configuration
+# This section will be synced to .devcontainer/devcontainer.json
+devcontainer:
+  enabled: true
+  name: "My Rails App Development"
+  service: app
+  workspaceFolder: "/workspace"
+  remoteUser: "vscode"
+
+  # DevContainer Features (with shortcuts)
+  features:
+    docker-in-docker: {}
+    github-cli:
+      version: "latest"
+    git: {}
+
+  # VSCode customizations
+  customizations:
+    vscode:
+      extensions:
+        - rebornix.ruby
+        - castwide.solargraph
+        - kaiwood.endwise
+        - ms-azuretools.vscode-docker
+      settings:
+        ruby.rubocop.path: "/usr/local/bundle/bin/"
+        ruby.lint:
+          rubocop: true
+
+  # Port forwarding
+  forwardPorts:
+    - 3000
+    - 5432
+    - 6379
+
+  # Lifecycle commands
+  postCreateCommand: "bundle install && rails db:setup"
+  postStartCommand: "echo 'Welcome to development environment!'"
+
+# Standard Hip interaction commands
+interaction:
+  shell:
+    description: Open Bash shell in app container
+    service: app
+    command: bash
+
+  bundle:
+    description: Run Bundler commands
+    service: app
+    command: bundle
+
+  rails:
+    description: Run Rails commands
+    service: app
+    command: bundle exec rails
+    subcommands:
+      c:
+        description: Open Rails console
+        command: bundle exec rails console
+      s:
+        description: Run Rails server
+        service: web
+        compose:
+          run_options: [service-ports, use-aliases]
+
+  rspec:
+    description: Run RSpec tests
+    service: app
+    environment:
+      RAILS_ENV: test
+    command: bundle exec rspec
+
+  rubocop:
+    description: Run RuboCop linter
+    service: app
+    command: bundle exec rubocop
+
+# Provision commands
+provision:
+  - hip compose down --volumes
+  - hip compose up -d postgres redis
+  - hip bundle install
+  - hip rails db:create db:migrate db:seed
