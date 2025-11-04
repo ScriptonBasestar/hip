@@ -3,6 +3,7 @@
 require "bundler/setup"
 
 ENV["HIP_ENV"] = "test"
+ENV["RSPEC_RUNNING"] = "true"
 
 require "simplecov"
 SimpleCov.start do

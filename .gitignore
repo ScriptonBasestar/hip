@@ -18,3 +18,6 @@
 lefthook-local.yml
 
 /dip-*.gem
+
+# Claude Code integration files (auto-generated)
+/.claude/

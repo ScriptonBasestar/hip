@@ -600,6 +600,87 @@ Hip provides convenient shortcuts for common DevContainer features:
 
 Use `hip devcontainer features --list` to see all available shortcuts.
 
+### hip claude
+
+Hip provides integration with Claude Code (claude.ai/code) to make Hip commands easily discoverable and usable within AI-assisted development workflows.
+
+#### Features
+
+- **Auto-generated Documentation**: Creates Claude-readable guides from your `hip.yml` configuration
+- **Project-Specific Commands**: Generates `.claude/ctx/hip-project-guide.md` with available commands
+- **Slash Commands**: Adds `/hip` command for interactive help in Claude Code
+- **Global Reference**: Optional `~/.claude/ctx/HIP_QUICK_REFERENCE.md` for Hip basics
+- **Auto-provisioning**: Automatically generates Claude files during `hip provision` (first run only)
+
+#### Quick Start
+
+```sh
+# Generate Claude Code integration files for current project
+hip claude:setup
+
+# Also create global reference guide
+hip claude:setup --global
+```
+
+#### What Gets Generated
+
+After running `hip claude:setup`, you'll have:
+
+**`.claude/ctx/hip-project-guide.md`** - Project-specific command reference
+- Lists all available Hip commands from `hip.yml`
+- Includes descriptions for each command
+- Shows configured services and environment variables
+- Auto-updated with `hip claude:setup`
+
+**`.claude/commands/hip.md`** - Slash command for Claude Code
+- Type `/hip` in Claude Code for interactive help
+- Quick access to command documentation
+
+**`~/.claude/ctx/HIP_QUICK_REFERENCE.md`** (optional with `--global`)
+- Hip basics and command syntax
+- Common patterns and examples
+- Available across all projects
+
+#### Usage in Claude Code
+
+Once set up, Claude Code can:
+
+1. **Discover commands**: Ask "What Hip commands are available?"
+2. **Get help**: Use `/hip` slash command
+3. **Understand context**: Reads project-specific configuration
+4. **Suggest workflows**: Recommends appropriate Hip commands for tasks
+
+#### Example
+
+```yaml
+# hip.yml
+interaction:
+  console:
+    description: "Open Rails console"
+    service: rails
+    command: bin/rails console
+
+  test:
+    description: "Run test suite"
+    service: rails
+    command: bundle exec rspec
+```
+
+After `hip claude:setup`, Claude Code will know:
+- `hip console` opens Rails console
+- `hip test` runs the test suite
+- Both commands use the `rails` service
+
+#### Auto-Generation
+
+Claude files are automatically generated when you run `hip provision` for the first time in a project. To regenerate after changing `hip.yml`:
+
+```sh
+hip claude:setup
+```
+
+**Note**: `.claude/` directory is automatically git-ignored as it contains auto-generated files.
+
 ## 📖 Documentation
 
 - **[Configuration Examples](examples/README.md)** - Comprehensive examples for various use cases

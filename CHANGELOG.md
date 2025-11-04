@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Claude Code Integration
+- **`hip claude:setup` Command**: Generate Claude Code integration files for seamless AI-assisted development
+- **Auto-generated Documentation**: Creates `.claude/ctx/hip-project-guide.md` with project-specific commands
+- **Slash Commands**: Adds `/hip` command for interactive help in Claude Code
+- **Global Reference Guide**: Optional `~/.claude/ctx/HIP_QUICK_REFERENCE.md` with Hip basics
+- **Auto-provisioning**: Automatically generates Claude files during first `hip provision` run
+- **Project Context**: Claude Code can discover and understand Hip commands from `hip.yml` configuration
+- **Git Integration**: `.claude/` directory automatically added to `.gitignore`
+
 #### DevContainer Integration
 - **Full DevContainer Support**: Seamless integration with VSCode DevContainers
 - **Bidirectional Sync**: Keep `hip.yml` and `.devcontainer/devcontainer.json` synchronized

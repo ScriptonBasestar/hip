@@ -26,6 +26,27 @@ module Hip
         commands.each do |command|
           exec_subprocess(command)
         end
+
+        # Auto-generate Claude Code integration files after successful provision
+        auto_generate_claude_files
+      end
+
+      private
+
+      def auto_generate_claude_files
+        return unless Hip.config.exist?
+
+        claude_guide = ".claude/ctx/hip-project-guide.md"
+
+        # Only generate if .claude directory doesn't exist or guide is missing
+        return if File.exist?(claude_guide)
+
+        Hip.logger.debug "Auto-generating Claude Code integration files..."
+        require_relative "claude/setup"
+        Hip::Commands::Claude::Setup.new({}).execute
+      rescue StandardError => e
+        # Don't fail provision if Claude file generation fails
+        Hip.logger.debug "Failed to auto-generate Claude files: #{e.message}"
       end
     end
   end
