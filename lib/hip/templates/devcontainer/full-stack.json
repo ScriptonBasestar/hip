@@ -1,0 +1,36 @@
+{
+  "name": "Full-Stack Development Container",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.ruby",
+        "castwide.solargraph",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "ruby.rubocop.path": "/usr/local/bundle/bin/",
+        "ruby.lint": {
+          "rubocop": true
+        }
+      }
+    }
+  },
+  "forwardPorts": [3000, 5432, 6379, 8080],
+  "postCreateCommand": "bundle install && npm install",
+  "remoteUser": "vscode"
+}
