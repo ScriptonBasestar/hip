@@ -253,6 +253,123 @@
           ]
         }
       }
+    },
+    "devcontainer": {
+      "type": "object",
+      "description": "DevContainer configuration for VSCode integration",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable or disable devcontainer integration",
+          "examples": [true]
+        },
+        "config_path": {
+          "type": "string",
+          "description": "Path to existing devcontainer.json file to sync with",
+          "examples": [".devcontainer/devcontainer.json"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name for the devcontainer",
+          "examples": ["My Rails App Development"]
+        },
+        "image": {
+          "type": "string",
+          "description": "Docker image to use (alternative to dockerFile)",
+          "examples": ["mcr.microsoft.com/devcontainers/ruby:3.2"]
+        },
+        "dockerFile": {
+          "type": "string",
+          "description": "Path to Dockerfile (alternative to image)",
+          "examples": ["Dockerfile", ".devcontainer/Dockerfile"]
+        },
+        "service": {
+          "type": "string",
+          "description": "Docker Compose service to use",
+          "examples": ["app", "web"]
+        },
+        "workspaceFolder": {
+          "type": "string",
+          "description": "Path to workspace folder inside container",
+          "examples": ["/workspace", "/app"]
+        },
+        "remoteUser": {
+          "type": "string",
+          "description": "User to run as inside container",
+          "examples": ["vscode", "node", "root"]
+        },
+        "features": {
+          "type": "object",
+          "description": "DevContainer features to install",
+          "additionalProperties": {
+            "type": "object"
+          },
+          "examples": [{
+            "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+            "ghcr.io/devcontainers/features/github-cli:1": {"version": "latest"}
+          }]
+        },
+        "customizations": {
+          "type": "object",
+          "description": "Tool-specific customizations (VSCode, etc.)",
+          "additionalProperties": true,
+          "examples": [{
+            "vscode": {
+              "extensions": ["rebornix.ruby", "castwide.solargraph"],
+              "settings": {"ruby.rubocop.path": "/usr/local/bundle/bin/"}
+            }
+          }]
+        },
+        "forwardPorts": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "Ports to forward from container to host",
+          "examples": [[3000, 5432, 6379]]
+        },
+        "postCreateCommand": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ],
+          "description": "Command to run after container is created",
+          "examples": ["bundle install && rails db:setup"]
+        },
+        "postStartCommand": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ],
+          "description": "Command to run each time container starts",
+          "examples": ["rails server"]
+        },
+        "postAttachCommand": {
+          "oneOf": [
+            {"type": "string"},
+            {"type": "array", "items": {"type": "string"}}
+          ],
+          "description": "Command to run after attaching to container",
+          "examples": ["echo 'Welcome to development environment'"]
+        },
+        "mounts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional volume mounts",
+          "examples": [["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"]]
+        },
+        "runArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional arguments for docker run",
+          "examples": [["--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined"]]
+        }
+      }
     }
   },
   "required": ["version"]

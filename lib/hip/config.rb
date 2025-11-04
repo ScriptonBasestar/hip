@@ -20,10 +20,11 @@ module Hip
       kubectl: {},
       infra: {},
       interaction: {},
-      provision: []
+      provision: [],
+      devcontainer: {}
     }.freeze
 
-    TOP_LEVEL_KEYS = %i[environment compose kubectl infra interaction provision].freeze
+    TOP_LEVEL_KEYS = %i[environment compose kubectl infra interaction provision devcontainer].freeze
 
     ConfigKeyMissingError = Class.new(ArgumentError)
 
