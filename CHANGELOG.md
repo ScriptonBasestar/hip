@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### DevContainer Integration
+- **Full DevContainer Support**: Seamless integration with VSCode DevContainers
+- **Bidirectional Sync**: Keep `hip.yml` and `.devcontainer/devcontainer.json` synchronized
+- **Feature Shortcuts**: Convenient aliases for common DevContainer features (e.g., `docker-in-docker`, `github-cli`)
+- **Templates**: Quick-start templates for Ruby, Node.js, Python, Go, and full-stack projects
+- **CLI Commands**: Complete devcontainer management from command line
+  - `hip devcontainer init` - Generate devcontainer.json from hip.yml
+  - `hip devcontainer sync` - Bidirectional configuration sync
+  - `hip devcontainer validate` - Validate devcontainer.json
+  - `hip devcontainer shell` - Open shell in devcontainer
+  - `hip devcontainer provision` - Run postCreateCommand
+  - `hip devcontainer features` - Manage DevContainer features
+  - `hip devcontainer info` - Show configuration status
+
+#### Configuration
+- Added `devcontainer` section to `hip.yml` schema
+- Support for all major DevContainer specification properties:
+  - Container configuration (image, service, workspaceFolder)
+  - Features with version control
+  - VSCode customizations (extensions, settings)
+  - Port forwarding
+  - Lifecycle commands (postCreateCommand, postStartCommand, postAttachCommand)
+  - Advanced options (mounts, runArgs)
+
+#### Documentation
+- Added comprehensive DevContainer documentation in README.md
+- Added [examples/devcontainer.yml](examples/devcontainer.yml) with full configuration example
+- Added 5 DevContainer templates in `lib/hip/templates/devcontainer/`
+
 ### 🚨 BREAKING CHANGES - Complete Rebranding from "dip" to "hip"
 
 This is a major breaking release that completely renames the project from "dip" to "hip" (Handy Infrastructure Provisioner).

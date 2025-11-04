@@ -512,6 +512,94 @@ You can skip validation by setting `HIP_SKIP_VALIDATION` environment variable.
 
 Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip (original project)/refs/heads/master/schema.json` to the top of your hip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
 
+### hip devcontainer
+
+Hip provides seamless integration with VSCode DevContainers, enabling bidirectional synchronization between `hip.yml` and `.devcontainer/devcontainer.json`.
+
+#### Features
+
+- **Bidirectional Sync**: Keep hip.yml and devcontainer.json in sync
+- **Feature Shortcuts**: Use simple names like `docker-in-docker` instead of full feature URLs
+- **Templates**: Quick-start templates for Ruby, Node.js, Python, Go, and full-stack projects
+- **CLI Commands**: Manage devcontainer configuration from command line
+
+#### Quick Start
+
+```sh
+# Generate devcontainer.json from hip.yml
+hip devcontainer init
+
+# Use a template
+hip devcontainer init --template ruby
+
+# Sync configurations
+hip devcontainer sync
+
+# Validate devcontainer.json
+hip devcontainer validate
+
+# Open shell in devcontainer
+hip devcontainer bash
+
+# Run postCreateCommand
+hip devcontainer provision
+
+# View devcontainer info
+hip devcontainer info
+
+# List available features
+hip devcontainer features --list
+```
+
+#### Configuration Example
+
+```yaml
+# hip.yml
+devcontainer:
+  enabled: true
+  name: "My Rails App"
+  service: app
+  workspaceFolder: "/workspace"
+
+  # Simple feature shortcuts
+  features:
+    docker-in-docker: {}
+    github-cli:
+      version: "latest"
+
+  customizations:
+    vscode:
+      extensions:
+        - rebornix.ruby
+        - castwide.solargraph
+
+  forwardPorts: [3000, 5432]
+  postCreateCommand: "bundle install && rails db:setup"
+```
+
+See [examples/devcontainer.yml](examples/devcontainer.yml) for a complete example.
+
+#### Available Templates
+
+- `ruby` - Ruby/Rails development
+- `node` - Node.js/JavaScript development
+- `python` - Python development
+- `go` - Go development
+- `full-stack` - Full-stack with multiple languages
+
+#### Feature Shortcuts
+
+Hip provides convenient shortcuts for common DevContainer features:
+
+- `docker-in-docker` → `ghcr.io/devcontainers/features/docker-in-docker:2`
+- `github-cli` → `ghcr.io/devcontainers/features/github-cli:1`
+- `node` → `ghcr.io/devcontainers/features/node:1`
+- `python` → `ghcr.io/devcontainers/features/python:1`
+- `go` → `ghcr.io/devcontainers/features/go:1`
+- `kubectl` → `ghcr.io/devcontainers/features/kubectl-helm-minikube:1`
+
+Use `hip devcontainer features --list` to see all available shortcuts.
+
 ## 📖 Documentation
 
 - **[Configuration Examples](examples/README.md)** - Comprehensive examples for various use cases
