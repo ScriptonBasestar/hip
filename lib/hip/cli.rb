@@ -5,7 +5,7 @@ require "hip/run_vars"
 
 module Hip
   class CLI < Thor
-    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down run provision ssh infra console validate]
+    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down run provision ssh infra console validate devcontainer]
 
     class << self
       # Hackery. Take the run method away from Thor so that we can redefine it.
@@ -145,5 +145,9 @@ module Hip
     require_relative "cli/console"
     desc "console", "Integrate Hip commands into shell (only ZSH and Bash are supported)"
     subcommand :console, Hip::CLI::Console
+
+    require_relative "cli/devcontainer"
+    desc "devcontainer", "DevContainer integration commands"
+    subcommand :devcontainer, Hip::CLI::DevContainer
   end
 end
