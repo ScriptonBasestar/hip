@@ -36,19 +36,21 @@ describe Hip::Commands::Claude::Setup do
   describe "#execute" do
     context "when hip.yml exists" do
       it "creates .claude directory structure" do
-        expect(FileUtils).to receive(:mkdir_p).with(".claude/ctx")
-        expect(FileUtils).to receive(:mkdir_p).with(".claude/commands")
+        allow(FileUtils).to receive(:mkdir_p)
+        allow(File).to receive(:write)
 
-        expect(File).to receive(:write).with(
+        subject.execute
+
+        expect(FileUtils).to have_received(:mkdir_p).with(".claude/ctx")
+        expect(FileUtils).to have_received(:mkdir_p).with(".claude/commands")
+        expect(File).to have_received(:write).with(
           ".claude/ctx/hip-project-guide.md",
           anything
         )
-        expect(File).to receive(:write).with(
+        expect(File).to have_received(:write).with(
           ".claude/commands/hip.md",
           anything
         )
-
-        subject.execute
       end
 
       it "generates project guide with commands list" do
@@ -87,15 +89,15 @@ describe Hip::Commands::Claude::Setup do
         allow(FileUtils).to receive(:mkdir_p)
         allow(File).to receive(:write)
 
-        expect(FileUtils).to receive(:mkdir_p).with(
+        subject.execute
+
+        expect(FileUtils).to have_received(:mkdir_p).with(
           File.dirname(File.expand_path("~/.claude/ctx/HIP_QUICK_REFERENCE.md"))
         )
-        expect(File).to receive(:write).with(
+        expect(File).to have_received(:write).with(
           File.expand_path("~/.claude/ctx/HIP_QUICK_REFERENCE.md"),
           anything
         )
-
-        subject.execute
       end
 
       it "includes Hip version in global guide" do

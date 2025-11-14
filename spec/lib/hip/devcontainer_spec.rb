@@ -3,6 +3,7 @@
 require "spec_helper"
 require "hip/devcontainer"
 
+# rubocop:disable RSpec/FilePath, RSpec/SpecFilePathFormat
 RSpec.describe Hip::DevContainer do
   let(:config) { instance_double(Hip::Config) }
   let(:devcontainer) { described_class.new(config) }
@@ -103,10 +104,10 @@ RSpec.describe Hip::DevContainer do
     end
 
     it "generates devcontainer.json file" do
-      expect(FileUtils).to receive(:mkdir_p).with(".devcontainer")
-      expect(File).to receive(:write).with(devcontainer_path, anything)
-
       devcontainer.generate
+
+      expect(FileUtils).to have_received(:mkdir_p).with(".devcontainer")
+      expect(File).to have_received(:write).with(devcontainer_path, anything)
     end
 
     it "expands feature shortcuts in the generated config" do
@@ -122,3 +123,4 @@ RSpec.describe Hip::DevContainer do
     end
   end
 end
+# rubocop:enable RSpec/FilePath, RSpec/SpecFilePathFormat
