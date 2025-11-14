@@ -51,11 +51,11 @@ module Hip
     end
 
     def early_envs
-      @early_envs ||= env["DIP_EARLY_ENVS"].to_s.split(",")
+      @early_envs ||= env["HIP_EARLY_ENVS"].to_s.split(",")
     end
 
     def ignore_var?(key)
-      key.start_with?("DIP_", "_")
+      key.start_with?("HIP_", "_")
     end
   end
 end
