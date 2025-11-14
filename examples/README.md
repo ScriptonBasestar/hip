@@ -59,8 +59,8 @@ If you're new to Hip, start with [`basic.yml`](basic.yml) - it contains the esse
 
 - **[modules/](modules/)** - Modular configuration example
   - **[main.yml](modules/main.yml)** - Main configuration importing modules
-  - **[.dip/sast.yml](modules/.dip/sast.yml)** - Static analysis and security tools module
-  - **[.dip/testing.yml](modules/.dip/testing.yml)** - Testing framework module
+  - **[.hip/sast.yml](modules/.hip/sast.yml)** - Static analysis and security tools module
+  - **[.hip/testing.yml](modules/.hip/testing.yml)** - Testing framework module
   - Use when: Large projects with shared configurations across teams
 
 ## Using These Examples
@@ -69,11 +69,11 @@ If you're new to Hip, start with [`basic.yml`](basic.yml) - it contains the esse
 
 ```bash
 # Copy an example to your project root
-cp examples/basic.yml ./dip.yml
+cp examples/basic.yml ./hip.yml
 
 # Or for modules
-cp -r examples/modules/main.yml ./dip.yml
-cp -r examples/modules/.dip ./
+cp -r examples/modules/main.yml ./hip.yml
+cp -r examples/modules/.hip ./
 ```
 
 ### 2. Customize for Your Project
@@ -87,11 +87,11 @@ Edit the copied file to match your:
 ### 3. Validate Your Configuration
 
 ```bash
-# Validate your dip.yml
-dip validate
+# Validate your hip.yml
+hip validate
 
 # Or validate a specific example
-dip validate -c examples/basic.yml
+hip validate -c examples/basic.yml
 ```
 
 ## Configuration File Structure
@@ -169,13 +169,13 @@ interaction:
 
 ```yaml
 provision:
-  default:              # 'dip provision' or 'dip provision default'
-    - dip compose up -d
-    - dip bundle install
+  default:              # 'hip provision' or 'hip provision default'
+    - hip compose up -d
+    - hip bundle install
 
-  reset:                # 'dip provision reset'
-    - dip compose down --volumes
-    - dip compose build --no-cache
+  reset:                # 'hip provision reset'
+    - hip compose down --volumes
+    - hip compose build --no-cache
 ```
 
 ## Validation
@@ -184,12 +184,12 @@ All examples in this directory are validated against the schema. You can validat
 
 ```bash
 # Validate a specific example
-DIP_FILE=examples/basic.yml dip validate
+HIP_FILE=examples/basic.yml hip validate
 
 # Validate all examples
 for file in examples/*.yml; do
   echo "Validating $file..."
-  DIP_FILE=$file dip validate
+  HIP_FILE=$file hip validate
 done
 ```
 
@@ -199,9 +199,9 @@ done
 2. **Use Provision Profiles**: Create profiles for different scenarios (development, testing, deployment)
 3. **Document Your Commands**: Use `description` fields to help team members
 4. **Leverage Subcommands**: Organize related commands hierarchically
-5. **Version Control**: Commit your `dip.yml` to share with your team
+5. **Version Control**: Commit your `hip.yml` to share with your team
 6. **Modules for Scale**: Use modules for large projects with many commands
-7. **Validate Often**: Run `dip validate` after making changes
+7. **Validate Often**: Run `hip validate` after making changes
 
 ## Contributing
 

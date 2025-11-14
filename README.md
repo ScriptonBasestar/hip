@@ -50,12 +50,12 @@ gem install hip
 Hip can be injected into the current shell (ZSH or Bash).
 
 ```sh
-eval "$(dip console)"
+eval "$(hip console)"
 ```
 
 **IMPORTANT**: Beware of possible collisions with local tools. One particular example is supporting both local and Docker frontend build tools, such as Yarn. If you want some developer to run `yarn` locally and other to use Docker for that, you should either avoid adding the `yarn` command to the `hip.yml` or avoid using the shell integration for hybrid development.
 
-After that we can type commands without `dip` prefix. For example:
+After that we can type commands without `hip` prefix. For example:
 
 ```sh
 <run-command> *any-args
@@ -79,8 +79,8 @@ After that, it will be automatically applied when you open your preferred termin
 ## Usage
 
 ```sh
-dip --help
-dip SUBCOMMAND --help
+hip --help
+hip SUBCOMMAND --help
 ```
 
 ### hip.yml
@@ -193,10 +193,10 @@ interaction:
     command: rm -rf $(pwd)/tmp/cache/*
 
 provision:
-  - dip compose down --volumes
-  - dip clean_cache
-  - dip compose up -d pg redis
-  - dip bash -c ./bin/setup
+  - hip compose down --volumes
+  - hip clean_cache
+  - hip compose up -d pg redis
+  - hip bash -c ./bin/setup
 ```
 
 ### Predefined environment variables
@@ -232,7 +232,7 @@ services:
 
 ```sh
 cd sub-project-dir
-dip run bash -c pwd
+hip run bash -c pwd
 ```
 
 returned is `/app/sub-project-dir`.
@@ -259,12 +259,12 @@ The container will run using the same user ID as your host machine.
 
 ### Modules
 
-Modules are defined as array in `modules` section of hip.yml, modules are stored in `.dip` subdirectory of hip.yml directory.
+Modules are defined as array in `modules` section of hip.yml, modules are stored in `.hip` subdirectory of hip.yml directory.
 
 The main purpose of modules is to improve maintainability for a group of projects.
-Imagine having multiple gems which are managed with dip, each of them has the same commands, so to change one command in dip you need to update all gems individualy.
+Imagine having multiple gems which are managed with hip, each of them has the same commands, so to change one command in hip you need to update all gems individualy.
 
-With `modules` you can define a group of modules for dip.
+With `modules` you can define a group of modules for hip.
 
 For example having setup as this:
 
@@ -308,7 +308,7 @@ interaction:
     command: bundle exec annotate
 ```
 
-Imagine `.dip` to be a submodule so it can be managed only in one place.
+Imagine `.hip` to be a submodule so it can be managed only in one place.
 
 If you want to override module command, you can redefine it in hip.yml
 
@@ -343,7 +343,7 @@ interaction:
 
 Nested modules are not supported.
 
-### dip run
+### hip run
 
 Run commands defined within the `interaction` section of hip.yml
 
@@ -354,29 +354,29 @@ A command will be executed by specified runner. Hip has three types of them:
 - `local` runner — used when the previous ones are not defined.
 
 ```sh
-dip run rails c
-dip run rake db:migrate
+hip run rails c
+hip run rake db:migrate
 ```
 
 Also, `run` argument can be omitted
 
 ```sh
-dip rake db:migrate
+hip rake db:migrate
 ```
 
 You can pass in a custom environment variable into a container:
 
 ```sh
-dip VERSION=12352452 rake db:rollback
+hip VERSION=12352452 rake db:rollback
 ```
 
 Use options `-p, --publish=[]` if you need to additionally publish a container's port(s) to the host unless this behaviour is not configured at hip.yml:
 
 ```sh
-dip run -p 3000:3000 bundle exec rackup config.ru
+hip run -p 3000:3000 bundle exec rackup config.ru
 ```
 
-You can also override docker compose command by passing `HIP_COMPOSE_COMMAND` if you wish. For example if you want to use [`mutagen-compose`](https://mutagen.io/documentation/orchestration/compose) run `HIP_COMPOSE_COMMAND=mutagen-compose dip run`.
+You can also override docker compose command by passing `HIP_COMPOSE_COMMAND` if you wish. For example if you want to use [`mutagen-compose`](https://mutagen.io/documentation/orchestration/compose) run `HIP_COMPOSE_COMMAND=mutagen-compose hip run`.
 
 If you want to persist that change you can specify command in `compose` section of hip.yml :
 
@@ -386,40 +386,40 @@ compose:
 
 ```
 
-### dip ls
+### hip ls
 
 List all available run commands.
 
 ```sh
-dip ls
+hip ls
 
 bash     # Open the Bash shell in app's container
 rails    # Run Rails command
 rails s  # Run Rails server at http://localhost:3000
 ```
 
-### dip provision
+### hip provision
 
 Run commands each by each from `provision` section of hip.yml
 
-### dip compose
+### hip compose
 
 Run Docker Compose commands that are configured according to the application's hip.yml:
 
 ```sh
-dip compose COMMAND [OPTIONS]
+hip compose COMMAND [OPTIONS]
 
-dip compose up -d redis
+hip compose up -d redis
 ```
 
-### dip infra
+### hip infra
 
 Runs shared Docker Compose services that are used by the current application. Useful for microservices.
 
 There are several official infrastructure services available:
-- [dip-postgres](https://github.com/bibendi/dip (original project)-postgres)
-- [dip-kafka](https://github.com/bibendi/dip (original project)-kafka)
-- [dip-nginx](https://github.com/bibendi/dip (original project)-nginx)
+- [dip-postgres](https://github.com/bibendi/dip-postgres)
+- [dip-kafka](https://github.com/bibendi/dip-kafka)
+- [dip-nginx](https://github.com/bibendi/dip-nginx)
 
 ```yaml
 # hip.yml
@@ -435,30 +435,30 @@ Repositories will be pulled to a `~/.hip/infra` folder. For example, for the `fo
 
 Available CLI commands:
 
-- `dip infra update` pulls updates from sources
-- `dip infra up` starts all infra services
-- `dip infra up -n kafka` starts a specific infra service
-- `dip infra down` stops all infra services
-- `dip infra down -n kafka` stops a specific infra service
+- `hip infra update` pulls updates from sources
+- `hip infra up` starts all infra services
+- `hip infra up -n kafka` starts a specific infra service
+- `hip infra down` stops all infra services
+- `hip infra down -n kafka` stops a specific infra service
 
-### dip ktl
+### hip ktl
 
 Run kubectl commands that are configured according to the application's hip.yml:
 
 ```sh
-dip ktl COMMAND [OPTIONS]
+hip ktl COMMAND [OPTIONS]
 
-STAGE=some dip ktl get pods
+STAGE=some hip ktl get pods
 ```
 
-### dip ssh
+### hip ssh
 
 Runs ssh-agent container based on https://github.com/whilp/ssh-agent with your ~/.ssh/id_rsa.
 It creates a named volume `ssh_data` with ssh socket.
 An application's docker-compose.yml should contains environment variable `SSH_AUTH_SOCK=/ssh/auth/sock` and connects to external volume `ssh_data`.
 
 ```sh
-dip ssh up
+hip ssh up
 ```
 
 docker-compose.yml
@@ -480,7 +480,7 @@ volumes:
 if you want to use non-root user you can specify UID like so:
 
 ```
-dip ssh up -u 1000
+hip ssh up -u 1000
 ```
 
 This especially helpful if you have something like this in your docker-compose.yml:
@@ -491,12 +491,12 @@ services:
     user: "1000:1000"
 ```
 
-### dip validate
+### hip validate
 
 Validates your hip.yml configuration against the JSON schema. The schema validation helps ensure your configuration is correct and follows the expected format.
 
 ```sh
-dip validate
+hip validate
 ```
 
 The validator will check:
@@ -686,10 +686,10 @@ hip claude:setup
 - **[Configuration Examples](examples/README.md)** - Comprehensive examples for various use cases
 - **[Development Roadmap](docs/ROADMAP.md)** - Future plans and Ruby 3.2+ migration strategy
 - **[Schema Reference](schema.json)** - Configuration schema for validation
-- **[Original Project](https://github.com/bibendi/dip (original project))** - Evil Martians' original dip project
+- **[Original Project](https://github.com/bibendi/dip)** - Evil Martians' original dip project
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
-Original project releases: https://github.com/bibendi/dip (original project)/releases
+Original project releases: https://github.com/bibendi/dip/releases
