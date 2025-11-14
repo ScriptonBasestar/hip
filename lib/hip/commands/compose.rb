@@ -78,7 +78,7 @@ module Hip
       end
 
       def compose_command_override
-        Hip.env["DIP_COMPOSE_COMMAND"] || config[:command]
+        Hip.env["HIP_COMPOSE_COMMAND"] || config[:command]
       end
 
       def set_infra_env
