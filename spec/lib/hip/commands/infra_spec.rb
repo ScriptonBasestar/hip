@@ -9,7 +9,7 @@ describe Hip::Commands::Infra, :config do
   let(:config) { {infra: {nginx: {git: "some@git.repo"}}} }
 
   describe Hip::Commands::Infra::Update do
-    let(:folder) { "#{Dip.home_path}/infra/nginx/latest" }
+    let(:folder) { "#{Hip.home_path}/infra/nginx/latest" }
 
     it "creates folder and clones repo" do
       FakeFS do
