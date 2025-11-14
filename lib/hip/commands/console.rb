@@ -101,7 +101,7 @@ module Hip
         def add_aliases(*names)
           names.each do |name|
             aliases << name
-            out << "function #{name}() { #{Dip.bin_path} #{name} $@; }"
+            out << "function #{name}() { #{Hip.bin_path} #{name} $@; }"
           end
         end
 

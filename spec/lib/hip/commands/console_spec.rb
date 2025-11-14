@@ -13,9 +13,9 @@ describe Hip::Commands::Console do
 
       it { expect { subject }.to output(/export HIP_SHELL=1/).to_stdout }
       it { expect { subject }.to output(/export HIP_EARLY_ENVS/).to_stdout }
-      it { expect { subject }.to output(/function dip_clear/).to_stdout }
-      it { expect { subject }.to output(/function dip_inject/).to_stdout }
-      it { expect { subject }.to output(/function dip_reload/).to_stdout }
+      it { expect { subject }.to output(/function hip_clear/).to_stdout }
+      it { expect { subject }.to output(/function hip_inject/).to_stdout }
+      it { expect { subject }.to output(/function hip_reload/).to_stdout }
     end
   end
 
