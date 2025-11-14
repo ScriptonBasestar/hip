@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
 #
-# Example: Full-Stack Dip Configuration
+# Example: Full-Stack Hip Configuration
 # Use Case: Rails + Node.js + PostgreSQL + Redis full-stack application
-# Features: Demonstrates all major dip features including provision profiles,
+# Features: Demonstrates all major hip features including provision profiles,
 #           subcommands, multiple runners, compose profiles, and infra management
 #
 # Usage:

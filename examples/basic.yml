@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
 #
-# Example: Basic Dip Configuration for Rails
+# Example: Basic Hip Configuration for Rails
 # Use Case: Simple Rails project with PostgreSQL - perfect for getting started
 # Features: Essential commands (shell, rails, bundle, rake), simple provision
 #

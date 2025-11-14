@@ -1,10 +1,10 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
 #
-# Example: Modular Dip Configuration with Modules
+# Example: Modular Hip Configuration with Modules
 # Use Case: Large projects with shared configurations across teams
 # Features: Module system for reusable command sets
 #
-# This example demonstrates how to split your dip configuration into modules.
+# This example demonstrates how to split your hip configuration into modules.
 # Modules allow you to:
 # - Share common commands across multiple projects
 # - Organize large configurations

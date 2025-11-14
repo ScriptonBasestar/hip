@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
 #
-# Example: Node.js Dip Configuration
+# Example: Node.js Hip Configuration
 # Use Case: Node.js/Express application with MongoDB and Redis
 # Features: npm/yarn commands, multiple services, development/production modes
 #

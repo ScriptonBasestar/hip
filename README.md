@@ -47,7 +47,7 @@ gem install hip
 
 ### Integration with shell
 
-Dip can be injected into the current shell (ZSH or Bash).
+Hip can be injected into the current shell (ZSH or Bash).
 
 ```sh
 eval "$(dip console)"
@@ -67,7 +67,7 @@ provision
 
 When we change the current directory, all shell aliases will be automatically removed. But when we enter back into a directory with a `hip.yml` file, then shell aliases will be renewed.
 
-Also, in shell mode Dip is trying to determine manually passed environment variables. For example:
+Also, in shell mode Hip is trying to determine manually passed environment variables. For example:
 
 ```sh
 VERSION=20180515103400 rails db:migrate:down
@@ -207,7 +207,7 @@ Current OS architecture (e.g. `linux`, `darwin`, `freebsd`, and so on). Sometime
 
 #### $HIP_WORK_DIR_REL_PATH
 
-Relative path from the current directory to the nearest directory where a Dip's config is found. It is useful when you need to mount a specific local directory to a container along with ability to change its working dir. For example:
+Relative path from the current directory to the nearest directory where a Hip config is found. It is useful when you need to mount a specific local directory to a container along with ability to change its working dir. For example:
 
 ```
 - project_root
@@ -347,7 +347,7 @@ Nested modules are not supported.
 
 Run commands defined within the `interaction` section of hip.yml
 
-A command will be executed by specified runner. Dip has three types of them:
+A command will be executed by specified runner. Hip has three types of them:
 
 - `docker compose` runner — used when the `service` option is defined.
 - `kubectl` runner — used when the `pod` option is defined.

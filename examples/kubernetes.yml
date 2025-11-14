@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
 #
-# Example: Kubernetes Dip Configuration
+# Example: Kubernetes Hip Configuration
 # Use Case: Development against Kubernetes cluster using kubectl runner
 # Features: kubectl runner, namespace configuration, pod targeting
 #

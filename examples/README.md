@@ -1,10 +1,10 @@
-# Dip Configuration Examples
+# Hip Configuration Examples
 
-This directory contains comprehensive examples of Dip configurations for various use cases and project types. Each example demonstrates different features and best practices.
+This directory contains comprehensive examples of Hip configurations for various use cases and project types. Each example demonstrates different features and best practices.
 
 ## Quick Start
 
-If you're new to Dip, start with [`basic.yml`](basic.yml) - it contains the essential commands you'll need for a simple Rails project.
+If you're new to Hip, start with [`basic.yml`](basic.yml) - it contains the essential commands you'll need for a simple Rails project.
 
 ## Examples by Use Case
 
@@ -14,7 +14,7 @@ If you're new to Dip, start with [`basic.yml`](basic.yml) - it contains the esse
   - Perfect for beginners
   - Essential commands: shell, rails, bundle, rake
   - Single provision profile
-  - Use when: Starting a new Rails project or learning Dip
+  - Use when: Starting a new Rails project or learning Hip
 
 ### 🚀 Full-Stack Applications
 
@@ -209,7 +209,7 @@ Found a bug in an example or have a suggestion for a new one? Please open an iss
 
 ## Learn More
 
-- [Dip Documentation](https://github.com/bibendi/dip)
+- [Hip Documentation](https://github.com/bibendi/dip)
 - [Schema Reference](../schema.json)
 - [Roadmap](../docs/ROADMAP.md)
 
