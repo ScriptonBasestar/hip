@@ -22,7 +22,9 @@ describe Hip::Commands::SSH do
       }
     end
 
-    context "when option `key` is present" do
+    context "when option `key` is present", :env do
+      let(:env) { {"HOME" => "/root"} }
+
       before { cli.start "up --key /foo/bar-baz-rsa".shellsplit }
 
       it {
@@ -31,7 +33,9 @@ describe Hip::Commands::SSH do
       }
     end
 
-    context "when option `volume` is present" do
+    context "when option `volume` is present", :env do
+      let(:env) { {"HOME" => "/root"} }
+
       before { cli.start "up --volume /foo/.ssh".shellsplit }
 
       it {
