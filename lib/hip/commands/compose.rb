@@ -20,7 +20,7 @@ module Hip
 
       def execute
         Hip.logger.debug "Dip.Commands.Compose#execute >>>>>>>"
-        Hip.env["DIP_DNS"] ||= find_dns
+        Hip.env["HIP_DNS"] ||= find_dns
 
         set_infra_env
 
