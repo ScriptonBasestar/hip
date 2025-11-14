@@ -36,7 +36,7 @@ module Hip
       attr_reader :command, :argv, :options
 
       def lookup_runner
-        Hip.logger.debug "Dip.Commands.Run#lookup_runner command: #{command}"
+        Hip.logger.debug "Hip.Commands.Run#lookup_runner command: #{command}"
         if (runner = command[:runner])
           camelized_runner = runner.split("_").collect(&:capitalize).join
           Runners.const_get("#{camelized_runner}Runner")

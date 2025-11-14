@@ -19,7 +19,7 @@ module Hip
       end
 
       def execute
-        Hip.logger.debug "Dip.Commands.Compose#execute >>>>>>>"
+        Hip.logger.debug "Hip.Commands.Compose#execute >>>>>>>"
         Hip.env["HIP_DNS"] ||= find_dns
 
         set_infra_env

@@ -10,9 +10,9 @@ module Hip
       end
 
       def execute
-        Hip.logger.debug "Dip.Commands.Provision#execute >>>>>>>"
+        Hip.logger.debug "Hip.Commands.Provision#execute >>>>>>>"
         provision_key = @argv.first || :default
-        Hip.logger.debug "Dip.Commands.Provision #{Hip.config.provision}"
+        Hip.logger.debug "Hip.Commands.Provision #{Hip.config.provision}"
 
         # If provision is empty or key not found, just return without error
         return if Hip.config.provision.empty?
