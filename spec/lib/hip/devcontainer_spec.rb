@@ -28,10 +28,7 @@ RSpec.describe Hip::DevContainer do
   describe "#service_name" do
     context "when devcontainer service is configured" do
       before do
-        allow(config).to receive(:to_h).and_return(
-          devcontainer: {service: "web"}
-        )
-        allow(config).to receive(:devcontainer).and_return({service: "web"})
+        allow(config).to receive_messages(to_h: {devcontainer: {service: "web"}}, devcontainer: {service: "web"})
       end
 
       it "returns configured service name" do
@@ -41,8 +38,7 @@ RSpec.describe Hip::DevContainer do
 
     context "when devcontainer service is not configured" do
       before do
-        allow(config).to receive(:to_h).and_return({})
-        allow(config).to receive(:compose).and_return({})
+        allow(config).to receive_messages(to_h: {}, compose: {})
       end
 
       it "returns default service name" do
@@ -54,10 +50,7 @@ RSpec.describe Hip::DevContainer do
   describe "#enabled?" do
     context "when devcontainer is explicitly enabled" do
       before do
-        allow(config).to receive(:to_h).and_return(
-          devcontainer: {enabled: true}
-        )
-        allow(config).to receive(:devcontainer).and_return({enabled: true})
+        allow(config).to receive_messages(to_h: {devcontainer: {enabled: true}}, devcontainer: {enabled: true})
       end
 
       it "returns true" do
@@ -67,10 +60,7 @@ RSpec.describe Hip::DevContainer do
 
     context "when devcontainer is explicitly disabled" do
       before do
-        allow(config).to receive(:to_h).and_return(
-          devcontainer: {enabled: false}
-        )
-        allow(config).to receive(:devcontainer).and_return({enabled: false})
+        allow(config).to receive_messages(to_h: {devcontainer: {enabled: false}}, devcontainer: {enabled: false})
       end
 
       it "returns false" do
@@ -93,28 +83,20 @@ RSpec.describe Hip::DevContainer do
     let(:devcontainer_path) { Pathname.new(".devcontainer/devcontainer.json") }
 
     before do
-      allow(config).to receive(:to_h).and_return(
-        devcontainer: {
-          name: "Test Container",
-          service: "app",
-          features: {
-            "docker-in-docker": {}
-          }
-        },
-        compose: {
-          files: ["docker-compose.yml"]
-        }
-      )
-      allow(config).to receive(:devcontainer).and_return(
-        name: "Test Container",
-        service: "app",
-        features: {
-          "docker-in-docker": {}
-        }
-      )
-      allow(config).to receive(:compose).and_return(
-        files: ["docker-compose.yml"]
-      )
+      allow(config).to receive_messages(to_h: {devcontainer: {
+                                                 name: "Test Container",
+                                                 service: "app",
+                                                 features: {
+                                                   "docker-in-docker": {}
+                                                 }
+                                               },
+                                               compose: {
+                                                 files: ["docker-compose.yml"]
+                                               }}, devcontainer: {name: "Test Container",
+                                                                  service: "app",
+                                                                  features: {
+                                                                    "docker-in-docker": {}
+                                                                  }}, compose: {files: ["docker-compose.yml"]})
       allow(devcontainer).to receive(:devcontainer_path).and_return(devcontainer_path)
       allow(FileUtils).to receive(:mkdir_p)
       allow(File).to receive(:write)

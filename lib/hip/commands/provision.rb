@@ -44,7 +44,7 @@ module Hip
         Hip.logger.debug "Auto-generating Claude Code integration files..."
         require_relative "claude/setup"
         Hip::Commands::Claude::Setup.new({}).execute
-      rescue StandardError => e
+      rescue => e
         # Don't fail provision if Claude file generation fails
         Hip.logger.debug "Failed to auto-generate Claude files: #{e.message}"
       end

@@ -14,20 +14,20 @@ module Hip
             config = devcontainer.read
             puts "✓ DevContainer configuration is valid"
             puts "\nConfiguration summary:"
-            puts "  Name: #{config['name'] || '(not set)'}"
-            puts "  Service: #{config['service'] || '(not set)'}"
-            puts "  Image: #{config['image'] || '(using docker-compose)'}"
-            puts "  Workspace: #{config['workspaceFolder'] || '/workspace'}"
+            puts "  Name: #{config["name"] || "(not set)"}"
+            puts "  Service: #{config["service"] || "(not set)"}"
+            puts "  Image: #{config["image"] || "(using docker-compose)"}"
+            puts "  Workspace: #{config["workspaceFolder"] || "/workspace"}"
 
-            if config['features']
-              puts "\n  Features (#{config['features'].keys.size}):"
-              config['features'].keys.each do |feature|
+            if config["features"]
+              puts "\n  Features (#{config["features"].keys.size}):"
+              config["features"].keys.each do |feature|
                 puts "    - #{feature}"
               end
             end
 
-            if config['forwardPorts']
-              puts "\n  Forward Ports: #{config['forwardPorts'].join(', ')}"
+            if config["forwardPorts"]
+              puts "\n  Forward Ports: #{config["forwardPorts"].join(", ")}"
             end
           end
         rescue Hip::Error => e

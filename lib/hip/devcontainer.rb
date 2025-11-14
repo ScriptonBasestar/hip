@@ -77,11 +77,10 @@ module Hip
       Hip.logger.debug "DevContainer#sync_from_devcontainer: Syncing devcontainer.json → hip.yml"
 
       devcontainer_config = read
-      hip_config = build_hip_config_from_devcontainer(devcontainer_config)
+      build_hip_config_from_devcontainer(devcontainer_config)
 
       # Note: This returns the config hash but doesn't write to hip.yml
       # Actual writing should be done by a separate command
-      hip_config
     end
 
     # Validate devcontainer.json exists and is valid JSON
@@ -91,7 +90,7 @@ module Hip
       raise Hip::Error, "DevContainer file not found: #{devcontainer_path}" unless File.exist?(devcontainer_path)
 
       begin
-        config = JSON.parse(File.read(devcontainer_path))
+        JSON.parse(File.read(devcontainer_path))
         Hip.logger.info "DevContainer configuration is valid"
         true
       rescue JSON::ParserError => e
@@ -117,10 +116,8 @@ module Hip
       # Fallback: try to infer from compose config
       if config.compose.is_a?(Hash) && config.compose[:files]
         # Return first service from docker-compose.yml (simplified)
-        "app"
-      else
-        "app"
       end
+      "app"
     end
 
     private

@@ -35,11 +35,11 @@ module Hip
             begin
               config = devcontainer.read
               puts "\n  Configuration:"
-              puts "    Name: #{config['name'] || '(not set)'}"
-              puts "    Service: #{config['service'] || config['image'] || '(not set)'}"
-              puts "    Workspace: #{config['workspaceFolder'] || '(not set)'}"
-              puts "    Features: #{config['features']&.keys&.size || 0}"
-              puts "    Ports: #{config['forwardPorts']&.size || 0}"
+              puts "    Name: #{config["name"] || "(not set)"}"
+              puts "    Service: #{config["service"] || config["image"] || "(not set)"}"
+              puts "    Workspace: #{config["workspaceFolder"] || "(not set)"}"
+              puts "    Features: #{config["features"]&.keys&.size || 0}"
+              puts "    Ports: #{config["forwardPorts"]&.size || 0}"
             rescue Hip::Error => e
               puts "  ✗ Error reading devcontainer.json: #{e.message}"
             end

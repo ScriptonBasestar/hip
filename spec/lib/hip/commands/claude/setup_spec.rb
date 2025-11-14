@@ -29,10 +29,7 @@ describe Hip::Commands::Claude::Setup do
   end
 
   before do
-    allow(Hip.config).to receive(:exist?).and_return(true)
-    allow(Hip.config).to receive(:interaction).and_return(config[:interaction])
-    allow(Hip.config).to receive(:environment).and_return(config[:environment])
-    allow(Hip.config).to receive(:compose).and_return(nil)
+    allow(Hip.config).to receive_messages(exist?: true, interaction: config[:interaction], environment: config[:environment], compose: nil)
     allow(Dir).to receive(:pwd).and_return("/test/project")
   end
 
@@ -168,8 +165,7 @@ describe Hip::Commands::Claude::Setup do
       allow(File).to receive(:write) do |path, content|
         guide_content = content if path == ".claude/ctx/hip-project-guide.md"
       end
-      allow(Hip.config).to receive(:compose).and_return(nil)
-      allow(Hip.config).to receive(:environment).and_return({})
+      allow(Hip.config).to receive_messages(compose: nil, environment: {})
 
       subject.execute
 

@@ -3,11 +3,11 @@
 require "hip/errors"
 require "hip/config"
 require "hip/environment"
-require 'logger'
+require "logger"
 
 module Hip
   def self.logger
-    @logger ||= Logger.new(STDOUT).tap do |log|
+    @logger ||= Logger.new($stdout).tap do |log|
       log.level = Logger::INFO
       log.formatter = proc do |severity, datetime, progname, msg|
         "[#{datetime}] #{severity}: #{msg}\n"
@@ -19,7 +19,6 @@ module Hip
     def config
       @config ||= Hip::Config.new
     end
-
 
     def env
       @env ||= Hip::Environment.new(config.exist? ? config.environment : {})
