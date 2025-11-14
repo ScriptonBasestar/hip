@@ -106,7 +106,7 @@ describe Hip::Config do
     end
 
     context "when schema is invalid", :env do
-      let(:env) { {"HIP_FILE" => fixture_path("invalid-with-schema/dip.yml")} }
+      let(:env) { {"HIP_FILE" => fixture_path("invalid-with-schema/hip.yml")} }
 
       it "raises a Hip::Error" do
         expect { subject.validate }.to raise_error(Hip::Error, /Schema validation failed/)
