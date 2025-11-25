@@ -15,7 +15,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '8.2.8'
+version: '9.0.0'
 
 environment:
   RAILS_ENV: development
@@ -57,63 +57,63 @@ provision:
   default:
     - hip compose down --volumes
     - hip compose up -d db redis
-    - dip bundle install
-    - dip rails db:create
-    - dip rails db:migrate
-    - dip rails db:seed
-    - echo "✅ Setup complete! Run 'dip rails server' to start the app"
+    - hip bundle install
+    - hip rails db:create
+    - hip rails db:migrate
+    - hip rails db:seed
+    - echo "✅ Setup complete! Run 'hip rails server' to start the app"
 
   # Reset: Nuclear option - rebuild everything from scratch
   reset:
     - hip compose down --volumes --remove-orphans
     - rm -rf tmp/ log/*.log
     - hip compose build --no-cache
-    - dip bundle install
-    - dip rails db:drop db:create db:migrate db:seed
-    - dip rails assets:clobber assets:precompile
+    - hip bundle install
+    - hip rails db:drop db:create db:migrate db:seed
+    - hip rails assets:clobber assets:precompile
     - echo "✅ Complete reset done!"
 
   # Seed: Re-seed database without destroying data
   seed:
-    - dip rails db:seed
+    - hip rails db:seed
     - echo "✅ Database seeded"
 
   # Update: Pull latest changes and update dependencies
   update:
     - git pull origin main
     - hip compose pull
-    - dip bundle install
-    - dip rails db:migrate
-    - dip rails assets:precompile
+    - hip bundle install
+    - hip rails db:migrate
+    - hip rails assets:precompile
     - echo "✅ Updated to latest version"
 
   # Test: Setup test environment
   test:
     - hip compose up -d db redis
-    - RAILS_ENV=test dip bundle install
-    - RAILS_ENV=test dip rails db:create db:migrate
-    - echo "✅ Test environment ready. Run 'dip rspec' to run tests"
+    - RAILS_ENV=test hip bundle install
+    - RAILS_ENV=test hip rails db:create db:migrate
+    - echo "✅ Test environment ready. Run 'hip rspec' to run tests"
 
   # CI: Continuous Integration setup
   ci:
     - hip compose up -d db redis
-    - dip bundle install --jobs 4 --retry 3
-    - dip rails db:create db:schema:load
-    - dip rails assets:precompile
+    - hip bundle install --jobs 4 --retry 3
+    - hip rails db:create db:schema:load
+    - hip rails assets:precompile
     - echo "✅ CI environment ready"
 
   # Deploy: Production deployment preparation
   deploy:
     - hip compose build
-    - dip rails db:migrate
-    - dip rails assets:precompile
-    - dip rails assets:clean
+    - hip rails db:migrate
+    - hip rails assets:precompile
+    - hip rails assets:clean
     - echo "✅ Ready for deployment"
 
   # Quick: Fast setup for minor updates
   quick:
-    - dip bundle install
-    - dip rails db:migrate
+    - hip bundle install
+    - hip rails db:migrate
     - echo "✅ Quick setup complete"
 
   # Clean: Clean up temporary files and caches
@@ -121,5 +121,5 @@ provision:
     - rm -rf tmp/cache/*
     - rm -rf public/assets
     - rm -rf log/*.log
-    - dip rails tmp:clear
+    - hip rails tmp:clear
     - echo "✅ Cleaned up temporary files"

@@ -13,7 +13,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '8.2.8'
+version: '9.0.0'
 
 # Environment variables available to all services
 environment:
@@ -68,7 +68,7 @@ provision:
   default:
     - hip compose down --volumes
     - hip compose up -d db
-    - dip bundle install
-    - dip rails db:create
-    - dip rails db:migrate
-    - dip rails db:seed
+    - hip bundle install
+    - hip rails db:create
+    - hip rails db:migrate
+    - hip rails db:seed

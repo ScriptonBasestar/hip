@@ -14,7 +14,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '8.2.8'
+version: '9.0.0'
 
 environment:
   NODE_ENV: development
@@ -118,30 +118,30 @@ provision:
   default:
     - hip compose down --volumes
     - hip compose up -d mongo redis
-    - dip npm install
-    - dip npm run build
-    - echo "✅ Setup complete! Run 'dip npm run dev' to start"
+    - hip npm install
+    - hip npm run build
+    - echo "✅ Setup complete! Run 'hip npm run dev' to start"
 
   # Clean install
   reset:
     - hip compose down --volumes
     - rm -rf node_modules package-lock.json
-    - dip npm install
-    - dip npm run build
+    - hip npm install
+    - hip npm run build
 
   # Update dependencies
   update:
-    - dip npm update
-    - dip npm audit fix
-    - dip npm run build
+    - hip npm update
+    - hip npm audit fix
+    - hip npm run build
 
   # Production build
   production:
-    - dip npm ci
-    - dip npm run build
-    - dip npm prune --production
+    - hip npm ci
+    - hip npm run build
+    - hip npm prune --production
 
   # Test setup
   test:
-    - NODE_ENV=test dip npm install
-    - NODE_ENV=test dip npm run build
+    - NODE_ENV=test hip npm install
+    - NODE_ENV=test hip npm run build

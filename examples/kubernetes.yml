@@ -18,7 +18,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '8.2.8'
+version: '9.0.0'
 
 # Kubernetes configuration
 kubectl:
@@ -88,7 +88,7 @@ provision:
   deploy:
     - kubectl set image deployment/web web=myapp:latest
     - kubectl rollout status deployment/web
-    - dip rails db:migrate
+    - hip rails db:migrate
 
   # Rollback deployment
   rollback:
