@@ -21,15 +21,15 @@ This document outlines planned features, improvements, and breaking changes for 
 ### 🔮 Future: Ruby 3.2+ Migration
 
 **Status**: Planned (not scheduled)
-**Target Version**: 9.0.0 (major version bump)
+**Target Version**: 10.0.0 (next major version bump)
 **Impact**: ⚠️ Breaking change
 
 #### Motivation
 
 - json-schema v6.0+ requires Ruby >= 3.2
 - Ruby 2.7 reached EOL on 2023-03-31
-- Ruby 3.0 reaches EOL on 2024-03-31
-- Ruby 3.1 reaches EOL on 2025-03-31
+- Ruby 3.0 reached EOL on 2024-03-31
+- Ruby 3.1 reached EOL on 2025-03-31
 
 #### Changes Required
 
@@ -55,7 +55,7 @@ This document outlines planned features, improvements, and breaking changes for 
 
 #### Migration Guide (Draft)
 
-Users upgrading from 8.x to 9.0 will need to:
+Users upgrading from 9.x to 10.0 will need to:
 
 1. **Upgrade Ruby version**
    ```bash
@@ -68,9 +68,9 @@ Users upgrading from 8.x to 9.0 will need to:
 
 2. **Update Hip**
    ```bash
-   gem update dip
+   gem update hip
    # or in Gemfile
-   gem 'dip', '~> 9.0'
+   gem 'hip', '~> 10.0'
    ```
 
 3. **No configuration changes required**
@@ -89,6 +89,16 @@ This update will be considered when:
 ---
 
 ## Completed Milestones
+
+### ✅ v9.0.0 (November 2025)
+
+- 🚨 **Breaking**: Complete rebranding from "dip" to "hip"
+  - Binary: `dip` → `hip`
+  - Config files: `dip.yml` → `hip.yml`
+  - Environment variables: `DIP_*` → `HIP_*`
+- ✨ Claude Code Integration (`hip claude:setup`)
+- ✨ DevContainer Integration (`hip devcontainer`)
+- 🐛 Multiple dip→hip migration fixes
 
 ### ✅ v8.2.8 (January 2025)
 
@@ -115,6 +125,6 @@ Have suggestions for the roadmap? Please:
 
 ## Maintenance Policy
 
-- **Active Support**: Latest minor version (8.2.x)
-- **Security Fixes**: Latest major version (8.x)
+- **Active Support**: Latest minor version (9.0.x)
+- **Security Fixes**: Latest major version (9.x)
 - **Ruby EOL Policy**: We aim to drop support 6-12 months after Ruby version EOL
