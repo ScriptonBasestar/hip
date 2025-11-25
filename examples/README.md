@@ -215,5 +215,5 @@ Found a bug in an example or have a suggestion for a new one? Please open an iss
 
 ---
 
-**Version**: 8.2.8
-**Last Updated**: January 2025
+**Version**: 9.0.0
+**Last Updated**: November 2025

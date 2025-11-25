@@ -6,7 +6,7 @@ This document outlines planned features, improvements, and breaking changes for 
 
 ## Version History Context
 
-- **Current**: 8.2.8 (January 2025)
+- **Current**: 9.0.0 (November 2025)
 - **Ruby Support**: >= 2.7
 - **Runtime Dependencies**:
   - json-schema ~> 5

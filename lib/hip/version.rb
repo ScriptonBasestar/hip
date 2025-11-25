@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Hip
-  VERSION = "8.2.8"
+  VERSION = "9.0.0"
 end
