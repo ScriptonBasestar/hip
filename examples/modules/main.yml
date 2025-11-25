@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
 #
 # Example: Modular Hip Configuration with Modules
 # Use Case: Large projects with shared configurations across teams
@@ -12,11 +12,11 @@
 # - Maintain team-specific tooling separately
 #
 # Usage:
-#   dip rails console          # From main config
-#   dip rubocop                # From sast module
-#   dip rspec                  # From testing module
+#   hip rails console          # From main config
+#   hip rubocop                # From sast module
+#   hip rspec                  # From testing module
 #
-# Learn more: https://github.com/bibendi/dip
+# Learn more: https://github.com/ScriptonBasestar/hip
 
 version: '8.2.8'
 

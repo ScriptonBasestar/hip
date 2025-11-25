@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
 #
 # Example: Full-Stack Hip Configuration
 # Use Case: Rails + Node.js + PostgreSQL + Redis full-stack application
@@ -8,12 +8,12 @@
 # Usage:
 #   hip provision              # Run default setup
 #   hip provision reset        # Reset and rebuild
-#   dip rails console          # Start Rails console
-#   dip rails db:migrate       # Run migrations
-#   dip npm install            # Install Node packages
-#   dip rspec                  # Run tests
+#   hip rails console          # Start Rails console
+#   hip rails db:migrate       # Run migrations
+#   hip npm install            # Install Node packages
+#   hip rspec                  # Run tests
 #
-# Learn more: https://github.com/bibendi/dip
+# Learn more: https://github.com/ScriptonBasestar/hip
 
 version: '8.2.8'
 

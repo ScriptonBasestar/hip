@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
 #
 # Example: Provision Profiles Configuration
 # Use Case: Demonstrates the power of provision profiles for different scenarios
@@ -13,7 +13,7 @@
 #   hip provision ci           # CI/CD pipeline setup
 #   hip provision deploy       # Production deployment preparation
 #
-# Learn more: https://github.com/bibendi/dip
+# Learn more: https://github.com/ScriptonBasestar/hip
 
 version: '8.2.8'
 

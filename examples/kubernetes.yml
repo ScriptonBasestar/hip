@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
 #
 # Example: Kubernetes Hip Configuration
 # Use Case: Development against Kubernetes cluster using kubectl runner
@@ -10,13 +10,13 @@
 #   - Pods running in the target namespace
 #
 # Usage:
-#   dip k8s get pods                 # List all pods
-#   dip rails console                # Start Rails console in the web pod
-#   dip logs                         # Stream logs from web pod
-#   dip bash                         # Open bash shell in web pod
-#   dip port-forward                 # Forward local port 3000 to pod
+#   hip k8s get pods                 # List all pods
+#   hip rails console                # Start Rails console in the web pod
+#   hip logs                         # Stream logs from web pod
+#   hip bash                         # Open bash shell in web pod
+#   hip port-forward                 # Forward local port 3000 to pod
 #
-# Learn more: https://github.com/bibendi/dip
+# Learn more: https://github.com/ScriptonBasestar/hip
 
 version: '8.2.8'
 

@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
 #
 # Example: Basic Hip Configuration for Rails
 # Use Case: Simple Rails project with PostgreSQL - perfect for getting started
@@ -6,12 +6,12 @@
 #
 # Usage:
 #   hip provision          # Set up the project for the first time
-#   dip shell              # Start a bash shell in the container
-#   dip rails console      # Start Rails console
-#   dip rake db:migrate    # Run database migrations
-#   dip bundle install     # Install gems
+#   hip shell              # Start a bash shell in the container
+#   hip rails console      # Start Rails console
+#   hip rake db:migrate    # Run database migrations
+#   hip bundle install     # Install gems
 #
-# Learn more: https://github.com/bibendi/dip
+# Learn more: https://github.com/ScriptonBasestar/hip
 
 version: '8.2.8'
 

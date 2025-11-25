@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip/refs/heads/master/schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
 #
 # Example: Node.js Hip Configuration
 # Use Case: Node.js/Express application with MongoDB and Redis
@@ -6,13 +6,13 @@
 #
 # Usage:
 #   hip provision              # Setup project
-#   dip npm install            # Install dependencies
-#   dip npm run dev            # Start development server
-#   dip npm run build          # Build for production
-#   dip yarn add lodash        # Add a package
-#   dip mongo                  # Connect to MongoDB shell
+#   hip npm install            # Install dependencies
+#   hip npm run dev            # Start development server
+#   hip npm run build          # Build for production
+#   hip yarn add lodash        # Add a package
+#   hip mongo                  # Connect to MongoDB shell
 #
-# Learn more: https://github.com/bibendi/dip
+# Learn more: https://github.com/ScriptonBasestar/hip
 
 version: '8.2.8'
 

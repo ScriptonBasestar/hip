@@ -209,7 +209,7 @@ Found a bug in an example or have a suggestion for a new one? Please open an iss
 
 ## Learn More
 
-- [Hip Documentation](https://github.com/bibendi/dip)
+- [Hip Documentation](https://github.com/ScriptonBasestar/hip)
 - [Schema Reference](../schema.json)
 - [Roadmap](../docs/ROADMAP.md)
 
