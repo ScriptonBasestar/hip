@@ -107,7 +107,7 @@ See [CHANGELOG.md](../CHANGELOG.md) for complete version history.
 
 Have suggestions for the roadmap? Please:
 
-1. Open an issue on [GitHub](https://github.com/bibendi/dip)
+1. Open an issue on [GitHub](https://github.com/ScriptonBasestar/hip)
 2. Discuss in existing roadmap issues
 3. Submit a pull request with your proposal
 

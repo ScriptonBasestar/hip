@@ -510,7 +510,7 @@ If validation fails, you'll get detailed error messages indicating what needs to
 
 You can skip validation by setting `HIP_SKIP_VALIDATION` environment variable.
 
-Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/bibendi/dip (original project)/refs/heads/master/schema.json` to the top of your hip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
+Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json` to the top of your hip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
 
 ### hip devcontainer
 

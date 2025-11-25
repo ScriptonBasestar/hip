@@ -125,10 +125,10 @@ module Hip
       end
     end
 
-    desc "validate", "Validate the dip.yml file against the schema"
+    desc "validate", "Validate the hip.yml file against the schema"
     def validate
       Hip.config.validate
-      puts "dip.yml is valid"
+      puts "hip.yml is valid"
     rescue Hip::Error => e
       warn "Validation failed: #{e.message}"
       exit 1
