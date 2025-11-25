@@ -47,6 +47,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added [examples/devcontainer.yml](examples/devcontainer.yml) with full configuration example
 - Added 5 DevContainer templates in `lib/hip/templates/devcontainer/`
 
+### Fixed
+- **CLI validate command**: Fixed description and output message to reference `hip.yml` instead of `dip.yml`
+- **README.md**: Fixed schema.json URL to point to ScriptonBasestar/hip repository
+- **docs/ROADMAP.md**: Fixed GitHub issues link to point to ScriptonBasestar/hip
+- **examples/*.yml**: Fixed schema.json URLs and command examples from `dip` to `hip`
+- **examples/README.md**: Fixed Hip Documentation link
+- **.ruby-version**: Updated from 3.3.6 to 3.3.10 for rbenv compatibility
+
 ### 🚨 BREAKING CHANGES - Complete Rebranding from "dip" to "hip"
 
 This is a major breaking release that completely renames the project from "dip" to "hip" (Handy Infrastructure Provisioner).
