@@ -6,89 +6,63 @@ This document outlines planned features, improvements, and breaking changes for 
 
 ## Version History Context
 
-- **Current**: 9.0.0 (November 2025)
-- **Ruby Support**: >= 2.7
+- **Current**: 9.1.0 (November 2025)
+- **Ruby Support**: >= 3.3
 - **Runtime Dependencies**:
-  - json-schema ~> 5
+  - json-schema ~> 6.0
   - thor >= 0.20, < 2
-  - public_suffix >= 2.0.2, < 6.0
+  - public_suffix >= 6.0
 - **Development Tools**: bundler >= 2.5, rspec ~> 3.13, standard ~> 1.0
 
 ---
 
 ## Planned Updates
 
-### 🔮 Future: Ruby 3.2+ Migration
+### 🔮 Future: Ruby 3.4+ Features
 
 **Status**: Planned (not scheduled)
-**Target Version**: 10.0.0 (next major version bump)
-**Impact**: ⚠️ Breaking change
+**Target Version**: 10.0.0
 
-#### Motivation
-
-- json-schema v6.0+ requires Ruby >= 3.2
-- Ruby 2.7 reached EOL on 2023-03-31
-- Ruby 3.0 reached EOL on 2024-03-31
-- Ruby 3.1 reached EOL on 2025-03-31
-
-#### Changes Required
-
-**Dependencies to Update:**
-- `json-schema`: ~> 5 → ~> 6.0
-- `public_suffix`: >= 2.0.2, < 6.0 → >= 6.0 (no upper bound needed)
-
-**Gemspec Changes:**
-```diff
-- spec.required_ruby_version = ">= 2.7"
-+ spec.required_ruby_version = ">= 3.2"
-
-- spec.add_dependency "json-schema", "~> 5"
-+ spec.add_dependency "json-schema", "~> 6.0"
-
-- spec.add_dependency "public_suffix", ">= 2.0.2", "< 6.0"
-+ spec.add_dependency "public_suffix", ">= 6.0"
-```
-
-**CI/CD Updates:**
-- Remove Ruby 2.7, 3.0, 3.1 from test matrix
-- Add Ruby 3.4+ to test matrix
-
-#### Migration Guide (Draft)
-
-Users upgrading from 9.x to 10.0 will need to:
-
-1. **Upgrade Ruby version**
-   ```bash
-   # Check current Ruby version
-   ruby -v
-
-   # Required: Ruby >= 3.2
-   # Recommended: Ruby 3.3+
-   ```
-
-2. **Update Hip**
-   ```bash
-   gem update hip
-   # or in Gemfile
-   gem 'hip', '~> 10.0'
-   ```
-
-3. **No configuration changes required**
-   - hip.yml format remains compatible
-   - All commands work the same way
-
-#### Timeline
-
-This update will be considered when:
-- [ ] Majority of users have migrated to Ruby 3.2+
-- [ ] Ruby 3.1 approaches EOL (2025-03-31)
-- [ ] Community feedback indicates readiness
-
-**Related Issues**: (Link to GitHub issue when created)
+Potential features for the next major version:
+- YJIT optimization flags for improved performance
+- Pattern matching enhancements
+- Ruby 3.4+ specific improvements
 
 ---
 
 ## Completed Milestones
+
+### ✅ v9.1.0 (November 2025) - Ruby 3.3+ Migration
+
+**Impact**: ⚠️ Breaking change (Ruby version requirement)
+
+#### What Changed
+
+- **Minimum Ruby**: 2.7 → **3.3**
+- **Dependencies Updated**:
+  - `json-schema`: ~> 5 → ~> 6.0
+  - `public_suffix`: >= 2.0.2, < 6.0 → >= 6.0
+- **CI Matrix**: Ruby 3.3, 3.4 (dropped 2.7, 3.0, 3.1, 3.2)
+- **RuboCop**: Target version updated to 3.3
+
+#### Migration Guide
+
+```bash
+# 1. Check Ruby version
+ruby -v  # Must be >= 3.3
+
+# 2. Update Hip
+gem update hip
+# or in Gemfile
+gem 'hip', '~> 9.1'
+
+# 3. Update dependencies
+bundle update
+```
+
+No `hip.yml` configuration changes required.
+
+---
 
 ### ✅ v9.0.0 (November 2025)
 
