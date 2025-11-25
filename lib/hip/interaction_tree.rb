@@ -45,7 +45,7 @@ module Hip
       cmd = build_command(entry)
 
       tree[name] = cmd
-      base_cmd = entry.select { |k, _| k != :subcommands }
+      base_cmd = entry.except(:subcommands)
 
       entry[:subcommands]&.each do |sub_name, sub_entry|
         sub_command_defaults!(sub_entry)

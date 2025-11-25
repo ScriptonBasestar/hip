@@ -4,7 +4,7 @@ require "pathname"
 
 module Hip
   class Environment
-    VAR_REGEX = /\$\{?(?<var_name>[a-zA-Z_][a-zA-Z0-9_]*)\}?/.freeze
+    VAR_REGEX = /\$\{?(?<var_name>[a-zA-Z_][a-zA-Z0-9_]*)\}?/
     SPECIAL_VARS = %i[os work_dir_rel_path current_user].freeze
 
     attr_reader :vars
