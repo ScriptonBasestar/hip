@@ -55,10 +55,17 @@ module Hip
     end
     map %w[--version -v] => :version
 
-    desc "ls", "List available run commands"
+    desc "ls [OPTIONS]", "List available run commands"
+    method_option :format, aliases: "-f", type: :string, default: "table",
+      desc: "Output format (table, json, yaml)"
+    method_option :detailed, aliases: "-d", type: :boolean, default: false,
+      desc: "Show detailed information (runner, service, command)"
     def ls
       require_relative "commands/list"
-      Hip::Commands::List.new.execute
+      Hip::Commands::List.new(
+        format: options[:format],
+        detailed: options[:detailed]
+      ).execute
     end
 
     desc "compose CMD [OPTIONS]", "Run Docker Compose commands"
