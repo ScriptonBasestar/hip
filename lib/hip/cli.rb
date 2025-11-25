@@ -107,7 +107,6 @@ module Hip
       end
     end
 
-    # TODO use desc in schema.json ??
     desc "provision", "Execute commands within provision section"
     method_option :help, aliases: "-h", type: :boolean,
       desc: "Display usage information"
