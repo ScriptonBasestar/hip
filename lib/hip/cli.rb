@@ -10,7 +10,7 @@ require "hip/run_vars"
 
 module Hip
   class CLI < Thor
-    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down run provision ssh infra console validate devcontainer claude]
+    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down run provision ssh infra console validate manifest devcontainer claude]
 
     class << self
       # Hackery. Take the run method away from Thor so that we can redefine it.
@@ -156,6 +156,22 @@ module Hip
     rescue Hip::Error => e
       warn "Validation failed: #{e.message}"
       exit 1
+    end
+
+    desc "manifest [OPTIONS]", "Output complete command manifest"
+    method_option :format, aliases: "-f", type: :string, default: "json",
+      desc: "Output format (json, yaml)"
+    def manifest
+      require_relative "command_registry"
+
+      output = case options[:format]
+      when "yaml"
+        Hip::CommandRegistry.to_yaml
+      else
+        Hip::CommandRegistry.to_json
+      end
+
+      puts output
     end
 
     require_relative "cli/ssh"
