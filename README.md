@@ -94,8 +94,8 @@ Config file reference will be written soon.
 Also, you can check out examples at the top.
 
 ```yml
-# Required minimum dip version
-version: '8.2.8'
+# Required minimum hip version
+version: '9.0.0'
 
 environment:
   COMPOSE_EXT: development
