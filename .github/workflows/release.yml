@@ -11,16 +11,16 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.3'
           bundler-cache: true
 
       - name: Build gem
-        run: gem build dip.gemspec
+        run: gem build hip.gemspec
 
       - name: Upload gem to release
         env:
