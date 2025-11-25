@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+# @file: lib/hip/commands/runners/base.rb
+# @purpose: Abstract base class for command execution strategies
+# @flow: Run.lookup_runner -> Runner.new -> Runner.execute
+# @dependencies: Hip::Command (for exec methods)
+# @key_methods: initialize, execute, command_args
 
 module Hip
   module Commands

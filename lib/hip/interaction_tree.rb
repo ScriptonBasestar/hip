@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+# @file: lib/hip/interaction_tree.rb
+# @purpose: Parse and lookup commands from hip.yml interaction: hierarchy
+# @flow: Config.interaction -> InteractionTree.new -> find(cmd, *argv)
+# @dependencies: shellwords, hip/ext/hash
+# @key_methods: find (recursive lookup), list (flatten all commands)
 
 require "shellwords"
 require "hip/ext/hash"

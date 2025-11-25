@@ -1,4 +1,10 @@
 # frozen_string_literal: true
+# @file: lib/hip/commands/runners/kubectl_runner.rb
+# @purpose: Execute commands in Kubernetes pods via kubectl exec
+# @flow: Run -> KubectlRunner.execute -> kubectl exec command construction
+# @dependencies: Base, Hip::Commands::Kubectl
+# @key_methods: execute (parses pod:container, builds kubectl exec args)
+# @config_keys: command[:pod], command[:entrypoint]
 
 require_relative "base"
 require_relative "../kubectl"

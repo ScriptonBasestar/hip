@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+# @file: lib/hip.rb
+# @purpose: Hip module entry point, provides global state access
+# @flow: exe/hip -> require 'hip' -> Hip.config, Hip.env, Hip.logger
+# @dependencies: hip/errors, hip/config, hip/environment, logger
+# @key_methods: config, env, logger, bin_path, home_path, reset!
 
 require "hip/errors"
 require "hip/config"

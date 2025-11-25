@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+# @file: lib/hip/cli.rb
+# @purpose: Thor-based CLI interface, routes commands to implementations
+# @flow: exe/hip -> CLI.start(ARGV) -> RunVars -> Thor routing -> Command classes
+# @dependencies: thor, hip/run_vars, command classes (lazy loaded)
+# @key_methods: start (dynamic routing), run, compose, provision, ls
 
 require "thor"
 require "hip/run_vars"

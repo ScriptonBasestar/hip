@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+# @file: lib/hip/commands/run.rb
+# @purpose: Execute interaction commands from hip.yml, dispatch to runners
+# @flow: CLI.run -> Run.new -> InteractionTree.find -> lookup_runner -> Runner.execute
+# @dependencies: InteractionTree, Runners (DockerCompose/Kubectl/Local)
+# @key_methods: initialize, execute, lookup_runner
 
 require "shellwords"
 require_relative "../../../lib/hip/run_vars"

@@ -1,4 +1,9 @@
 # frozen_string_literal: true
+# @file: lib/hip/environment.rb
+# @purpose: Manage environment variables and interpolation in commands
+# @flow: Hip.env -> Environment.new -> interpolate($VAR, ${VAR})
+# @dependencies: pathname
+# @key_methods: interpolate, merge (supports special vars: HIP_OS, HIP_WORK_DIR_REL_PATH, HIP_CURRENT_USER)
 
 require "pathname"
 

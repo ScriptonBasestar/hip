@@ -1,4 +1,10 @@
 # frozen_string_literal: true
+# @file: lib/hip/commands/runners/docker_compose_runner.rb
+# @purpose: Execute commands via Docker Compose (run/exec/up methods)
+# @flow: Run -> DockerComposeRunner.execute -> Compose command construction
+# @dependencies: Base, Hip::Commands::Compose
+# @key_methods: execute (builds compose args with env, ports, profiles)
+# @config_keys: command[:service], command[:compose][:method], command[:compose][:run_options]
 
 require_relative "base"
 require_relative "../compose"
