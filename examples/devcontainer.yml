@@ -88,7 +88,8 @@ interaction:
 
 # Provision commands
 provision:
-  - hip compose down --volumes
-  - hip compose up -d postgres redis
-  - hip bundle install
-  - hip rails db:create db:migrate db:seed
+  default:
+    - hip compose down --volumes
+    - hip compose up -d postgres redis
+    - hip bundle install
+    - hip rails db:create db:migrate db:seed
