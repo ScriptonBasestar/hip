@@ -381,16 +381,38 @@ Also, `run` argument can be omitted
 hip rake db:migrate
 ```
 
-You can pass in a custom environment variable into a container:
+#### Options
+
+**`--explain, -e`** - Show execution plan without running the command:
 
 ```sh
-hip VERSION=12352452 rake db:rollback
+hip run --explain rails c
+hip rails c --explain          # Also works with shorthand syntax
 ```
 
-Use options `-p, --publish=[]` if you need to additionally publish a container's port(s) to the host unless this behaviour is not configured at hip.yml:
+Output example:
+```
+=== Command Execution Plan ===
+Command: bundle exec rails console
+Description: Run Rails console
+Runner: DockerComposeRunner
+Service: app
+Compose Method: run
+Shell Mode: true
+```
+
+**`--publish, -p`** - Publish container port(s) to host:
 
 ```sh
 hip run -p 3000:3000 bundle exec rackup config.ru
+```
+
+#### Environment Variables
+
+You can pass in custom environment variables into a container:
+
+```sh
+hip VERSION=12352452 rake db:rollback
 ```
 
 You can also override docker compose command by passing `HIP_COMPOSE_COMMAND` if you wish. For example if you want to use [`mutagen-compose`](https://mutagen.io/documentation/orchestration/compose) run `HIP_COMPOSE_COMMAND=mutagen-compose hip run`.
@@ -413,6 +435,40 @@ hip ls
 bash     # Open the Bash shell in app's container
 rails    # Run Rails command
 rails s  # Run Rails server at http://localhost:3000
+```
+
+#### Options
+
+**`--format, -f`** - Output format (table, json, yaml):
+
+```sh
+hip ls --format json           # JSON output for scripts/tools
+hip ls -f yaml                 # YAML output
+```
+
+**`--detailed, -d`** - Show detailed information (runner, service, command):
+
+```sh
+hip ls --detailed
+
+shell    [DockerCompose]  service:app  /bin/bash
+         # Open the Bash shell in app's container
+pry      [DockerCompose]  service:app  ./bin/console
+         # Open Pry console
+```
+
+JSON output example:
+```json
+{
+  "shell": {
+    "description": "Open the Bash shell in app's container",
+    "command": "/bin/bash",
+    "runner": "DockerCompose",
+    "shell": true,
+    "service": "app",
+    "compose_method": "run"
+  }
+}
 ```
 
 ### hip provision
@@ -528,6 +584,62 @@ If validation fails, you'll get detailed error messages indicating what needs to
 You can skip validation by setting `HIP_SKIP_VALIDATION` environment variable.
 
 Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json` to the top of your hip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
+
+### hip manifest
+
+Outputs a complete command manifest with metadata about all available commands, subcommands, and runners. This is particularly useful for:
+
+- **LLMs/AI tools** - Discover and understand all Hip commands without parsing source code
+- **Shell completion generators** - Generate accurate completions for shells
+- **Documentation tools** - Build reference documentation automatically
+- **CI/CD scripts** - Validate configurations and available commands
+
+```sh
+hip manifest                   # JSON output (default)
+hip manifest --format yaml     # YAML output
+hip manifest -f json           # Short form
+```
+
+The manifest includes:
+
+- **Static commands** - Built-in CLI commands (version, ls, compose, run, etc.)
+- **Subcommand groups** - Hierarchical subcommands (ssh, infra, console, devcontainer, claude)
+- **Dynamic commands** - Commands defined in your hip.yml interaction section
+- **Runners** - Available runner types and their trigger conditions
+
+JSON output example:
+```json
+{
+  "hip_version": "9.1.0",
+  "schema_version": "1.0",
+  "generated_at": "2025-11-25T17:15:25+09:00",
+  "config_file": "/path/to/hip.yml",
+  "static_commands": {
+    "run": {
+      "description": "Run configured command (run prefix may be omitted)",
+      "type": "dynamic_router",
+      "options": {
+        "publish": "Publish container ports to host",
+        "explain": "Show execution plan without running"
+      }
+    }
+  },
+  "dynamic_commands": {
+    "shell": {
+      "description": "Open the Bash shell in app's container",
+      "command": "/bin/bash",
+      "runner": "docker_compose",
+      "service": "app"
+    }
+  },
+  "runners": {
+    "docker_compose": {
+      "trigger": "service key present in command config",
+      "description": "Executes commands in Docker Compose services"
+    }
+  }
+}
+```
 
 ### hip devcontainer
 
