@@ -18,8 +18,9 @@ require_relative "kubectl"
 module Hip
   module Commands
     class Run < Hip::Command
-      def initialize(cmd, *argv, **options)
+      def initialize(cmd, *argv, explain: false, **options)
         @options = options
+        @explain_mode = explain
 
         @command, @argv = InteractionTree
           .new(Hip.config.interaction)
@@ -31,14 +32,35 @@ module Hip
       end
 
       def execute
-        lookup_runner
-          .new(command, argv, **options)
-          .execute
+        if @explain_mode
+          explain_execution
+        else
+          lookup_runner
+            .new(command, argv, **options)
+            .execute
+        end
       end
 
       private
 
       attr_reader :command, :argv, :options
+
+      def explain_execution
+        runner_class = lookup_runner
+        puts "=== Command Execution Plan ==="
+        puts "Command: #{command[:command]}"
+        puts "Description: #{command[:description]}" if command[:description]
+        puts "Runner: #{runner_class.name.split('::').last}"
+        puts "Service: #{command[:service]}" if command[:service]
+        puts "Pod: #{command[:pod]}" if command[:pod]
+        puts "Compose Method: #{command.dig(:compose, :method)}" if command[:service]
+        puts "Arguments: #{argv.join(' ')}" if argv.any?
+        puts "Shell Mode: #{command[:shell]}"
+        puts "Environment Variables:" if command[:environment]&.any?
+        command[:environment]&.each do |key, value|
+          puts "  #{key}=#{value}"
+        end
+      end
 
       def lookup_runner
         Hip.logger.debug "Hip.Commands.Run#lookup_runner command: #{command}"

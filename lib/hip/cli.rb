@@ -31,8 +31,15 @@ module Hip
         cmd = argv.first
         Hip.logger.debug "Hip.CLI#start cmd: #{cmd}"
 
+        # Handle dynamic command routing: if first arg is not a top-level command
+        # but matches an interaction command, prepend 'run' and move options
         if cmd && !TOP_LEVEL_COMMANDS.include?(cmd) && Hip.config.exist? && Hip.config.interaction.key?(cmd.to_sym)
-          argv.unshift("run")
+          # Extract options (arguments starting with -)
+          options = argv.select { |arg| arg.start_with?("-") }
+          non_options = argv.reject { |arg| arg.start_with?("-") }
+
+          # Reconstruct as: run [options] cmd [args]
+          argv = ["run"] + options + non_options
         end
 
         super(Hip::RunVars.call(argv, ENV))
@@ -98,6 +105,8 @@ module Hip
     desc "run [OPTIONS] CMD [ARGS]", "Run configured command (`run` prefix may be omitted)"
     method_option :publish, aliases: "-p", type: :string, repeatable: true,
       desc: "Publish a container's port(s) to the host"
+    method_option :explain, aliases: "-e", type: :boolean,
+      desc: "Show execution plan without running"
     method_option :help, aliases: "-h", type: :boolean, desc: "Display usage information"
     def run(*argv)
       if argv.empty? || options[:help]
@@ -105,9 +114,13 @@ module Hip
       else
         require_relative "commands/run"
 
+        opts = options.to_h.transform_keys(&:to_sym)
+        explain = opts.delete(:explain)
+
         Hip::Commands::Run.new(
           *argv,
-          **options.to_h.transform_keys!(&:to_sym)
+          explain: explain || false,
+          **opts
         ).execute
       end
     end
