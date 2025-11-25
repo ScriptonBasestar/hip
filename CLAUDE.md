@@ -1,211 +1,214 @@
-# CLAUDE.md
+# CLAUDE.md - Hip CLI for LLMs
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**Quick Reference:** See `CONTEXT_MAP.md` for file navigation by task type.
 
-## Project Overview
+---
 
-Hip (Handy Infrastructure Provisioner) is a Ruby gem that provides a CLI tool for Docker and Kubernetes development workflows. Forked from [bibendi/dip](https://github.com/bibendi/dip).
+## TL;DR
 
-**Core Purpose**: Simplifies Docker Compose and Kubernetes interactions by wrapping complex commands into simple, configurable CLI shortcuts defined in `hip.yml` files.
+Hip is a Ruby CLI gem that wraps Docker Compose/Kubernetes commands with simple shortcuts defined in `hip.yml`.
+
+**Core Flow:** `hip command` → CLI routing → InteractionTree lookup → Runner execution (Docker/Kubectl/Local)
+
+**Entry Points:**
+- `exe/hip` (22 lines) → `lib/hip.rb` (47 lines) → `lib/hip/cli.rb` (156 lines)
+
+**Key Files:**
+- `lib/hip/config.rb` - hip.yml parsing, modules, validation
+- `lib/hip/commands/run.rb` - Command dispatch to runners
+- `lib/hip/commands/runners/` - Execution strategies (Docker/Kubectl/Local)
+- `schema.json` - hip.yml validation rules
+
+**Runner Selection:**
+```
+command[:runner] → explicit runner
+command[:service] → DockerComposeRunner
+command[:pod] → KubectlRunner
+else → LocalRunner
+```
+
+---
 
 ## Development Commands
 
-### Setup
 ```bash
-bundle install                    # Install dependencies
-hip provision                     # Run provisioning (defined in hip.yml)
+# Setup
+bundle install                # Install dependencies
+
+# Testing
+bundle exec rspec             # Run all tests (90% coverage required)
+bundle exec rubocop           # Lint (must pass)
+bundle exec rubocop -a        # Auto-fix
+
+# Build
+rake build                    # Build gem
+rake install:local            # Install locally
+
+# Using Hip on itself
+hip shell                     # Open container bash
+hip rspec <args>             # Run specs in container
+hip rubocop <args>           # Lint in container
 ```
 
-### Testing
-```bash
-bundle exec rspec                 # Run all tests
-bundle exec rspec spec/path/to/file_spec.rb         # Run specific test file
-bundle exec rspec spec/path/to/file_spec.rb:42      # Run specific test at line
-```
-
-### Code Quality
-```bash
-bundle exec rubocop               # Run linter
-bundle exec rubocop -a            # Auto-fix linting issues
-```
-
-### Build & Release
-```bash
-rake build                        # Build gem into pkg/
-rake install:local                # Install gem locally without network
-rake release                      # Tag version and push to RubyGems
-```
-
-### Using Hip on Itself (Dogfooding)
-```bash
-hip shell                         # Open bash in Docker container
-hip pry                          # Open Pry console
-hip bundle <command>             # Run bundler commands in container
-hip rspec <args>                 # Run specs in container
-hip rubocop <args>               # Run rubocop in container
-```
+---
 
 ## Architecture
 
-### Core Components
+### Components
 
-**`lib/hip.rb`**: Entry point that initializes Config, Environment, and Logger.
-
-**`lib/hip/cli.rb`**: Thor-based CLI interface. Maps user commands to command classes.
-
-**`lib/hip/config.rb`**: Parses `hip.yml` configuration files. Handles:
-- Config file discovery (walks up directory tree)
-- Module system (loads `.hip/*.yml` files)
-- Override files (`hip.override.yml`)
-- Schema validation via `schema.json`
-
-**`lib/hip/commands/`**: Command implementations:
-- `run.rb`: Executes interaction commands defined in `hip.yml`
-- `compose.rb`: Docker Compose wrapper
-- `kubectl.rb`: Kubernetes wrapper
-- `provision.rb`: Runs provisioning scripts
-- `console.rb`: Shell integration (bash/zsh aliases)
-- `infra.rb`: Manages shared infrastructure services
-- `ssh.rb`: SSH agent container management
-
-**`lib/hip/commands/runners/`**: Execution strategies:
-- `docker_compose_runner.rb`: Runs commands via Docker Compose
-- `kubectl_runner.rb`: Runs commands in Kubernetes pods
-- `local_runner.rb`: Executes commands on host machine
-
-**`lib/hip/environment.rb`**: Manages environment variables, including predefined ones:
-- `HIP_OS`: Current OS (linux, darwin, etc.)
-- `HIP_WORK_DIR_REL_PATH`: Relative path to config directory
-- `HIP_CURRENT_USER`: Current user UID
-
-**`lib/hip/interaction_tree.rb`**: Parses command hierarchy (commands and subcommands) from configuration.
+| Component | File | Purpose |
+|-----------|------|---------|
+| CLI Entry | `lib/hip/cli.rb` | Thor routing, TOP_LEVEL_COMMANDS dispatch |
+| Config | `lib/hip/config.rb` | hip.yml parsing, modules, schema validation |
+| Command Dispatch | `lib/hip/commands/run.rb` | InteractionTree lookup, runner selection |
+| Runners | `lib/hip/commands/runners/` | Docker/Kubectl/Local execution strategies |
+| Environment | `lib/hip/environment.rb` | Variable interpolation ($VAR, ${VAR}) |
+| Command Tree | `lib/hip/interaction_tree.rb` | Parse hip.yml interaction: hierarchy |
 
 ### Configuration System
 
-Hip uses a hierarchical configuration model:
+**Hierarchy:**
+1. Base: `hip.yml` (discovered by walking up directory tree)
+2. Modules: `.hip/*.yml` (merged into base)
+3. Overrides: `hip.override.yml` (local, git-ignored)
 
-1. **Base config**: `hip.yml` (searched up directory tree)
-2. **Modules**: `.hip/*.yml` files (merged into base config)
-3. **Overrides**: `hip.override.yml` (local customizations, git-ignored)
+**Interaction Mapping:**
+- `service:` key → DockerComposeRunner
+- `pod:` key → KubectlRunner
+- Neither → LocalRunner
 
-The `interaction` section defines commands that map to three runner types:
-- **service**: Uses Docker Compose runner
-- **pod**: Uses Kubectl runner
-- **command**: Uses local runner (when neither service nor pod specified)
+### Design Patterns
 
-### Key Design Patterns
+- **Command Pattern**: Each CLI command = separate class
+- **Strategy Pattern**: Runners = execution strategies
+- **Template Method**: `Hip::Command` base class with shared logic
+- **Configuration as Code**: hip.yml defines declarative commands
 
-**Command Pattern**: Each CLI subcommand is a separate class in `lib/hip/commands/`.
+---
 
-**Strategy Pattern**: Runners provide different execution strategies (Docker Compose, Kubectl, local shell).
+## Extending Hip
 
-**Template Method**: `Hip::Command` base class provides common command infrastructure; subclasses implement specific behavior.
+### Add Command
 
-**Configuration as Code**: The `hip.yml` schema defines infrastructure commands declaratively, validated by JSON Schema.
+1. Create `lib/hip/commands/my_command.rb` inheriting `Hip::Command`
+2. Register in `lib/hip/cli.rb`:
+   ```ruby
+   desc "my-cmd", "Description"
+   def my_cmd(*argv)
+     require_relative "commands/my_command"
+     Hip::Commands::MyCommand.new(*argv).execute
+   end
+   ```
+3. Add tests: `spec/lib/hip/commands/my_command_spec.rb`
 
-## Important Constraints
+### Add Runner
 
-### Ruby Version Compatibility
-- **Current**: Requires Ruby >= 2.7
-- **Future**: Version 9.0 will require Ruby >= 3.2 (see `docs/ROADMAP.md`)
-- **Dependencies**: `public_suffix < 6.0` pinned for Ruby 2.7 compatibility
-
-### Testing Requirements
-- SimpleCov enforces minimum 90% code coverage
-- Uses FakeFS for filesystem mocking in tests
-- Tests must pass before release
-
-### Naming Conventions
-- Gem name is "hip"
-- Internal module is `Hip::`
-- Binary is `hip` (installed via `exe/hip`)
-- Config files: `hip.yml`, `hip.override.yml`, `.hip/`
-
-### Schema Validation
-- All `hip.yml` files must validate against `schema.json`
-- Validation can be skipped via `HIP_SKIP_VALIDATION` env var
-- VSCode users can enable inline validation with YAML language server
-
-## File Structure Notes
-
-```
-lib/hip/
-├── cli.rb                    # Thor CLI entry point
-├── config.rb                 # Configuration parser and validator
-├── environment.rb            # Environment variable management
-├── command.rb                # Base command class
-├── commands/                 # Command implementations
-│   ├── run.rb               # Execute interaction commands
-│   ├── compose.rb           # Docker Compose wrapper
-│   ├── kubectl.rb           # Kubernetes wrapper
-│   ├── provision.rb         # Provisioning scripts
-│   ├── console.rb           # Shell integration
-│   ├── infra.rb             # Infrastructure management
-│   └── runners/             # Execution strategies
-│       ├── docker_compose_runner.rb
-│       ├── kubectl_runner.rb
-│       └── local_runner.rb
-└── interaction_tree.rb       # Command hierarchy parser
-
-examples/                     # Example hip.yml configurations
-├── basic.yml                # Simple Rails setup
-├── full-stack.yml           # Rails + Node.js
-├── kubernetes.yml           # K8s integration
-└── modules/                 # Modular config examples
-
-spec/                        # RSpec tests
-└── fixtures/                # Test fixtures (sample hip.yml files)
-```
-
-## Development Workflow
-
-1. **Make changes** to Ruby files in `lib/`
-2. **Write tests** in `spec/` with matching file structure
-3. **Run tests** to verify: `bundle exec rspec`
-4. **Check coverage**: SimpleCov report in `coverage/index.html`
-5. **Lint code**: `bundle exec rubocop -a`
-6. **Update schema** if changing `hip.yml` structure (edit `schema.json`)
-7. **Update examples** if adding new features (in `examples/`)
-
-## Common Development Patterns
-
-### Adding a New Command
-
-1. Create command class in `lib/hip/commands/new_command.rb`
-2. Inherit from `Hip::Command` or `Thor`
-3. Register in `lib/hip/cli.rb`
-4. Add schema definition to `schema.json` if config-driven
-5. Add tests in `spec/lib/hip/commands/new_command_spec.rb`
-6. Update examples if user-facing
-
-### Adding a New Runner
-
-1. Create runner in `lib/hip/commands/runners/new_runner.rb`
+1. Create `lib/hip/commands/runners/my_runner.rb` inheriting `Base`
 2. Implement `#execute` method
-3. Update `lib/hip/commands/run.rb` to detect when to use new runner
-4. Add tests with fixtures
+3. Update `lib/hip/commands/run.rb` `lookup_runner` logic
+4. Add tests with FakeFS fixtures
 
-### Modifying Configuration Schema
+### Modify hip.yml Schema
 
 1. Edit `schema.json` with new properties
-2. Update `lib/hip/config.rb` if parsing logic changes
-3. Add validation tests in `spec/lib/hip/config_spec.rb`
-4. Create example in `examples/` directory
-5. Document in README.md
+2. Update `lib/hip/config.rb` if new top-level key
+3. Add validation tests
+4. Create example in `examples/`
 
-## Testing Strategy
+---
 
-Tests use **FakeFS** to mock filesystem operations, enabling fast, isolated tests without real files.
+## Testing
 
-**Key test patterns:**
-- Fixture-based: Load sample `hip.yml` files from `spec/fixtures/`
-- Command testing: Verify correct shell commands are constructed
-- Runner testing: Mock Docker/Kubectl execution, verify arguments
-- Config testing: Ensure schema validation and merging logic
+Uses **FakeFS** for fast, isolated filesystem mocking.
 
-**Run specific test suites:**
+**Patterns:**
+- Fixture-based: `spec/fixtures/*.yml` samples
+- Command: Verify shell command construction
+- Runner: Mock execution, verify arguments
+- Config: Schema validation, merging logic
+
+**Commands:**
 ```bash
 bundle exec rspec spec/lib/hip/config_spec.rb       # Config tests
-bundle exec rspec spec/lib/hip/commands/            # All command tests
-bundle exec rspec --tag focus                       # Tests marked with :focus
+bundle exec rspec spec/lib/hip/commands/            # All commands
+bundle exec rspec --tag focus                       # Focused tests
 ```
+
+---
+
+## Constraints
+
+### Ruby Version
+- **Current**: Ruby >= 3.3 (v9.1.0)
+- **CI**: Ruby 3.3, 3.4
+
+### Quality Gates
+- **Coverage**: SimpleCov 90% minimum (enforced)
+- **Schema**: All hip.yml must validate against schema.json
+- **Linting**: RuboCop must pass
+
+### Naming
+- Gem: "hip"
+- Module: `Hip::`
+- Binary: `hip`
+- Config: `hip.yml`, `hip.override.yml`, `.hip/`
+
+---
+
+## Common Patterns
+
+### Dynamic Command Routing
+
+`hip shell` → CLI.start detects "shell" not in TOP_LEVEL_COMMANDS → prepends "run" → becomes `hip run shell`
+
+Only works if "shell" defined in hip.yml interaction: section.
+
+### Environment Interpolation
+
+Commands support `$VAR` and `${VAR}`:
+- `$HIP_OS` → linux, darwin, etc.
+- `$HIP_WORK_DIR_REL_PATH` → relative path to hip.yml directory
+- `$HIP_CURRENT_USER` → current user UID
+
+### Module System
+
+```yaml
+# hip.yml
+modules:
+  - ruby
+  - postgres
+
+# .hip/ruby.yml
+interaction:
+  bundle:
+    service: app
+    command: bundle
+
+# .hip/postgres.yml
+interaction:
+  psql:
+    service: db
+    command: psql
+```
+
+All merged, overrides win.
+
+---
+
+## Key CLI Commands
+
+| Command | Purpose |
+|---------|---------|
+| `hip run CMD` | Execute interaction command |
+| `hip ls` | List available commands |
+| `hip compose CMD` | Docker Compose wrapper |
+| `hip provision [PROFILE]` | Run provisioning scripts |
+| `hip validate` | Validate hip.yml schema |
+| `hip devcontainer` | VSCode DevContainer integration |
+| `hip claude:setup` | Generate Claude Code files |
+
+---
+
+**For detailed navigation:** See `CONTEXT_MAP.md`
+**For architecture deep dive:** Read source files with headers (Phase 1.4)
+**For examples:** See `examples/` directory
