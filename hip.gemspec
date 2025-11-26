@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.license = "MIT"
   spec.version = Hip::VERSION
   spec.authors = ["archmagece"]
-  spec.email = ["archmagece@gmail.com"]
+  spec.email = ["archmagece@users.noreply.github.com"]
 
   spec.summary = "Handy Infrastructure Provisioner - CLI for Docker/Kubernetes workflows"
   spec.description = "Hip (Handy Infrastructure Provisioner) - A tool for streamlined Docker and Kubernetes development. " \
