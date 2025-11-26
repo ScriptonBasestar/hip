@@ -1,0 +1,68 @@
+# hip.yml - Example configuration for Makefile integration
+# This demonstrates Hip commands used in Makefile.dev.mk examples
+
+version: '8.2'
+
+environment:
+  COMPOSE_EXT: development
+  RAILS_ENV: development
+
+compose:
+  files:
+    - docker-compose.yml
+  project_name: myapp
+
+interaction:
+  # Rails console - used by 'make hip-console'
+  rails:
+    description: Run Rails commands
+    service: app
+    command: bundle exec rails
+    subcommands:
+      console:
+        description: Open Rails console
+        command: bundle exec rails console
+
+      db:migrate:
+        description: Run database migrations
+        command: bundle exec rails db:migrate
+
+      db:seed:
+        description: Seed database
+        command: bundle exec rails db:seed
+
+  # RSpec tests - used by 'make hip-test'
+  rspec:
+    description: Run RSpec tests
+    service: app
+    environment:
+      RAILS_ENV: test
+    command: bundle exec rspec
+
+  # Shell access
+  shell:
+    description: Open bash shell in app container
+    service: app
+    command: bash
+
+  # Database console
+  psql:
+    description: Open PostgreSQL console
+    service: app
+    command: psql -h postgres -U myapp_user myapp_development
+
+  # Bundler
+  bundle:
+    description: Run Bundler commands
+    service: app
+    command: bundle
+
+# Provisioning - used by 'make hip-provision'
+provision:
+  - hip compose down --volumes
+  - hip compose up -d postgres redis
+  - hip bundle install
+  - hip rails db:create
+  - hip rails db:migrate
+  - hip rails db:seed
+  - echo "✓ Provisioning complete"
