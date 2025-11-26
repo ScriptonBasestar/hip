@@ -78,38 +78,27 @@ Once integrated, you can use these commands:
 | `make hip-dev` | Full dev cycle (down, clean, up, provision) |
 | `make hip-restart` | Quick restart |
 
-## Converting from DIP
+## Migrating from DIP to Hip
 
-If you're migrating from DIP (Docker Interact Process) to Hip:
+Hip is a fork of DIP (Docker Interact Process) with the same functionality. Migration is straightforward:
 
-### Before (DIP)
+**Simple replacement:**
+- Command: `dip` → `hip`
+- Config file: `dip.yml` → `hip.yml`
+- Makefile targets: `dip-*` → `hip-*`
+
+**Example:**
 ```makefile
-dev-dip-up:
-	dip up -d
+# Old DIP targets (deprecated)
+# dip-up:     dip up -d
+# dip-console: dip rails console
 
-dev-dip-down:
-	dip down
-
-dev-dip-console:
-	dip rails console
+# New Hip targets (active)
+hip-up:      hip compose up -d
+hip-console: hip rails console
 ```
 
-### After (Hip)
-```makefile
-hip-up:
-	hip compose up -d
-
-hip-down:
-	hip compose down
-
-hip-console:
-	hip rails console
-```
-
-**Key changes:**
-- `dip` → `hip`
-- `dip.yml` → `hip.yml`
-- All commands work the same way!
+All DIP commands and configurations work identically in Hip.
 
 ## Example Workflows
 
