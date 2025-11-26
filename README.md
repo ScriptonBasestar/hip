@@ -41,9 +41,26 @@ See [examples/README.md](examples/README.md) for detailed documentation and usag
 
 ## Installation
 
+> **⚠️ Important**: `gem install hip` installs a different gem (hostname resolver).
+> See **[INSTALL.md](INSTALL.md)** for correct installation methods.
+
+**Quick Install (Git):**
+
 ```sh
-gem install hip
+# Using Bundler (recommended)
+bundle add hip --git https://github.com/ScriptonBasestar/hip.git
+
+# Or using specific_install
+gem install specific_install
+gem specific_install https://github.com/ScriptonBasestar/hip.git
 ```
+
+**Other installation methods:**
+- GitHub Packages - See [INSTALL.md](INSTALL.md)
+- GitHub Releases - See [INSTALL.md](INSTALL.md)
+- Local build - See [INSTALL.md](INSTALL.md)
+
+📖 **See [INSTALL.md](INSTALL.md) for detailed installation guide.**
 
 ### Integration with shell
 

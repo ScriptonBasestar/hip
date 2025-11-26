@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.description = "Hip (Handy Infrastructure Provisioner) - A tool for streamlined Docker and Kubernetes development. " \
                        "Forked from bibendi/dip and renamed for easier typing. " \
                        "Provides intuitive CLI commands for container orchestration and development workflows."
-  spec.homepage = "https://github.com/archmagece/hip"
+  spec.homepage = "https://github.com/ScriptonBasestar/hip"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
   # to allow pushing to a single host or delete this section to allow pushing to any host.

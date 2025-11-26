@@ -28,15 +28,7 @@ jobs:
         run: |
           gh release upload ${{ github.event.release.tag_name }} hip-*.gem
 
-      - name: Publish to RubyGems
-        env:
-          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
-        run: |
-          mkdir -p ~/.gem
-          cat << EOF > ~/.gem/credentials
-          ---
-          :rubygems_api_key: ${GEM_HOST_API_KEY}
-          EOF
-          chmod 0600 ~/.gem/credentials
-          gem push hip-*.gem
-          rm ~/.gem/credentials
+      # Note: RubyGems.org already has a 'hip' gem (hostname resolver)
+      # This project cannot be published to rubygems.org due to name conflict
+      # Users should install via GitHub Packages or direct download
+      # See INSTALL.md for installation methods
