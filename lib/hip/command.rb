@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # @file: lib/hip/command.rb
 # @purpose: Base class for executable commands with program/subprocess runners
 # @flow: Command classes inherit -> exec_program/exec_subprocess -> Kernel.exec/system

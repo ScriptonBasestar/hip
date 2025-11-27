@@ -8,7 +8,7 @@ Rake::Task["install"].clear
 Rake::Task["install:local"].clear
 
 desc "Build and install hip.gem into system gems without RDoc"
-task :install => :build do
+task install: :build do
   require "tmpdir"
   Dir.chdir(Dir.tmpdir) do
     built_gem_path = File.join(File.dirname(__FILE__), "pkg", "#{Bundler::GemHelper.gemspec.full_name}.gem")
@@ -18,7 +18,7 @@ end
 
 namespace :install do
   desc "Build and install hip.gem into system gems without network access and without RDoc"
-  task :local => :build do
+  task local: :build do
     require "tmpdir"
     Dir.chdir(Dir.tmpdir) do
       built_gem_path = File.join(File.dirname(__FILE__), "pkg", "#{Bundler::GemHelper.gemspec.full_name}.gem")

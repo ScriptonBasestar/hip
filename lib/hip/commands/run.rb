@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # @file: lib/hip/commands/run.rb
 # @purpose: Execute interaction commands from hip.yml, dispatch to runners
 # @flow: CLI.run -> Run.new -> InteractionTree.find -> lookup_runner -> Runner.execute
@@ -50,11 +51,11 @@ module Hip
         puts "=== Command Execution Plan ==="
         puts "Command: #{command[:command]}"
         puts "Description: #{command[:description]}" if command[:description]
-        puts "Runner: #{runner_class.name.split('::').last}"
+        puts "Runner: #{runner_class.name.split("::").last}"
         puts "Service: #{command[:service]}" if command[:service]
         puts "Pod: #{command[:pod]}" if command[:pod]
         puts "Compose Method: #{command.dig(:compose, :method)}" if command[:service]
-        puts "Arguments: #{argv.join(' ')}" if argv.any?
+        puts "Arguments: #{argv.join(" ")}" if argv.any?
         puts "Shell Mode: #{command[:shell]}"
         puts "Environment Variables:" if command[:environment]&.any?
         command[:environment]&.each do |key, value|

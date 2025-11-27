@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # @file: lib/hip/command_registry.rb
 # @purpose: Centralized command metadata for AI discoverability
 # @flow: CLI.manifest -> CommandRegistry.manifest -> JSON/YAML output
@@ -182,7 +183,7 @@ module Hip
             environment: command[:environment]&.any? ? command[:environment] : nil
           }.compact
         end
-      rescue StandardError => e
+      rescue => e
         {error: "Failed to load dynamic commands: #{e.message}"}
       end
 

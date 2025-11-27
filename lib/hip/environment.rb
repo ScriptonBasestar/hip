@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # @file: lib/hip/environment.rb
 # @purpose: Manage environment variables and interpolation in commands
 # @flow: Hip.env -> Environment.new -> interpolate($VAR, ${VAR})

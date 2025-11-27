@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # @file: lib/hip/commands/runners/docker_compose_runner.rb
 # @purpose: Execute commands via Docker Compose (run/exec/up methods)
 # @flow: Run -> DockerComposeRunner.execute -> Compose command construction

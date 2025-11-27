@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # @file: lib/hip/interaction_tree.rb
 # @purpose: Parse and lookup commands from hip.yml interaction: hierarchy
 # @flow: Config.interaction -> InteractionTree.new -> find(cmd, *argv)

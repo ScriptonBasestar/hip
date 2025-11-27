@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # @file: lib/hip/commands/runners/kubectl_runner.rb
 # @purpose: Execute commands in Kubernetes pods via kubectl exec
 # @flow: Run -> KubectlRunner.execute -> kubectl exec command construction
