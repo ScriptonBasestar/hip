@@ -129,4 +129,54 @@ describe Hip::Config do
       end
     end
   end
+
+  describe "#format_validation_error" do
+    let(:error) { double("ValidationError", message: "The property '#/provision' of type array did not match the following type: object") }
+    let(:data) { {provision: ["cmd1", "cmd2"]} }
+
+    it "formats error message with property path" do
+      message = subject.send(:format_validation_error, error, data)
+      expect(message).to include("Schema validation failed in hip.yml")
+      expect(message).to include("Property: provision")
+      expect(message).to include("Hint: Run 'hip validate'")
+    end
+  end
+
+  describe "#extract_property_value" do
+    let(:data) { {provision: {default: ["cmd1", "cmd2"]}, interaction: {test: {service: "app"}}} }
+
+    it "extracts nested hash values" do
+      value = subject.send(:extract_property_value, data, "provision/default")
+      expect(value).to eq(["cmd1", "cmd2"])
+    end
+
+    it "extracts array elements" do
+      value = subject.send(:extract_property_value, data, "provision/default/0")
+      expect(value).to eq("cmd1")
+    end
+
+    it "returns nil for missing paths" do
+      value = subject.send(:extract_property_value, data, "nonexistent/path")
+      expect(value).to be_nil
+    end
+  end
+
+  describe "#format_yaml_snippet" do
+    it "formats nil values" do
+      result = subject.send(:format_yaml_snippet, nil)
+      expect(result).to eq("  (not found)")
+    end
+
+    it "formats small values" do
+      result = subject.send(:format_yaml_snippet, ["cmd1", "cmd2"])
+      expect(result).to include("cmd1")
+      expect(result).to include("cmd2")
+    end
+
+    it "truncates large arrays" do
+      large_array = (1..15).to_a
+      result = subject.send(:format_yaml_snippet, large_array)
+      expect(result).to include("more lines)")
+    end
+  end
 end

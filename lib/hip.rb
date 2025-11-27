@@ -14,9 +14,14 @@ require "logger"
 module Hip
   def self.logger
     @logger ||= Logger.new($stdout).tap do |log|
-      log.level = Logger::INFO
+      log.level = debug? ? Logger::DEBUG : Logger::INFO
       log.formatter = proc do |severity, datetime, progname, msg|
-        "[#{datetime}] #{severity}: #{msg}\n"
+        if debug?
+          "[#{datetime}] #{severity}: #{msg}\n"
+        elsif severity != "DEBUG"
+          # Simpler format for non-debug mode
+          "#{msg}\n"
+        end
       end
     end
   end
@@ -40,7 +45,7 @@ module Hip
 
     %w[test debug].each do |key|
       define_method("#{key}?") do
-        ENV["HIP_ENV"] == key
+        ENV["HIP_ENV"] == key || (key == "debug" && ENV["HIP_DEBUG"] == "1")
       end
     end
 

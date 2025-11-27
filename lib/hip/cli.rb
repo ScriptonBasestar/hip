@@ -26,11 +26,24 @@ module Hip
       end
 
       def start(argv)
+        # Handle --debug flag early, before any other processing
+        if argv.include?("--debug")
+          ENV["HIP_DEBUG"] = "1"
+          argv.delete("--debug")
+          Hip.logger.level = Logger::DEBUG
+        end
+
         Hip.logger.debug "Hip.CLI#start >>>>>>>>>>"
         argv = Hip::RunVars.call(argv, ENV)
 
         cmd = argv.first
         Hip.logger.debug "Hip.CLI#start cmd: #{cmd}"
+
+        # If no command provided, show helpful message
+        if argv.empty?
+          show_quick_help
+          return
+        end
 
         # Handle dynamic command routing: if first arg is not a top-level command
         # but matches an interaction command, prepend 'run' and move options
@@ -44,6 +57,33 @@ module Hip
         end
 
         super(Hip::RunVars.call(argv, ENV))
+      rescue Hip::Error => e
+        warn "\nERROR: #{e.message}\n"
+        exit 1
+      end
+
+      def show_quick_help
+        puts <<~HELP
+          Hip - Docker Compose/Kubernetes CLI wrapper
+
+          Usage: hip [--debug] COMMAND [ARGS]
+
+          Quick Start:
+            hip ls                List available commands
+            hip --version         Show version
+            hip help              Show full help
+            hip validate          Validate hip.yml schema
+
+          Common Commands:
+            hip COMMAND [ARGS]    Run interaction command from hip.yml
+            hip compose ARGS      Run docker compose commands
+            hip provision         Run provisioning scripts
+
+          Options:
+            --debug               Enable debug logging
+
+          For more information: hip help
+        HELP
       end
     end
 

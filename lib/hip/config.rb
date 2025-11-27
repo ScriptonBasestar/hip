@@ -127,11 +127,69 @@ module Hip
     rescue Psych::SyntaxError => e
       raise Hip::Error, "Invalid YAML syntax in config file: #{e.message}"
     rescue JSON::Schema::ValidationError => e
-      data_display = data ? data.to_yaml.gsub("\n", "\n  ") : "nil"
-      error_message = "Schema validation failed: #{e.message}\nInput data:\n  #{data_display}"
+      error_message = format_validation_error(e, data)
       raise Hip::Error, error_message
     rescue JSON::Schema::JsonParseError => e
       raise Hip::Error, "Error parsing schema file: #{e.message}"
+    end
+
+    def format_validation_error(error, data)
+      message = error.message
+
+      # Extract the property path and error details
+      if message =~ /The property '#\/([^']+)'/
+        property_path = ::Regexp.last_match(1)
+        property_value = extract_property_value(data, property_path)
+
+        error_msg = <<~ERROR
+          Schema validation failed in hip.yml
+
+          Property: #{property_path}
+          Error: #{message}
+
+          Current value:
+          #{format_yaml_snippet(property_value)}
+
+          Hint: Run 'hip validate' for detailed validation
+               Use HIP_DEBUG=1 to see full config dump
+        ERROR
+
+        error_msg.strip
+      else
+        # Fallback to simple message
+        "Schema validation failed: #{message}\n\nRun 'hip validate' for more details"
+      end
+    end
+
+    def extract_property_value(data, path)
+      parts = path.split("/")
+      value = data
+
+      parts.each do |part|
+        # Handle array indices like "provision/default/2"
+        if part =~ /^\d+$/
+          value = value[part.to_i] if value.is_a?(Array)
+        elsif value.is_a?(Hash)
+          value = value[part.to_sym]
+        end
+        break if value.nil?
+      end
+
+      value
+    end
+
+    def format_yaml_snippet(value)
+      return "  (not found)" if value.nil?
+
+      yaml_str = value.to_yaml.strip
+      lines = yaml_str.lines
+
+      # Limit to 10 lines for readability
+      if lines.size > 10
+        lines[0..9].join.strip + "\n  ... (#{lines.size - 10} more lines)"
+      else
+        "  " + yaml_str.gsub("\n", "\n  ")
+      end
     end
 
     private
@@ -178,8 +236,16 @@ module Hip
 
       @config = CONFIG_DEFAULTS.merge(base_config)
 
+      # Only validate if explicitly requested or in debug mode
+      # This improves startup performance
       unless ENV.key?("HIP_SKIP_VALIDATION")
-        validate
+        begin
+          validate
+        rescue Hip::Error => e
+          # Show concise error message and exit
+          warn "\n#{e.message}\n"
+          exit 1
+        end
       end
 
       @config
