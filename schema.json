@@ -172,28 +172,87 @@
     },
     "provision": {
       "type": "object",
-      "description": "Execute commands within provision section. Keys represent provision profiles (e.g., 'default', 'reset'), each containing an array of shell commands to execute.",
+      "description": "Execute commands within provision section. Keys represent provision profiles (e.g., 'default', 'reset'), each containing an array of commands to execute. Commands can be strings (shell commands) or objects (structured commands).",
       "patternProperties": {
         "^[\\w\\-.:/\\s]+$": {
           "type": "array",
           "items": {
-            "type": "string"
+            "oneOf": [
+              {
+                "type": "string",
+                "description": "Raw shell command string"
+              },
+              {
+                "type": "object",
+                "description": "Structured command with explicit type and arguments",
+                "additionalProperties": false,
+                "properties": {
+                  "echo": {
+                    "type": "string",
+                    "description": "Execute echo command with the given text"
+                  },
+                  "cmd": {
+                    "type": "string",
+                    "description": "Execute a raw shell command"
+                  },
+                  "shell": {
+                    "type": "string",
+                    "description": "Execute a multi-line shell script"
+                  },
+                  "sleep": {
+                    "oneOf": [
+                      { "type": "integer" },
+                      { "type": "number" },
+                      { "type": "string" }
+                    ],
+                    "description": "Sleep for the specified number of seconds"
+                  },
+                  "docker": {
+                    "type": "object",
+                    "description": "Execute docker command",
+                    "additionalProperties": false,
+                    "properties": {
+                      "compose": {
+                        "oneOf": [
+                          {
+                            "type": "string",
+                            "description": "Docker compose command with arguments"
+                          },
+                          {
+                            "type": "array",
+                            "items": { "type": "string" },
+                            "description": "Docker compose command as array of arguments"
+                          }
+                        ]
+                      }
+                    },
+                    "required": ["compose"]
+                  }
+                },
+                "minProperties": 1,
+                "maxProperties": 1
+              }
+            ]
           },
-          "description": "Array of shell commands to execute for this provision profile"
+          "description": "Array of commands (strings or structured objects) to execute for this provision profile"
         }
       },
       "additionalProperties": false,
       "examples": [
         {
           "default": [
-            "hip compose down --volumes",
-            "hip compose build",
-            "dip rails db:migrate"
+            "echo 'Setting up...'",
+            "docker compose down --volumes",
+            "sleep 2",
+            { "docker": { "compose": "up -d postgres redis" } }
           ],
-          "reset": [
-            "hip compose down --volumes",
-            "rm -rf Gemfile.lock",
-            "dip bundle install"
+          "structured": [
+            { "echo": "🚀 Starting development environment..." },
+            { "cmd": "docker compose down --volumes" },
+            { "sleep": 10 },
+            { "docker": { "compose": "up -d postgres redis" } },
+            { "echo": "✅ Setup complete" },
+            { "shell": "if [ -f config.yml ]; then echo 'Config exists'; fi" }
           ]
         }
       ]
