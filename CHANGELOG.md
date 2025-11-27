@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Makefile structure**: Refactored monolithic `Makefile.dev.mk` into modular `.make/*.mk` directory structure
+  - Split 151-line Makefile into 10 focused, categorized files for better maintainability
+  - Categories: build, install, test, lint, ci, dev, status, hip-examples, release, help
+  - Main `Makefile` now uses include system to aggregate all targets
+  - All existing targets preserved and verified working
+
 ### Added
 
 #### LLM/AI Friendliness Improvements

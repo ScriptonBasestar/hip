@@ -46,3 +46,7 @@ RSpec/MultipleExpectations:
 
 RSpec/VerifiedDoubles:
   Enabled: false
+
+# Disable Capybara/RSpec/PredicateMatcher due to RuboCop bug
+Capybara/RSpec/PredicateMatcher:
+  Enabled: false
