@@ -68,6 +68,27 @@ Start here for basic understanding:
 
 **DevContainer flow:** hip.yml devcontainer: → generate devcontainer.json → sync features
 
+### Modifying Build/Development Workflow
+
+**Goal:** Add/modify Makefile targets, change development commands
+
+**Load these files:**
+1. `.make/AGENTS.md` - Overview of modular Makefile structure
+2. `.make/{category}.mk` - Target category file:
+   - `build.mk` - Build targets (build, clean, clobber)
+   - `install.mk` - Install/bundle targets
+   - `test.mk` - Test execution
+   - `lint.mk` - Linting/formatting
+   - `ci.mk` - CI/CD pipelines
+   - `dev.mk` - Development tools
+   - `status.mk` - Status reporting
+   - `hip-examples.mk` - Usage examples
+   - `release.mk` - Release management
+   - `help.mk` - Help system
+3. `Makefile` - Main file that includes all `.make/*.mk` files
+
+**Pattern:** Choose category → Add target with `.PHONY` + `## description` → Test with `make target-name`
+
 ### Adding Tests
 
 **Goal:** Write specs for new/changed functionality
@@ -125,6 +146,19 @@ Quick reference for token estimation:
 ## Directory Structure
 
 ```
+.make/                       # Modular Makefile components
+├── AGENTS.md               # Guide for Makefile navigation
+├── build.mk                # Build targets (16 lines)
+├── install.mk              # Install/bundle targets (23 lines)
+├── test.mk                 # Test targets (13 lines)
+├── lint.mk                 # Lint/format targets (11 lines)
+├── ci.mk                   # CI/CD targets (10 lines)
+├── dev.mk                  # Dev tools (13 lines)
+├── status.mk               # Status reporting (18 lines)
+├── hip-examples.mk         # Usage examples (44 lines)
+├── release.mk              # Release management (6 lines)
+└── help.mk                 # Help system (11 lines)
+
 lib/hip/
 ├── cli.rb                    # Thor CLI entry point
 ├── cli/                      # CLI subcommand handlers
