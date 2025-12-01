@@ -507,6 +507,8 @@ hip up          # Start containers
 hip provision   # Run initialization scripts
 ```
 
+**Migration**: If upgrading from earlier versions, see [MIGRATION.md](docs/MIGRATION.md) for updating your `hip.yml`.
+
 ### hip compose
 
 Run Docker Compose commands that are configured according to the application's hip.yml:
