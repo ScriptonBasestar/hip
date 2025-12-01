@@ -45,6 +45,17 @@ If you're new to Hip, start with [`basic.yml`](basic.yml) - it contains the esse
   - TypeScript support
   - Use when: Building Node.js applications
 
+### 🤖 LLM/AI Integration
+
+- **[llm-integration.yml](llm-integration.yml)** - LLM-friendly features and patterns
+  - Command discovery with `hip manifest`
+  - Execution planning with `--explain`
+  - Structured output (JSON/YAML)
+  - Token efficiency patterns
+  - Programmatic usage examples
+  - CI/CD integration patterns
+  - Use when: Integrating with AI assistants or building automation
+
 ## Examples by Feature
 
 ### 📦 Provision Profiles
@@ -193,15 +204,52 @@ for file in examples/*.yml; do
 done
 ```
 
+## LLM-Friendly Features (v9.1+)
+
+Hip includes several features designed for AI/LLM integration:
+
+### Command Discovery
+
+```bash
+# Get complete command registry
+hip manifest                # JSON output (default)
+hip manifest -f yaml        # YAML output
+
+# List commands with metadata
+hip ls --format json        # Structured command list
+hip ls --detailed           # Show runner types and targets
+```
+
+### Execution Planning
+
+```bash
+# See what will run before executing
+hip shell --explain         # Show execution plan
+hip rake db:migrate -e      # Short form with -e
+```
+
+### Token Efficiency
+
+The new documentation system reduces LLM token usage by 65-70%:
+
+- **CONTEXT_MAP.md** - Navigate files by task type
+- **CLAUDE.md** - Compressed architecture guide
+- **AGENTS.md** - Component-specific guides
+- **Code headers** - Quick file understanding
+
+See [llm-integration.yml](llm-integration.yml) for comprehensive examples.
+
 ## Tips and Best Practices
 
 1. **Start Simple**: Begin with `basic.yml` and add features as needed
 2. **Use Provision Profiles**: Create profiles for different scenarios (development, testing, deployment)
-3. **Document Your Commands**: Use `description` fields to help team members
+3. **Document Your Commands**: Use `description` fields to help team members and LLMs
 4. **Leverage Subcommands**: Organize related commands hierarchically
 5. **Version Control**: Commit your `hip.yml` to share with your team
 6. **Modules for Scale**: Use modules for large projects with many commands
 7. **Validate Often**: Run `hip validate` after making changes
+8. **LLM Integration**: Use `hip manifest` for programmatic command discovery
+9. **Explain Before Execute**: Use `--explain` to validate command execution plans
 
 ## Contributing
 

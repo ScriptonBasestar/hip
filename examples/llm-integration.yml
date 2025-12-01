@@ -1,0 +1,245 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
+#
+# Example: LLM-Friendly Hip Configuration
+# Use Case: Demonstrate LLM/AI integration features from Hip v9.1+
+# Features: Command discovery, execution planning, structured output, token efficiency
+#
+# 🤖 LLM/AI Integration Features:
+#
+# 1. Command Discovery - Find available commands without reading source code
+#    $ hip manifest              # Get complete command registry (JSON)
+#    $ hip manifest -f yaml      # Same in YAML format
+#    $ hip ls --format json      # List dynamic commands with metadata
+#
+# 2. Execution Planning - Understand what will run before executing
+#    $ hip shell --explain       # Show execution plan without running
+#    $ hip rake db:migrate -e    # Short form with -e flag
+#
+# 3. Structured Output - Machine-readable data for programmatic access
+#    $ hip ls --format json | jq '.shell.runner'  # Query command metadata
+#    $ hip manifest | jq '.runners'                # Inspect runner types
+#
+# 4. Detailed Information - Get comprehensive command details
+#    $ hip ls --detailed         # Show runner type, target, actual command
+#    $ hip ls -d -f yaml         # Detailed output in YAML
+#
+# 🎯 Token Efficiency Benefits:
+#
+# Before (traditional approach):
+#   - Read lib/hip/cli.rb (~156 lines)
+#   - Read lib/hip/commands/run.rb (~53 lines)
+#   - Read lib/hip/interaction_tree.rb (~95 lines)
+#   - Total: ~304 lines ≈ 2000 tokens
+#
+# After (LLM-friendly approach):
+#   - Run: hip manifest
+#   - Total: ~80 lines ≈ 600 tokens
+#   - Token savings: ~70%
+#
+# 📚 Documentation Discovery:
+#
+# Hip provides structured documentation for LLM navigation:
+#   - CONTEXT_MAP.md - File navigation by task type
+#   - CLAUDE.md - Architecture overview and patterns
+#   - lib/hip/*/AGENTS.md - Component-specific guides
+#   - Code headers (@file, @purpose, @flow) on all core files
+#
+# Learn more: https://github.com/ScriptonBasestar/hip
+
+version: '9.1.0'
+
+# Environment variables
+environment:
+  APP_ENV: development
+  DATABASE_URL: postgres://user:password@db:5432/app_dev
+
+# Docker Compose configuration
+compose:
+  files:
+    - docker-compose.yml
+
+# Interactive commands - These show up in `hip manifest` and `hip ls`
+interaction:
+  # Shell access
+  shell:
+    description: Open bash shell in app container
+    service: app
+    command: /bin/bash
+    # 💡 LLM Tip: Use `hip shell --explain` to see how this executes
+
+  # Application server
+  server:
+    description: Start development server
+    service: app
+    command: npm run dev
+    # 💡 LLM Tip: Check runner type with `hip ls --detailed`
+
+  # Database commands
+  db:
+    description: Database operations
+    service: app
+    command: npm run db
+    subcommands:
+      migrate:
+        description: Run database migrations
+        command: npm run db:migrate
+      seed:
+        description: Seed database with sample data
+        command: npm run db:seed
+      reset:
+        description: Reset database (drop, create, migrate, seed)
+        command: npm run db:reset
+    # 💡 LLM Tip: Subcommands appear in manifest under dynamic_commands
+
+  # Testing
+  test:
+    description: Run test suite
+    service: app
+    command: npm test
+    compose:
+      run_options:
+        - rm  # Clean up container after tests
+    # 💡 LLM Tip: run_options affect docker compose run behavior
+
+  # Linting and formatting
+  lint:
+    description: Run ESLint
+    service: app
+    command: npm run lint
+    subcommands:
+      fix:
+        description: Auto-fix linting issues
+        command: npm run lint:fix
+
+  # Package management
+  npm:
+    description: Run npm commands
+    service: app
+    command: npm
+    # 💡 LLM Tip: This creates a pass-through command for any npm operation
+
+  # Database console (different runner - uses db service directly)
+  psql:
+    description: PostgreSQL interactive console
+    service: db
+    command: psql -U user app_dev
+    environment:
+      PGPASSWORD: password
+    # 💡 LLM Tip: This uses DockerCompose runner with db service
+
+# Provision profiles for different setup scenarios
+provision:
+  # Default: Full setup for new developers
+  default:
+    - echo "🚀 Setting up development environment..."
+    - hip compose down --volumes
+    - hip compose up -d db
+    - echo "⏳ Waiting for database..."
+    - sleep 5
+    - hip npm install
+    - hip db migrate
+    - hip db seed
+    - echo "✅ Setup complete! Run 'hip server' to start"
+    # 💡 LLM Tip: Provision scripts can call hip commands
+
+  # CI: Minimal setup for continuous integration
+  ci:
+    - hip compose up -d db
+    - sleep 3
+    - hip npm ci  # Use npm ci for faster, deterministic installs
+    - hip db migrate
+    # 💡 LLM Tip: Different profiles for different environments
+
+  # Test: Setup for running tests
+  test:
+    - hip compose up -d db
+    - sleep 3
+    - hip npm install
+    - hip db migrate
+    - hip test
+    # 💡 LLM Tip: Provision can include actual test execution
+
+# 🤖 Programmatic Usage Examples:
+#
+# Python example - Discover and execute commands:
+#   import subprocess, json
+#
+#   # Get all available commands
+#   manifest = json.loads(subprocess.check_output(['hip', 'manifest']))
+#   commands = manifest['dynamic_commands']
+#
+#   # Check what a command will do before running
+#   plan = subprocess.check_output(['hip', 'db', 'migrate', '--explain'])
+#   print(plan.decode())
+#
+#   # Execute if plan looks good
+#   subprocess.run(['hip', 'db', 'migrate'])
+#
+# Shell script example - Validate before deploy:
+#   #!/bin/bash
+#
+#   # Ensure all required commands exist
+#   required_commands="test lint db"
+#   available=$(hip ls --format json | jq -r 'keys[]')
+#
+#   for cmd in $required_commands; do
+#     if ! echo "$available" | grep -q "^${cmd}$"; then
+#       echo "Error: Required command '$cmd' not found"
+#       exit 1
+#     fi
+#   done
+#
+#   # Run validation pipeline
+#   hip lint || exit 1
+#   hip test || exit 1
+#   hip db migrate --explain  # Show what will run
+#   read -p "Proceed with migration? " -n 1 -r
+#   [[ $REPLY =~ ^[Yy]$ ]] && hip db migrate
+#
+# CI/CD Integration example (GitHub Actions):
+#   - name: Discover Hip commands
+#     run: |
+#       hip manifest > manifest.json
+#       cat manifest.json | jq '.dynamic_commands | keys'
+#
+#   - name: Validate setup
+#     run: |
+#       hip provision ci
+#
+#   - name: Run tests
+#     run: |
+#       hip test --explain  # Log what will run
+#       hip test            # Actually run tests
+#
+# Makefile Integration:
+#   .PHONY: setup test deploy
+#
+#   setup:
+#   	hip provision default
+#
+#   test:
+#   	hip test --explain
+#   	hip test
+#
+#   deploy:
+#   	@echo "Available commands:"
+#   	@hip ls --detailed
+#   	hip db migrate
+#   	# ... deployment steps
+
+# 📊 Monitoring and Observability:
+#
+# Use structured output for monitoring:
+#   # Get command execution stats
+#   $ hip manifest | jq '{
+#       total_commands: (.dynamic_commands | length),
+#       runners: (.runners | keys),
+#       subcommand_groups: (.subcommand_groups | length)
+#     }'
+#
+#   # Validate configuration
+#   $ hip validate && echo "✅ Config valid" || echo "❌ Config invalid"
+#
+#   # Export command documentation
+#   $ hip manifest -f yaml > docs/hip-commands.yml
+#   $ hip ls -d -f json > docs/command-reference.json
