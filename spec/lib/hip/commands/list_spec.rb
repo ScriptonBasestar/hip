@@ -230,7 +230,7 @@ RSpec.describe Hip::Commands::List do
       # Should default to table format
       output = capture_stdout { described_class.new(format: "invalid").execute }
 
-      expect(output).to_not be_empty
+      expect(output).not_to be_empty
       # Should not be JSON or YAML
       expect { JSON.parse(output) }.to raise_error(JSON::ParserError)
     end
