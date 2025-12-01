@@ -243,3 +243,184 @@ provision:
 #   # Export command documentation
 #   $ hip manifest -f yaml > docs/hip-commands.yml
 #   $ hip ls -d -f json > docs/command-reference.json
+
+# 🧠 Advanced LLM Patterns:
+#
+# Pattern 1: Command Composition with --explain
+#   Use --explain to validate complex command chains:
+#
+#   $ hip db migrate --explain  # Verify what will run
+#   $ hip db migrate            # Execute after validation
+#
+#   Benefits:
+#   - LLM can suggest commands without risk
+#   - User reviews plan before execution
+#   - No trial-and-error needed
+#
+# Pattern 2: Dynamic Command Discovery
+#   Discover available commands based on context:
+#
+#   $ hip manifest | jq -r '.dynamic_commands | to_entries[] |
+#       select(.value.runner == "DockerCompose") | .key'
+#   # Output: shell, bundle, rails, rake, db
+#
+#   $ hip manifest | jq -r '.dynamic_commands["rails"].subcommands | keys[]'
+#   # Output: console, server, generate, db
+#
+# Pattern 3: Multi-Stage Workflow Validation
+#   Validate entire workflows before execution:
+#
+#   workflow_plan.sh:
+#   #!/bin/bash
+#   echo "=== Workflow Plan ==="
+#   hip provision default --explain
+#   hip db migrate --explain
+#   hip test --explain
+#   echo "=== Execute? (y/n) ==="
+#   read confirm
+#   [[ "$confirm" == "y" ]] && {
+#     hip provision default
+#     hip db migrate
+#     hip test
+#   }
+#
+# Pattern 4: Command Metadata for Context
+#   Extract command metadata for decision-making:
+#
+#   $ hip ls --format json | jq -r '
+#       to_entries[] |
+#       select(.value.shell == true) |
+#       "\(.key): \(.value.description)"'
+#   # Output: shell: Open development environment shell
+#
+#   $ hip manifest | jq -r '.runners | to_entries[] |
+#       "\(.key): \(.value.trigger)"'
+#   # Output:
+#   #   docker_compose: service key present
+#   #   kubectl: pod key present
+#   #   local: no service/pod key
+#
+# Pattern 5: Configuration Validation Pipeline
+#   Validate before deployment:
+#
+#   $ hip validate || exit 1  # Schema validation
+#   $ hip manifest > /dev/null || exit 1  # Manifest generation
+#   $ hip ls --format json > /dev/null || exit 1  # Command listing
+#   $ echo "✅ Configuration valid for deployment"
+#
+# Pattern 6: LLM-Friendly Error Handling
+#   Structure error handling for LLM consumption:
+#
+#   run_with_fallback.sh:
+#   #!/bin/bash
+#   if ! hip db migrate 2>&1 | tee migration.log; then
+#     echo "❌ Migration failed"
+#     hip manifest | jq -r '.dynamic_commands.db'
+#     cat migration.log
+#     exit 1
+#   fi
+#
+# Pattern 7: Token-Efficient Context Building
+#   Build minimal context for LLM operations:
+#
+#   # Instead of reading all code (~2000 tokens):
+#   $ hip manifest | jq '{
+#       version: .hip_version,
+#       commands: (.dynamic_commands | keys),
+#       runners: (.runners | keys)
+#     }'
+#   # Returns ~100 tokens with complete command context
+#
+# Pattern 8: Programmatic Command Construction
+#   Use manifest to build commands dynamically:
+#
+#   discover_and_run.py:
+#   import json, subprocess
+#
+#   # Get available commands
+#   manifest = json.loads(subprocess.check_output(['hip', 'manifest']))
+#
+#   # Find database commands
+#   db_commands = [k for k in manifest['dynamic_commands']
+#                  if k.startswith('db')]
+#
+#   # Execute with validation
+#   for cmd in db_commands:
+#       plan = subprocess.run(['hip', cmd, '--explain'],
+#                           capture_output=True, text=True)
+#       print(f"Plan for {cmd}:\n{plan.stdout}")
+#       # Decide whether to execute based on plan
+#
+# Pattern 9: CI/CD Integration with Manifest
+#   Use manifest for CI/CD pipeline generation:
+#
+#   generate_ci.sh:
+#   #!/bin/bash
+#   hip manifest | jq -r '.dynamic_commands | to_entries[] |
+#     select(.value.description | contains("test")) |
+#     "    - name: \(.value.description)\n      run: hip \(.key)"'
+#
+# Pattern 10: Interactive Command Selection
+#   Build interactive menus from manifest:
+#
+#   interactive_menu.sh:
+#   #!/bin/bash
+#   commands=$(hip ls --format json | jq -r 'keys[]')
+#   select cmd in $commands; do
+#       hip "$cmd" --explain
+#       read -p "Execute? (y/n) " confirm
+#       [[ "$confirm" == "y" ]] && hip "$cmd"
+#       break
+#   done
+#
+# 🎓 Best Practices for LLM Integration:
+#
+# 1. Always use --explain before suggesting commands
+#    - Prevents accidental execution of destructive operations
+#    - Builds user trust through transparency
+#
+# 2. Prefer structured output (JSON/YAML) over table format
+#    - Easier for LLM to parse and reason about
+#    - Enables programmatic command composition
+#
+# 3. Use manifest caching for performance
+#    - Shell completions cache for 60 minutes
+#    - Your tools can implement similar caching
+#
+# 4. Combine manifest with --explain for complete context
+#    - manifest: What commands exist
+#    - --explain: What a specific command will do
+#
+# 5. Validate configurations in CI/CD pipelines
+#    - hip validate: Schema validation
+#    - hip manifest: Ensures parseable config
+#
+# 6. Document command patterns in hip.yml comments
+#    - LLMs can read these comments via manifest
+#    - Provides usage examples inline
+#
+# 7. Use environment variable interpolation
+#    - $HIP_OS, $HIP_WORK_DIR_REL_PATH, $HIP_CURRENT_USER
+#    - Makes commands portable across environments
+#
+# 8. Structure provision scripts for clarity
+#    - Each step with clear echo messages
+#    - Enables LLM to understand workflow stages
+#
+# 9. Leverage subcommands for discoverability
+#    - rails: [console, server, generate, db]
+#    - Makes command hierarchies clear to LLMs
+#
+# 10. Export manifest as documentation
+#     - Generate markdown from manifest
+#     - Publish to docs/ for reference
+#
+# 📖 Additional Resources:
+#
+# - Shell Completions: completions/README.md
+# - Manifest Schema: Check `hip manifest | jq '.schema_version'`
+# - Examples Directory: examples/README.md
+# - Project Documentation: CONTEXT_MAP.md, CLAUDE.md
+#
+# For questions or contributions:
+# https://github.com/ScriptonBasestar/hip
