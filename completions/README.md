@@ -26,9 +26,30 @@ Shell completion scripts for Hip CLI, providing intelligent tab completion for a
 
 ## Installation
 
-### Bash
+### Quick Install (Recommended)
 
-#### Option 1: User-level (Recommended)
+Use the automated installation script:
+
+```bash
+# Interactive installation (detects your shell)
+./completions/install.sh
+
+# Install for specific shell
+./completions/install.sh bash
+./completions/install.sh zsh
+
+# System-wide installation (requires sudo)
+./completions/install.sh --system
+
+# Uninstall
+./completions/install.sh --uninstall
+```
+
+### Manual Installation
+
+#### Bash
+
+**Option 1: User-level**
 
 ```bash
 # Source in your ~/.bashrc or ~/.bash_profile
@@ -36,7 +57,7 @@ echo 'source ~/path/to/hip/completions/hip.bash' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-#### Option 2: System-wide
+**Option 2: System-wide**
 
 ```bash
 # macOS with Homebrew
@@ -49,9 +70,9 @@ sudo cp completions/hip.bash /etc/bash_completion.d/hip
 sudo cp completions/hip.bash /usr/share/bash-completion/completions/hip
 ```
 
-### Zsh
+#### Zsh
 
-#### Option 1: User-level (Recommended)
+**Option 1: User-level**
 
 ```bash
 # Add to your fpath in ~/.zshrc (before compinit)
@@ -59,7 +80,7 @@ fpath=(~/path/to/hip/completions $fpath)
 autoload -Uz compinit && compinit
 ```
 
-#### Option 2: System-wide
+**Option 2: System-wide**
 
 ```bash
 # macOS with Homebrew
@@ -69,7 +90,7 @@ cp completions/_hip $(brew --prefix)/share/zsh/site-functions/_hip
 sudo cp completions/_hip /usr/local/share/zsh/site-functions/_hip
 ```
 
-#### Option 3: Oh-My-Zsh
+**Option 3: Oh-My-Zsh**
 
 ```bash
 # Copy to custom completions directory
