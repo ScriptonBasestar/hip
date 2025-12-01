@@ -223,7 +223,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
   context "when container is already running" do
     let(:commands) { {bash: {service: "app", command: "bash"}} }
-    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:runner) { described_class.new(command, [], **{}) }
     let(:command) do
       {
         service: "app",
@@ -235,8 +235,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
     end
 
     before do
-      allow(runner).to receive(:detect_running_container_project).and_return("test-project")
-      allow(runner).to receive(:system).and_return(true)
+      allow(runner).to receive_messages(detect_running_container_project: "test-project", system: true)
     end
 
     it "switches from run to exec" do
@@ -248,7 +247,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
   context "when container is not running" do
     let(:commands) { {bash: {service: "app", command: "bash"}} }
-    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:runner) { described_class.new(command, [], **{}) }
     let(:command) do
       {
         service: "app",
@@ -272,7 +271,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
   context "when method is already exec" do
     let(:commands) { {bash: {service: "app", command: "bash", compose: {method: "exec"}}} }
-    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:runner) { described_class.new(command, [], **{}) }
     let(:command) do
       {
         service: "app",
@@ -292,7 +291,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
   # Edge case tests for detect_running_container_project
   describe "#detect_running_container_project" do
-    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:runner) { described_class.new(command, [], **{}) }
     let(:command) do
       {
         service: "app",
@@ -402,7 +401,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
   # Test compose command building
   describe "#build_compose_command" do
-    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:runner) { described_class.new(command, [], **{}) }
     let(:command) do
       {
         service: "app",
@@ -414,11 +413,8 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
     end
 
     before do
-      allow(Hip.config).to receive(:compose).and_return(
-        files: ["docker-compose.yml", "docker-compose.dev.yml"],
-        project_name: "test-project"
-      )
-      allow(Hip.config).to receive(:file_path).and_return(Pathname.new("/test/hip.yml"))
+      allow(Hip.config).to receive_messages(compose: {files: ["docker-compose.yml", "docker-compose.dev.yml"],
+                                                      project_name: "test-project"}, file_path: Pathname.new("/test/hip.yml"))
     end
 
     it "includes docker compose base command" do
@@ -449,7 +445,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
   # Test caching functionality
   describe "container detection caching" do
-    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:runner) { described_class.new(command, [], **{}) }
     let(:command) do
       {
         service: "app",
