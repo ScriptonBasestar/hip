@@ -17,12 +17,22 @@ module Hip
         def execute
           Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute >>>>>>>>>>"
           Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute command: #{command}"
+
+          # Auto-detect if container is running and switch to exec
+          auto_detect_compose_method!
+
           Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute compose_profiles: #{compose_profiles}"
           Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute compose_arguments: #{compose_arguments}"
+
+          # Build compose command with detected project name if needed
+          compose_cmd_args = []
+          compose_cmd_args.concat(compose_profiles)
+          compose_cmd_args.concat(detected_project_args) if @detected_project_name
+          compose_cmd_args << command[:compose][:method]
+          compose_cmd_args.concat(compose_arguments)
+
           Commands::Compose.new(
-            *compose_profiles,
-            command[:compose][:method],
-            *compose_arguments,
+            *compose_cmd_args,
             shell: command[:shell]
           ).execute
         end
@@ -98,6 +108,126 @@ module Hip
           command[:compose][:method] = "up"
           command[:command] = ""
           command[:compose][:run_options] = []
+        end
+
+        def auto_detect_compose_method!
+          # Auto-detect if container is already running and switch from 'run' to 'exec'
+          #
+          # This prevents container name conflicts when:
+          # - Container already exists with same name
+          # - Project name in hip.yml differs from actual running container's project
+          # - User runs commands while containers are still up
+          #
+          # Behavior:
+          # - Only operates on 'run' method (exec/up unchanged)
+          # - Returns early if no service specified
+          # - On detection success: switches to 'exec', removes incompatible flags
+          # - On detection failure: keeps 'run' method (safe fallback)
+          return unless command[:compose][:method] == "run"
+
+          service_name = command[:service]
+          return unless service_name
+
+          # Check if container is already running and get its actual project name
+          actual_project_name = detect_running_container_project(service_name)
+          if actual_project_name
+            Hip.logger.debug "Container for service '#{service_name}' is running under project '#{actual_project_name}', switching to exec"
+            command[:compose][:method] = "exec"
+            # exec doesn't support --rm and some run options
+            command[:compose][:run_options].reject! { |opt| opt.include?("--rm") }
+            # Override project name with actual running container's project
+            @detected_project_name = actual_project_name
+          end
+        end
+
+        def detect_running_container_project(service_name)
+          # Use docker compose ps to check if service container is running
+          # and return the actual project name
+          #
+          # Error Handling:
+          # - Returns nil on any error (graceful degradation to 'run' mode)
+          # - Expected error scenarios:
+          #   1. Docker daemon not running → StandardError → nil
+          #   2. Compose files not found → empty output → nil
+          #   3. Service doesn't exist → empty output → nil
+          #   4. Invalid JSON response → JSON::ParserError → nil
+          #   5. Network/permission issues → StandardError → nil
+          # - All errors logged at debug level (not user-facing)
+          ps_cmd = build_compose_command(["ps", "--format", "json", service_name])
+
+          Hip.logger.debug "Checking container status: #{ps_cmd.join(" ")}"
+
+          output = `#{ps_cmd.shelljoin} 2>/dev/null`.strip
+
+          # docker compose ps --format json outputs one JSON object per line
+          if output.empty?
+            Hip.logger.debug "No container found for service '#{service_name}'"
+            return nil
+          end
+
+          # Parse first line as JSON (could be multiple containers, we check the first)
+          require "json"
+          container_info = JSON.parse(output.lines.first)
+          state = container_info["State"]
+          project = container_info["Project"]
+
+          if state&.downcase == "running"
+            Hip.logger.debug "Container '#{container_info["Name"]}' (#{container_info["ID"]}) state: #{state}, project: #{project}"
+            project
+          else
+            Hip.logger.debug "Container found but not running: state=#{state}"
+            nil
+          end
+        rescue JSON::ParserError => e
+          # Malformed JSON from docker compose ps (rare but possible)
+          Hip.logger.debug "Failed to parse container status JSON: #{e.message}"
+          nil
+        rescue StandardError => e
+          # Covers: Errno::ENOENT (docker not found), command execution failures, etc.
+          Hip.logger.debug "Error checking container status: #{e.message}"
+          nil
+        end
+
+        def build_compose_command(args)
+          # Build compose command exactly like Hip::Commands::Compose#execute
+          #
+          # Constructs docker compose command with proper file paths and options:
+          # - Base: ["docker", "compose"]
+          # - Files: --file /path/to/compose.yml (from hip.yml compose.files)
+          # - Project: --project-name <name> (only if @detected_project_name set)
+          # - Args: additional arguments (e.g., ["ps", "--format", "json"])
+          cmd = ["docker", "compose"]
+          cmd.concat(compose_file_args)
+          cmd.concat(compose_project_args)
+          cmd.concat(args)
+          cmd
+        end
+
+        def compose_file_args
+          files = Hip.config.compose[:files]
+          return [] unless files.is_a?(Array)
+
+          files.each_with_object([]) do |file_path, memo|
+            file_path = Pathname.new(file_path)
+            file_path = Hip.config.file_path.parent.join(file_path).expand_path if file_path.relative?
+            next unless file_path.exist?
+
+            memo << "--file"
+            memo << file_path.to_s
+          end
+        end
+
+        def compose_project_args
+          # For ps command: don't specify project name - let docker compose
+          # auto-detect from compose files and directory context
+          # This avoids issues when project_name in hip.yml doesn't match
+          # the actual running containers
+          []
+        end
+
+        def detected_project_args
+          # Return project name args for detected running container
+          ["--project-name", @detected_project_name]
         end
       end
     end

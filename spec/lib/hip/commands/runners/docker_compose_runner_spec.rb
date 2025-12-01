@@ -220,4 +220,230 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
       it { expected_exec("docker", ["compose", "--profile", "foo", "--profile", "bar", "up", "app"]) }
     end
   end
+
+  context "when container is already running" do
+    let(:commands) { {bash: {service: "app", command: "bash"}} }
+    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:command) do
+      {
+        service: "app",
+        command: "bash",
+        shell: true,
+        compose: {method: "run", run_options: [], profiles: []},
+        environment: {}
+      }
+    end
+
+    before do
+      allow(runner).to receive(:detect_running_container_project).and_return("test-project")
+      allow(runner).to receive(:system).and_return(true)
+    end
+
+    it "switches from run to exec" do
+      expect(runner).to receive(:detect_running_container_project).with("app").and_return("test-project")
+      runner.send(:auto_detect_compose_method!)
+      expect(command[:compose][:method]).to eq("exec")
+    end
+  end
+
+  context "when container is not running" do
+    let(:commands) { {bash: {service: "app", command: "bash"}} }
+    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:command) do
+      {
+        service: "app",
+        command: "bash",
+        shell: true,
+        compose: {method: "run", run_options: [], profiles: []},
+        environment: {}
+      }
+    end
+
+    before do
+      allow(runner).to receive(:detect_running_container_project).and_return(nil)
+    end
+
+    it "keeps run method" do
+      expect(runner).to receive(:detect_running_container_project).with("app").and_return(nil)
+      runner.send(:auto_detect_compose_method!)
+      expect(command[:compose][:method]).to eq("run")
+    end
+  end
+
+  context "when method is already exec" do
+    let(:commands) { {bash: {service: "app", command: "bash", compose: {method: "exec"}}} }
+    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:command) do
+      {
+        service: "app",
+        command: "bash",
+        shell: true,
+        compose: {method: "exec", run_options: [], profiles: []},
+        environment: {}
+      }
+    end
+
+    it "does not check container status" do
+      expect(runner).not_to receive(:detect_running_container_project)
+      runner.send(:auto_detect_compose_method!)
+      expect(command[:compose][:method]).to eq("exec")
+    end
+  end
+
+  # Edge case tests for detect_running_container_project
+  describe "#detect_running_container_project" do
+    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:command) do
+      {
+        service: "app",
+        command: "bash",
+        shell: true,
+        compose: {method: "run", run_options: [], profiles: []},
+        environment: {}
+      }
+    end
+
+    context "when docker compose ps returns empty output" do
+      before do
+        allow(runner).to receive(:`).and_return("")
+      end
+
+      it "returns nil" do
+        result = runner.send(:detect_running_container_project, "app")
+        expect(result).to be_nil
+      end
+    end
+
+    context "when docker compose ps returns invalid JSON" do
+      before do
+        allow(runner).to receive(:`).and_return("not a json")
+      end
+
+      it "returns nil and logs error" do
+        expect(Hip.logger).to receive(:debug).with(/Checking container status/)
+        expect(Hip.logger).to receive(:debug).with(/Failed to parse container status JSON/)
+        result = runner.send(:detect_running_container_project, "app")
+        expect(result).to be_nil
+      end
+    end
+
+    context "when container exists but not running" do
+      before do
+        json_output = '{"ID":"abc123","Name":"test_app","State":"exited","Project":"test-project"}'
+        allow(runner).to receive(:`).and_return(json_output)
+      end
+
+      it "returns nil" do
+        expect(Hip.logger).to receive(:debug).with(/Checking container status/).ordered
+        expect(Hip.logger).to receive(:debug).with(/Container found but not running/).ordered
+        result = runner.send(:detect_running_container_project, "app")
+        expect(result).to be_nil
+      end
+    end
+
+    context "when container is running" do
+      before do
+        json_output = '{"ID":"abc123","Name":"test_app","State":"running","Project":"test-project"}'
+        allow(runner).to receive(:`).and_return(json_output)
+      end
+
+      it "returns project name" do
+        result = runner.send(:detect_running_container_project, "app")
+        expect(result).to eq("test-project")
+      end
+
+      it "logs container details" do
+        expect(Hip.logger).to receive(:debug).with(/Checking container status/).ordered
+        expect(Hip.logger).to receive(:debug).with(/Container 'test_app' \(abc123\) state: running, project: test-project/).ordered
+        runner.send(:detect_running_container_project, "app")
+      end
+    end
+
+    context "when container state is uppercase" do
+      before do
+        json_output = '{"ID":"abc123","Name":"test_app","State":"RUNNING","Project":"test-project"}'
+        allow(runner).to receive(:`).and_return(json_output)
+      end
+
+      it "handles case insensitively" do
+        result = runner.send(:detect_running_container_project, "app")
+        expect(result).to eq("test-project")
+      end
+    end
+
+    context "when docker compose command fails" do
+      before do
+        allow(runner).to receive(:`).and_raise(StandardError.new("Docker not found"))
+      end
+
+      it "returns nil and logs error" do
+        expect(Hip.logger).to receive(:debug).with(/Checking container status/)
+        expect(Hip.logger).to receive(:debug).with(/Error checking container status: Docker not found/)
+        result = runner.send(:detect_running_container_project, "app")
+        expect(result).to be_nil
+      end
+    end
+
+    context "when multiple containers returned (first line only)" do
+      before do
+        json_output = <<~JSON.strip
+          {"ID":"abc123","Name":"test_app_1","State":"running","Project":"test-project"}
+          {"ID":"def456","Name":"test_app_2","State":"running","Project":"test-project"}
+        JSON
+        allow(runner).to receive(:`).and_return(json_output)
+      end
+
+      it "uses first container" do
+        result = runner.send(:detect_running_container_project, "app")
+        expect(result).to eq("test-project")
+      end
+    end
+  end
+
+  # Test compose command building
+  describe "#build_compose_command" do
+    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:command) do
+      {
+        service: "app",
+        command: "bash",
+        shell: true,
+        compose: {method: "run", run_options: [], profiles: []},
+        environment: {}
+      }
+    end
+
+    before do
+      allow(Hip.config).to receive(:compose).and_return(
+        files: ["docker-compose.yml", "docker-compose.dev.yml"],
+        project_name: "test-project"
+      )
+      allow(Hip.config).to receive(:file_path).and_return(Pathname.new("/test/hip.yml"))
+    end
+
+    it "includes docker compose base command" do
+      result = runner.send(:build_compose_command, ["ps"])
+      expect(result[0..1]).to eq(["docker", "compose"])
+    end
+
+    it "includes file arguments" do
+      allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
+      result = runner.send(:build_compose_command, ["ps"])
+      expect(result).to include("--file")
+      expect(result).to include("/test/docker-compose.yml")
+      expect(result).to include("/test/docker-compose.dev.yml")
+    end
+
+    it "includes provided args" do
+      result = runner.send(:build_compose_command, ["ps", "--format", "json"])
+      expect(result).to include("ps")
+      expect(result).to include("--format")
+      expect(result).to include("json")
+    end
+
+    it "does not include project name by default" do
+      result = runner.send(:build_compose_command, ["ps"])
+      expect(result).not_to include("--project-name")
+    end
+  end
 end
