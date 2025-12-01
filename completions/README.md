@@ -197,6 +197,16 @@ All commands defined in `hip.yml` `interaction:` section:
 
 ### Completions Not Working
 
+**Automated testing:**
+
+```bash
+# Run integration tests
+./completions/test-completions.sh bash
+./completions/test-completions.sh zsh
+```
+
+**Manual checks:**
+
 ```bash
 # Check if jq is installed
 which jq
