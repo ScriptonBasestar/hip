@@ -32,7 +32,11 @@ module Hip
     end
 
     def env
-      @env ||= Hip::Environment.new(config.exist? ? config.environment : {})
+      @env ||= Hip::Environment.new(
+        config.exist? ? config.environment : {},
+        env_file_config: config.exist? ? config.env_file : nil,
+        base_path: config.exist? ? config.file_path.parent : nil
+      )
     end
 
     def bin_path

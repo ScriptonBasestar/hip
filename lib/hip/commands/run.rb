@@ -29,6 +29,12 @@ module Hip
 
         raise Hip::Error, "Command `#{[cmd, *argv].join(" ")}` not recognized!" unless command
 
+        # Load interaction-level env_file if present
+        if command[:env_file]
+          load_interaction_env_file
+        end
+
+        # Merge interaction-level environment variables
         Hip.env.merge(command[:environment])
       end
 
@@ -75,6 +81,28 @@ module Hip
         else
           Runners::LocalRunner
         end
+      end
+
+      def load_interaction_env_file
+        require "hip/env_file_loader"
+
+        Hip.logger.debug "Loading interaction-level env_file: #{command[:env_file].inspect}"
+
+        # Load env_file variables
+        env_file_vars = Hip::EnvFileLoader.load(
+          command[:env_file],
+          base_path: Hip.config.file_path.parent,
+          interpolate: true
+        )
+
+        # Merge into Hip.env (interaction-level env_file overrides top-level)
+        Hip.env.merge(env_file_vars)
+
+        Hip.logger.debug "Loaded #{env_file_vars.size} variables from interaction env_file"
+      rescue Hip::Error => e
+        raise e
+      rescue StandardError => e
+        raise Hip::Error, "Failed to load interaction env_file: #{e.message}"
       end
     end
   end

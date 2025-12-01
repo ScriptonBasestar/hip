@@ -15,10 +15,22 @@ module Hip
 
     attr_reader :vars
 
-    def initialize(default_vars)
+    def initialize(default_vars, env_file_config: nil, base_path: nil)
       @vars = {}
+      @env_file_config = env_file_config
+      @base_path = base_path
+      @delayed_env_file_vars = nil
 
+      # Load env_file first (if configured)
+      if env_file_config
+        load_env_files
+      end
+
+      # Then merge default_vars (which can override env_file if priority is 'before_environment')
       merge(default_vars || {})
+
+      # Apply delayed env_file vars if priority is 'after_environment'
+      merge_env_file_vars(@delayed_env_file_vars) if @delayed_env_file_vars
     end
 
     def merge(new_vars)
@@ -72,6 +84,64 @@ module Hip
 
     def find_current_user
       @find_current_user ||= Process.uid
+    end
+
+    def load_env_files
+      require "hip/env_file_loader"
+
+      # Determine priority and interpolate settings
+      priority = extract_priority(@env_file_config)
+      interpolate = extract_interpolate(@env_file_config)
+
+      # Load env_file variables
+      env_file_vars = Hip::EnvFileLoader.load(
+        @env_file_config,
+        base_path: @base_path || Hip.config.file_path.parent,
+        interpolate: interpolate
+      )
+
+      # Merge based on priority
+      case priority
+      when "before_environment"
+        # env_file loaded first, environment: can override
+        # Already happening in initialize order
+        merge_env_file_vars(env_file_vars)
+      when "after_environment"
+        # environment: loaded first (in initialize), env_file overrides
+        # We need to delay this merge until after default_vars
+        @delayed_env_file_vars = env_file_vars
+      else
+        # Default: before_environment
+        merge_env_file_vars(env_file_vars)
+      end
+    rescue Hip::Error => e
+      raise e
+    rescue => e
+      raise Hip::Error, "Failed to load env_file: #{e.message}"
+    end
+
+    def merge_env_file_vars(env_vars)
+      env_vars.each do |key, value|
+        @vars[key.to_s] = value.to_s
+      end
+    end
+
+    def extract_priority(config)
+      return "before_environment" unless config.is_a?(Hash)
+
+      config[:priority] || config["priority"] || "before_environment"
+    end
+
+    def extract_interpolate(config)
+      return true unless config.is_a?(Hash)
+
+      if config.key?(:interpolate)
+        config[:interpolate]
+      elsif config.key?("interpolate")
+        config["interpolate"]
+      else
+        true
+      end
     end
   end
 end

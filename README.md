@@ -137,6 +137,16 @@ Also, you can check out examples at the top.
 # Required minimum hip version
 version: '9.0.0'
 
+# Load environment variables from .env files
+# Supports multiple files, priority control, and variable interpolation
+env_file:
+  - .env.defaults    # Team defaults (committed)
+  - .env             # Secrets (git-ignored)
+  - .env.local       # Local overrides (git-ignored)
+
+# Or simple form:
+# env_file: .env
+
 environment:
   COMPOSE_EXT: development
   STAGE: "staging"

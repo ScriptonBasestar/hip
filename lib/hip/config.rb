@@ -7,6 +7,7 @@ require "json-schema"
 
 require "hip/version"
 require "hip/ext/hash"
+require "hip/env_file_loader"
 
 using ActiveSupportHashHelpers
 
@@ -16,6 +17,7 @@ module Hip
 
     CONFIG_DEFAULTS = {
       environment: {},
+      env_file: nil,
       compose: {},
       kubectl: {},
       infra: {},
@@ -24,7 +26,7 @@ module Hip
       devcontainer: {}
     }.freeze
 
-    TOP_LEVEL_KEYS = %i[environment compose kubectl infra interaction provision devcontainer].freeze
+    TOP_LEVEL_KEYS = %i[environment env_file compose kubectl infra interaction provision devcontainer].freeze
 
     ConfigKeyMissingError = Class.new(ArgumentError)
 

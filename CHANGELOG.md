@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`env_file` support**: Load environment variables from .env files
+  - Simple form: `env_file: .env`
+  - Multiple files: `env_file: [.env.defaults, .env, .env.local]`
+  - Priority control: `before_environment` (default) or `after_environment`
+  - Per-file required flag: `{ path: .env, required: true }`
+  - Variable interpolation: `$VAR` and `${VAR}` expansion
+  - Interaction-level env_file: command-specific environment files
+  - Examples: `examples/env-file-*.yml`
+  - RFC document: `docs/proposals/env-file-feature.md`
+
+- **Debug mode**: `--debug` flag to display executed commands
+  - Shows exact Docker Compose/kubectl commands before execution
+  - Visual separators with 🔍 emoji for clarity
+  - Helps troubleshoot workflow issues
+  - Usage: `hip --debug up`, `hip --debug down`
+
 ## [9.1.2] - 2025-12-01
 
 ### Added

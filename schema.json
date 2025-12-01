@@ -17,6 +17,86 @@
         { "PORT": "${PORT:-3000}" }
       ]
     },
+    "env_file": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Path to a single .env file"
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "path": { "type": "string" },
+                  "required": { "type": "boolean", "default": false }
+                },
+                "required": ["path"],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "description": "Array of .env file paths (later files override earlier)"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "files": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      { "type": "string" },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "path": { "type": "string" },
+                          "required": { "type": "boolean", "default": false }
+                        },
+                        "required": ["path"],
+                        "additionalProperties": false
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            "priority": {
+              "type": "string",
+              "enum": ["before_environment", "after_environment"],
+              "default": "before_environment",
+              "description": "Control whether env_file or environment: takes precedence"
+            },
+            "required": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether env files are required to exist"
+            },
+            "interpolate": {
+              "type": "boolean",
+              "default": true,
+              "description": "Enable variable interpolation in .env files"
+            }
+          },
+          "required": ["files"],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        ".env",
+        [".env.defaults", ".env", ".env.local"],
+        {
+          "files": [".env.defaults", ".env"],
+          "priority": "before_environment",
+          "required": false
+        }
+      ]
+    },
     "interaction_command": {
       "type": "object",
       "description": "Configuration for an interaction command",
@@ -54,6 +134,9 @@
         },
         "environment": {
           "$ref": "#/definitions/environment_vars"
+        },
+        "env_file": {
+          "$ref": "#/definitions/env_file"
         },
         "compose": {
           "type": "object",
@@ -267,6 +350,9 @@
     },
     "environment": {
       "$ref": "#/definitions/environment_vars"
+    },
+    "env_file": {
+      "$ref": "#/definitions/env_file"
     },
     "kubectl": {
       "type": "object",

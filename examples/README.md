@@ -74,6 +74,27 @@ If you're new to Hip, start with [`basic.yml`](basic.yml) - it contains the esse
   - **[.hip/testing.yml](modules/.hip/testing.yml)** - Testing framework module
   - Use when: Large projects with shared configurations across teams
 
+### 🔐 Environment Variables
+
+- **[env-file-basic.yml](env-file-basic.yml)** - Basic .env file usage
+  - Separate secrets from configuration
+  - Simple `env_file: .env` configuration
+  - Git-ignored secrets management
+  - Use when: Managing secrets and local configuration
+
+- **[env-file-priority.yml](env-file-priority.yml)** - Priority control
+  - Multiple .env files with layering
+  - before_environment vs after_environment priority
+  - Per-file required flags
+  - Command-specific env_file
+  - Use when: Complex multi-environment setups
+
+- **[env-file-multi-env.yml](env-file-multi-env.yml)** - Multi-environment support
+  - Environment-specific .env files (.env.development, .env.staging, .env.production)
+  - Variable interpolation ($VAR, ${VAR})
+  - Dynamic file selection based on ENV variable
+  - Use when: Supporting development, staging, production environments
+
 ## Using These Examples
 
 ### 1. Copy an Example
