@@ -112,7 +112,9 @@ module Hip
 
     TOP_LEVEL_KEYS.each do |key|
       define_method(key) do
-        config[key] || (raise config_missing_error(key))
+        # Return default value instead of raising error
+        # config is guaranteed to have all keys from CONFIG_DEFAULTS merge
+        config[key]
       end
     end
 
