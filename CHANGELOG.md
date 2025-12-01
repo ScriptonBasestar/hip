@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.2] - 2025-12-01
+
+### Added
+
+- **`hip clean` command**: Remove all containers, networks, and optionally volumes
+  - Resolves container name conflicts caused by Docker Compose project name mismatches
+  - Flags: `--volumes/-v` (remove volumes), `--images/-i` (remove images), `--force/-f` (skip confirmation)
+  - Interactive confirmation prompt by default (unless `--force` is used)
+  - Helps resolve common `hip up` failures due to existing containers
+
 ### Changed
 
 - **Makefile structure**: Refactored monolithic `Makefile.dev.mk` into modular `.make/*.mk` directory structure

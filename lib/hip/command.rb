@@ -26,7 +26,7 @@ module Hip
           warn "\n" + "=" * 80
           warn "🔍 DEBUG: Executing command (via exec)"
           warn "=" * 80
-          warn "Command: #{cmdline.is_a?(Array) ? cmdline.join(' ') : cmdline}"
+          warn "Command: #{cmdline.is_a?(Array) ? cmdline.join(" ") : cmdline}"
           warn "=" * 80 + "\n"
         end
 

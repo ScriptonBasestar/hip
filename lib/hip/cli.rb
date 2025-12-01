@@ -11,7 +11,7 @@ require "hip/run_vars"
 
 module Hip
   class CLI < Thor
-    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down run provision ssh infra console validate manifest devcontainer claude]
+    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down clean run provision ssh infra console validate manifest devcontainer claude]
 
     class << self
       # Hackery. Take the run method away from Thor so that we can redefine it.
@@ -77,6 +77,7 @@ module Hip
             hip compose ARGS      Run docker compose commands
             hip up [SERVICE]      Start services (docker compose up)
             hip down              Stop and remove containers
+            hip clean             Remove all containers/networks (resolves conflicts)
             hip stop [SERVICE]    Stop services
             hip build [SERVICE]   Build service images
 
@@ -158,6 +159,22 @@ module Hip
       else
         compose("down", *argv.push("--remove-orphans"))
       end
+    end
+
+    desc "clean [OPTIONS]", "Remove all containers, networks, and optionally volumes"
+    method_option :volumes, aliases: "-v", type: :boolean, default: false,
+      desc: "Also remove volumes (WARNING: data loss)"
+    method_option :images, aliases: "-i", type: :boolean, default: false,
+      desc: "Also remove images built by docker compose"
+    method_option :force, aliases: "-f", type: :boolean, default: false,
+      desc: "Skip confirmation prompt"
+    def clean
+      require_relative "commands/clean"
+      Hip::Commands::Clean.new(
+        volumes: options[:volumes],
+        images: options[:images],
+        force: options[:force]
+      ).execute
     end
 
     desc "ktl CMD [OPTIONS]", "Run kubectl commands"
