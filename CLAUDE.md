@@ -201,8 +201,10 @@ All merged, overrides win.
 |---------|---------|
 | `hip run CMD` | Execute interaction command |
 | `hip ls` | List available commands |
+| `hip up [SERVICE]` | Start containers (docker compose up) |
+| `hip down` | Stop and remove containers |
+| `hip provision [PROFILE]` | Run initialization scripts (after up) |
 | `hip compose CMD` | Docker Compose wrapper |
-| `hip provision [PROFILE]` | Run provisioning scripts |
 | `hip validate` | Validate hip.yml schema |
 | `hip devcontainer` | VSCode DevContainer integration |
 | `hip claude:setup` | Generate Claude Code files |

@@ -138,8 +138,8 @@ interaction:
     command: bundle exec rake
 
 provision:
+  # Note: Run 'hip up' first to start containers
   default:
-    - hip compose down --volumes
     - hip compose build
     - hip rails db:create
     - hip rails db:migrate
@@ -147,7 +147,6 @@ provision:
     - hip npm install
     - hip validate
   reset:
-    - hip compose down --volumes
     - rm -rf tmp/ log/*.log
     - hip compose build --no-cache
     - hip rails db:drop db:create db:migrate db:seed

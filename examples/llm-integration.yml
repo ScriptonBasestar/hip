@@ -129,11 +129,10 @@ interaction:
 
 # Provision profiles for different setup scenarios
 provision:
+  # Note: Run 'hip up' first to start containers
   # Default: Full setup for new developers
   default:
     - echo "🚀 Setting up development environment..."
-    - hip compose down --volumes
-    - hip compose up -d db
     - echo "⏳ Waiting for database..."
     - sleep 5
     - hip npm install
@@ -144,7 +143,6 @@ provision:
 
   # CI: Minimal setup for continuous integration
   ci:
-    - hip compose up -d db
     - sleep 3
     - hip npm ci  # Use npm ci for faster, deterministic installs
     - hip db migrate
@@ -152,7 +150,6 @@ provision:
 
   # Test: Setup for running tests
   test:
-    - hip compose up -d db
     - sleep 3
     - hip npm install
     - hip db migrate

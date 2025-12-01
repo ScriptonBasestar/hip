@@ -88,8 +88,7 @@ interaction:
 
 # Provision commands
 provision:
+  # Note: Run 'hip up' first to start containers
   default:
-    - hip compose down --volumes
-    - hip compose up -d postgres redis
     - hip bundle install
     - hip rails db:create db:migrate db:seed

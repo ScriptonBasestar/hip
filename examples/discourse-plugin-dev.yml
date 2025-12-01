@@ -124,8 +124,8 @@ interaction:
 
 # Provisioning for fresh setup
 provision:
+  # Note: Run 'hip up' first to start containers
   - echo "🚀 Setting up Discourse development environment..."
-  - hip compose up -d postgres redis
   - echo "⏳ Waiting for services to be ready..."
   - sleep 5
   - hip bundle install

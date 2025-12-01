@@ -59,8 +59,7 @@ interaction:
 
 # Provisioning - used by 'make hip-provision'
 provision:
-  - hip compose down --volumes
-  - hip compose up -d postgres redis
+  # Note: Run 'hip up' first to start containers
   - hip bundle install
   - hip rails db:create
   - hip rails db:migrate

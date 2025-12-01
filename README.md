@@ -496,7 +496,16 @@ JSON output example:
 
 ### hip provision
 
-Run commands each by each from `provision` section of hip.yml
+Run initialization commands from `provision` section of hip.yml.
+
+**Note**: `provision` only runs initialization scripts (database setup, dependencies, etc.).
+Use `hip up` to start containers first, then run `hip provision` for initialization.
+
+**Workflow**:
+```sh
+hip up          # Start containers
+hip provision   # Run initialization scripts
+```
 
 ### hip compose
 

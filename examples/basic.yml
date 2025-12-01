@@ -63,11 +63,10 @@ interaction:
       PGPASSWORD: password
 
 # Provision scripts for project setup
+# Note: Run 'hip up' first to start containers, then 'hip provision' for initialization
 provision:
   # Default setup - run this for first-time setup
   default:
-    - hip compose down --volumes
-    - hip compose up -d db
     - hip bundle install
     - hip rails db:create
     - hip rails db:migrate

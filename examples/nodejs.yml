@@ -114,17 +114,15 @@ interaction:
     command: npm run typecheck
 
 provision:
+  # Note: Run 'hip up' first to start containers
   # Default setup
   default:
-    - hip compose down --volumes
-    - hip compose up -d mongo redis
     - hip npm install
     - hip npm run build
     - echo "✅ Setup complete! Run 'hip npm run dev' to start"
 
   # Clean install
   reset:
-    - hip compose down --volumes
     - rm -rf node_modules package-lock.json
     - hip npm install
     - hip npm run build

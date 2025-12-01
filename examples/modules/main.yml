@@ -57,7 +57,7 @@ interaction:
     command: bundle
 
 provision:
+  # Note: Run 'hip up' first to start containers
   default:
-    - hip compose up -d db
     - hip bundle install
     - hip rails db:create db:migrate db:seed

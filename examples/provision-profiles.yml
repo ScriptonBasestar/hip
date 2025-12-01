@@ -53,10 +53,9 @@ interaction:
       RAILS_ENV: test
 
 provision:
+  # Note: Run 'hip up' first to start containers
   # Default: Full setup for new developers
   default:
-    - hip compose down --volumes
-    - hip compose up -d db redis
     - hip bundle install
     - hip rails db:create
     - hip rails db:migrate
@@ -65,7 +64,6 @@ provision:
 
   # Reset: Nuclear option - rebuild everything from scratch
   reset:
-    - hip compose down --volumes --remove-orphans
     - rm -rf tmp/ log/*.log
     - hip compose build --no-cache
     - hip bundle install
@@ -89,14 +87,12 @@ provision:
 
   # Test: Setup test environment
   test:
-    - hip compose up -d db redis
     - RAILS_ENV=test hip bundle install
     - RAILS_ENV=test hip rails db:create db:migrate
     - echo "✅ Test environment ready. Run 'hip rspec' to run tests"
 
   # CI: Continuous Integration setup
   ci:
-    - hip compose up -d db redis
     - hip bundle install --jobs 4 --retry 3
     - hip rails db:create db:schema:load
     - hip rails assets:precompile

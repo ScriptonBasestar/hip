@@ -68,21 +68,37 @@ module Hip
 
           Usage: hip [--debug] COMMAND [ARGS]
 
-          Quick Start:
-            hip ls                List available commands
-            hip --version         Show version
-            hip help              Show full help
-            hip validate          Validate hip.yml schema
+          Available Commands:
+            hip ls                List available interaction commands
+            hip run CMD [ARGS]    Run interaction command from hip.yml
+            hip provision         Run initialization scripts (after 'hip up')
 
-          Common Commands:
-            hip COMMAND [ARGS]    Run interaction command from hip.yml
+          Docker Compose:
             hip compose ARGS      Run docker compose commands
-            hip provision         Run provisioning scripts
+            hip up [SERVICE]      Start services (docker compose up)
+            hip down              Stop and remove containers
+            hip stop [SERVICE]    Stop services
+            hip build [SERVICE]   Build service images
+
+          Kubernetes:
+            hip ktl CMD [OPTIONS] Run kubectl commands
+
+          Configuration:
+            hip validate          Validate hip.yml schema
+            hip manifest          Output complete command manifest
+
+          Integration:
+            hip ssh               SSH-agent container commands
+            hip infra             Infrastructure services
+            hip console           Shell integration (ZSH/Bash)
+            hip devcontainer      VSCode DevContainer integration
+            hip claude            Claude Code integration
 
           Options:
             --debug               Enable debug logging
+            --version, -v         Show version
 
-          For more information: hip help
+          For detailed help: hip help [COMMAND]
         HELP
       end
     end
