@@ -20,6 +20,16 @@ module Hip
         Hip.logger.debug "Hip.Command.ProgramRunner#self.call cmdline: #{cmdline}"
         Hip.logger.debug "Hip.Command.ProgramRunner#self.call env: #{env}"
         Hip.logger.debug "Hip.Command.ProgramRunner#self.call options: #{options}"
+
+        # Show command in debug mode before exec replaces the process
+        if Hip.debug?
+          warn "\n" + "=" * 80
+          warn "🔍 DEBUG: Executing command (via exec)"
+          warn "=" * 80
+          warn "Command: #{cmdline.is_a?(Array) ? cmdline.join(' ') : cmdline}"
+          warn "=" * 80 + "\n"
+        end
+
         if cmdline.is_a?(Array)
           Hip.logger.debug "Hip.Command.ProgramRunner#self.call if"
           ::Kernel.exec(env, cmdline[0], *cmdline.drop(1), **options)
@@ -63,13 +73,18 @@ module Hip
         argv = argv.map { |arg| Hip.env.interpolate(arg) }
         cmdline = [cmd, *argv].compact
         cmdline = cmdline.join(" ").strip if shell
-        Hip.logger.debug "Hip.Command#run cmdline: #{cmdline}"
 
-        Hip.logger.debug "====================================="
-        Hip.logger.debug "====================================="
-        Hip.logger.debug [Hip.env.vars, cmdline].inspect
-        Hip.logger.debug "====================================="
-        Hip.logger.debug "====================================="
+        # Show command to users in debug mode
+        if Hip.debug?
+          puts "\n" + "=" * 80
+          puts "🔍 DEBUG: Executing command"
+          puts "=" * 80
+          puts "Command: #{cmdline}"
+          puts "=" * 80 + "\n"
+        end
+
+        Hip.logger.debug "Hip.Command#run cmdline: #{cmdline}"
+        Hip.logger.debug "Hip.Command#run env vars: #{Hip.env.vars.inspect}"
 
         runner.call(cmdline, env: Hip.env.vars, **options)
       end
