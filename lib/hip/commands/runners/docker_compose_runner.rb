@@ -200,7 +200,7 @@ module Hip
           # Malformed JSON from docker compose ps (rare but possible)
           Hip.logger.debug "Failed to parse container status JSON: #{e.message}"
           nil
-        rescue StandardError => e
+        rescue => e
           # Covers: Errno::ENOENT (docker not found), command execution failures, etc.
           Hip.logger.debug "Error checking container status: #{e.message}"
           nil
