@@ -178,16 +178,29 @@ interaction:
 
 ### Provision Profiles
 
+**Note**: As of v9.1.0, `provision` focuses on initialization only. Start containers with `hip up` first.
+
 ```yaml
 provision:
+  # Run 'hip up -d' first to start containers
   default:              # 'hip provision' or 'hip provision default'
-    - hip compose up -d
     - hip bundle install
+    - hip rails db:create
+    - hip rails db:migrate
 
   reset:                # 'hip provision reset'
     - hip compose down --volumes
-    - hip compose build --no-cache
+    - hip compose up -d
+    - hip bundle install
 ```
+
+**Workflow**:
+```bash
+hip up -d      # Start containers
+hip provision  # Initialize application
+```
+
+See [MIGRATION.md](../docs/MIGRATION.md) for upgrading from earlier versions.
 
 ## Validation
 
@@ -243,13 +256,14 @@ See [llm-integration.yml](llm-integration.yml) for comprehensive examples.
 
 1. **Start Simple**: Begin with `basic.yml` and add features as needed
 2. **Use Provision Profiles**: Create profiles for different scenarios (development, testing, deployment)
-3. **Document Your Commands**: Use `description` fields to help team members and LLMs
-4. **Leverage Subcommands**: Organize related commands hierarchically
-5. **Version Control**: Commit your `hip.yml` to share with your team
-6. **Modules for Scale**: Use modules for large projects with many commands
-7. **Validate Often**: Run `hip validate` after making changes
-8. **LLM Integration**: Use `hip manifest` for programmatic command discovery
-9. **Explain Before Execute**: Use `--explain` to validate command execution plans
+3. **Separate Concerns**: Use `hip up` for containers, `hip provision` for initialization (v9.1+)
+4. **Document Your Commands**: Use `description` fields to help team members and LLMs
+5. **Leverage Subcommands**: Organize related commands hierarchically
+6. **Version Control**: Commit your `hip.yml` to share with your team
+7. **Modules for Scale**: Use modules for large projects with many commands
+8. **Validate Often**: Run `hip validate` after making changes
+9. **LLM Integration**: Use `hip manifest` for programmatic command discovery
+10. **Explain Before Execute**: Use `--explain` to validate command execution plans
 
 ## Contributing
 
@@ -263,5 +277,5 @@ Found a bug in an example or have a suggestion for a new one? Please open an iss
 
 ---
 
-**Version**: 9.0.0
-**Last Updated**: November 2025
+**Version**: 9.1.0
+**Last Updated**: December 2025
