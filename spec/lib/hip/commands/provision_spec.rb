@@ -173,4 +173,57 @@ describe Hip::Commands::Provision, :config do
       expect { cli.start ["provision", "nonexistent"] }.to raise_error(SystemExit)
     end
   end
+
+  describe "workflow integration" do
+    context "when provision expects containers to be running" do
+      let(:commands) do
+        {
+          default: [
+            {echo: "Starting initialization..."},
+            {cmd: "bundle install"},
+            {cmd: "rails db:create"},
+            {cmd: "rails db:migrate"},
+            {echo: "Setup complete!"}
+          ]
+        }
+      end
+
+      before { cli.start ["provision"] }
+
+      it "executes initialization commands without container management" do
+        expected_subprocess("bundle install", [])
+        expected_subprocess("rails db:create", [])
+        expected_subprocess("rails db:migrate", [])
+      end
+
+      it "does not include docker compose up/down commands" do
+        expect(exec_subprocess_runner).not_to have_received(:call)
+          .with(match(/docker compose (up|down)/), anything)
+      end
+    end
+
+    context "when provision workflow is documented correctly" do
+      let(:commands) do
+        {
+          default: [
+            {echo: "Note: Ensure containers are running (hip up -d)"},
+            {cmd: "npm install"},
+            {cmd: "npm run build"}
+          ]
+        }
+      end
+
+      before { cli.start ["provision"] }
+
+      it "reminds user about container requirements" do
+        expect(exec_subprocess_runner).to have_received(:call)
+          .with(match(/ensure.*containers.*running/i), kind_of(Hash))
+      end
+
+      it "executes initialization tasks" do
+        expected_subprocess("npm install", [])
+        expected_subprocess("npm run build", [])
+      end
+    end
+  end
 end
