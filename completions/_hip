@@ -1,0 +1,223 @@
+#compdef hip
+# Hip CLI zsh completion script
+#
+# Installation:
+#   Add this file to your fpath and ensure compinit is called:
+#
+#   # Add to ~/.zshrc:
+#   fpath=(/path/to/completions $fpath)
+#   autoload -Uz compinit && compinit
+#
+#   Or copy to zsh completions directory:
+#     # On macOS with Homebrew:
+#     cp completions/_hip $(brew --prefix)/share/zsh/site-functions/_hip
+#
+#     # On Linux:
+#     sudo cp completions/_hip /usr/local/share/zsh/site-functions/_hip
+#
+# Usage:
+#   After installation, restart your shell or reload completions:
+#     exec zsh
+#   Or:
+#     rm -f ~/.zcompdump && compinit
+#
+#   Then enjoy tab completion:
+#     hip <TAB>           # Shows all available commands with descriptions
+#     hip run <TAB>       # Shows dynamic commands from hip.yml
+#     hip ls --<TAB>      # Shows available options
+
+_hip() {
+  local curcontext="$curcontext" state line
+  typeset -A opt_args
+
+  # Manifest cache for performance (60 minute TTL)
+  local manifest_cache="/tmp/hip-manifest-$USER.json"
+  local cache_ttl=60  # minutes
+
+  # Refresh cache if old or missing
+  if [[ ! -f "$manifest_cache" ]] || [[ -n $(find "$manifest_cache" -mmin +$cache_ttl 2>/dev/null) ]]; then
+    hip manifest -f json > "$manifest_cache" 2>/dev/null || return 1
+  fi
+
+  # Require jq for JSON parsing
+  if ! command -v jq &> /dev/null; then
+    _message "hip completion requires jq"
+    return 1
+  fi
+
+  # Parse manifest for available commands
+  local -a static_cmds subcommand_groups dynamic_cmds
+
+  static_cmds=(${(f)"$(jq -r '.static_commands | keys[]' "$manifest_cache" 2>/dev/null)"})
+  subcommand_groups=(${(f)"$(jq -r '.subcommand_groups | keys[]' "$manifest_cache" 2>/dev/null)"})
+  dynamic_cmds=(${(f)"$(jq -r '.dynamic_commands | keys[]' "$manifest_cache" 2>/dev/null)"})
+
+  # Build top-level commands with descriptions
+  local -a all_commands
+  for cmd in $static_cmds; do
+    local desc=$(jq -r --arg cmd "$cmd" '.static_commands[$cmd].description' "$manifest_cache" 2>/dev/null)
+    all_commands+=("$cmd:$desc")
+  done
+
+  for cmd in $subcommand_groups; do
+    local desc=$(jq -r --arg cmd "$cmd" '.subcommand_groups[$cmd].description' "$manifest_cache" 2>/dev/null)
+    all_commands+=("$cmd:$desc")
+  done
+
+  for cmd in $dynamic_cmds; do
+    local desc=$(jq -r --arg cmd "$cmd" '.dynamic_commands[$cmd].description // ""' "$manifest_cache" 2>/dev/null)
+    all_commands+=("$cmd:$desc")
+  done
+
+  # Main completion logic
+  _arguments -C \
+    '1: :->command' \
+    '*::arg:->args'
+
+  case $state in
+    command)
+      _describe 'hip command' all_commands
+      ;;
+
+    args)
+      local command="$line[1]"
+
+      case "$command" in
+        run)
+          _arguments \
+            '(-e --explain)'{-e,--explain}'[Show execution plan without running]' \
+            '(-p --publish)'{-p,--publish}'[Publish port mapping]:port mapping:' \
+            '(-h --help)'{-h,--help}'[Show help message]' \
+            '*: :->dynamic_commands'
+
+          if [[ $state == "dynamic_commands" ]]; then
+            local -a dyn_cmds
+            for cmd in $dynamic_cmds; do
+              local desc=$(jq -r --arg cmd "$cmd" '.dynamic_commands[$cmd].description // ""' "$manifest_cache" 2>/dev/null)
+              dyn_cmds+=("$cmd:$desc")
+            done
+            _describe 'dynamic command' dyn_cmds
+          fi
+          ;;
+
+        ls)
+          _arguments \
+            '(-f --format)'{-f,--format}'[Output format]:format:(table json yaml)' \
+            '(-d --detailed)'{-d,--detailed}'[Show detailed information]' \
+            '(-h --help)'{-h,--help}'[Show help message]'
+          ;;
+
+        manifest)
+          _arguments \
+            '(-f --format)'{-f,--format}'[Output format]:format:(json yaml)' \
+            '(-h --help)'{-h,--help}'[Show help message]'
+          ;;
+
+        compose)
+          local -a compose_cmds
+          compose_cmds=(
+            'up:Create and start containers'
+            'down:Stop and remove containers'
+            'build:Build or rebuild services'
+            'ps:List containers'
+            'logs:View output from containers'
+            'exec:Execute a command in a running container'
+            'run:Run a one-off command'
+            'restart:Restart services'
+            'stop:Stop services'
+            'rm:Remove stopped containers'
+            'pull:Pull service images'
+            'push:Push service images'
+            'config:Validate and view the Compose file'
+          )
+          _arguments \
+            '(-f --file)'{-f,--file}'[Specify compose file]:file:_files -g "*.yml"' \
+            '(-p --project-name)'{-p,--project-name}'[Project name]:project:' \
+            '(-d --detach)'{-d,--detach}'[Detached mode]' \
+            '1: :_describe "compose command" compose_cmds'
+          ;;
+
+        ktl|kubectl)
+          local -a kubectl_cmds
+          kubectl_cmds=(
+            'get:Display one or many resources'
+            'describe:Show details of a specific resource'
+            'logs:Print the logs for a container in a pod'
+            'exec:Execute a command in a container'
+            'apply:Apply a configuration to a resource'
+            'delete:Delete resources'
+            'port-forward:Forward one or more local ports to a pod'
+          )
+          _arguments \
+            '(-n --namespace)'{-n,--namespace}'[Namespace]:namespace:' \
+            '1: :_describe "kubectl command" kubectl_cmds'
+          ;;
+
+        provision)
+          local -a profiles
+          profiles=(${(f)"$(jq -r 'select(.dynamic_commands.provision != null) | .dynamic_commands.provision.subcommands // {} | to_entries[] | "\(.key):\(.value.description // "")"' "$manifest_cache" 2>/dev/null)"})
+          profiles+=("default:Default provision profile")
+          _describe 'provision profile' profiles
+          ;;
+
+        ssh)
+          local -a ssh_cmds
+          ssh_cmds=(${(f)"$(jq -r '.subcommand_groups.ssh.commands | to_entries[] | "\(.key):\(.value.description)"' "$manifest_cache" 2>/dev/null)"})
+          _describe 'ssh command' ssh_cmds
+          ;;
+
+        infra)
+          local -a infra_cmds
+          infra_cmds=(${(f)"$(jq -r '.subcommand_groups.infra.commands | to_entries[] | "\(.key):\(.value.description)"' "$manifest_cache" 2>/dev/null)"})
+          _describe 'infra command' infra_cmds
+          ;;
+
+        console)
+          local -a console_cmds
+          console_cmds=(${(f)"$(jq -r '.subcommand_groups.console.commands | to_entries[] | "\(.key):\(.value.description)"' "$manifest_cache" 2>/dev/null)"})
+          _describe 'console command' console_cmds
+          ;;
+
+        devcontainer)
+          local -a dc_cmds
+          dc_cmds=(${(f)"$(jq -r '.subcommand_groups.devcontainer.commands | to_entries[] | "\(.key):\(.value.description)"' "$manifest_cache" 2>/dev/null)"})
+          _describe 'devcontainer command' dc_cmds
+          ;;
+
+        claude)
+          local -a claude_cmds
+          claude_cmds=(${(f)"$(jq -r '.subcommand_groups.claude.commands | to_entries[] | "\(.key):\(.value.description)"' "$manifest_cache" 2>/dev/null)"})
+          _describe 'claude command' claude_cmds
+          ;;
+
+        help)
+          _describe 'help topic' all_commands
+          ;;
+
+        validate)
+          _arguments \
+            '(-c --config)'{-c,--config}'[Config file to validate]:file:_files -g "*.yml"' \
+            '(-h --help)'{-h,--help}'[Show help message]'
+          ;;
+
+        --version|-v|version)
+          # No further completion
+          ;;
+
+        *)
+          # Check for dynamic command with subcommands
+          local -a subcmds
+          subcmds=(${(f)"$(jq -r --arg cmd "$command" 'select(.dynamic_commands[$cmd].subcommands != null) | .dynamic_commands[$cmd].subcommands | to_entries[] | "\(.key):\(.value.description // "")"' "$manifest_cache" 2>/dev/null)"})
+
+          if [[ ${#subcmds[@]} -gt 0 ]]; then
+            _describe 'subcommand' subcmds
+          else
+            _arguments '(-h --help)'{-h,--help}'[Show help message]'
+          fi
+          ;;
+      esac
+      ;;
+  esac
+}
+
+_hip "$@"

@@ -62,6 +62,29 @@ gem specific_install https://github.com/ScriptonBasestar/hip.git
 
 📖 **See [INSTALL.md](INSTALL.md) for detailed installation guide.**
 
+### Shell Completions
+
+Hip provides intelligent tab completion for bash and zsh shells. Completions automatically discover all commands (static, dynamic, and subcommands) using `hip manifest`.
+
+**Installation:**
+
+```bash
+# Bash - Add to ~/.bashrc
+source /path/to/hip/completions/hip.bash
+
+# Zsh - Add to ~/.zshrc (before compinit)
+fpath=(/path/to/hip/completions $fpath)
+autoload -Uz compinit && compinit
+```
+
+**Features:**
+- Complete all Hip commands and options
+- Discover dynamic commands from `hip.yml`
+- Context-aware completions
+- Cached for performance (60-minute TTL)
+
+📖 **See [completions/README.md](completions/README.md) for detailed setup and troubleshooting.**
+
 ### Integration with shell
 
 Hip can be injected into the current shell (ZSH or Bash).
