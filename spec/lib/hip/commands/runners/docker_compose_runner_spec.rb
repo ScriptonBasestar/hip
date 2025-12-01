@@ -354,7 +354,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
       it "logs container details" do
         expect(Hip.logger).to receive(:debug).with(/Checking container status/).ordered
-        expect(Hip.logger).to receive(:debug).with(/Container 'test_app' \(abc123\) state: running, project: test-project/).ordered
+        expect(Hip.logger).to receive(:debug).with(/Container "test_app" \(abc123\) state: running, project: test-project/).ordered
         runner.send(:detect_running_container_project, "app")
       end
     end
@@ -444,6 +444,75 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
     it "does not include project name by default" do
       result = runner.send(:build_compose_command, ["ps"])
       expect(result).not_to include("--project-name")
+    end
+  end
+
+  # Test caching functionality
+  describe "container detection caching" do
+    let(:runner) { Hip::Commands::Runners::DockerComposeRunner.new(command, [], **{}) }
+    let(:command) do
+      {
+        service: "app",
+        command: "bash",
+        shell: true,
+        compose: {method: "run", run_options: [], profiles: []},
+        environment: {}
+      }
+    end
+
+    before do
+      json_output = '{"ID":"abc123","Name":"test_app","State":"running","Project":"test-project"}'
+      allow(runner).to receive(:`).and_return(json_output)
+    end
+
+    it "caches container detection results" do
+      # First call - should query docker
+      expect(runner).to receive(:`).once.and_return('{"ID":"abc123","Name":"test_app","State":"running","Project":"test-project"}')
+      result1 = runner.send(:detect_running_container_project, "app")
+
+      # Second call within TTL - should use cache
+      expect(runner).not_to receive(:`)
+      result2 = runner.send(:detect_running_container_project, "app")
+
+      expect(result1).to eq("test-project")
+      expect(result2).to eq("test-project")
+    end
+
+    it "expires cache after TTL" do
+      # First call
+      result1 = runner.send(:detect_running_container_project, "app")
+      expect(result1).to eq("test-project")
+
+      # Simulate time passage beyond TTL
+      allow(Time).to receive(:now).and_return(Time.now + Hip::Commands::Runners::DockerComposeRunner::CONTAINER_CACHE_TTL + 1)
+
+      # Should query docker again
+      expect(runner).to receive(:`).and_return('{"ID":"xyz789","Name":"test_app","State":"running","Project":"new-project"}')
+      result2 = runner.send(:detect_running_container_project, "app")
+
+      expect(result2).to eq("new-project")
+    end
+
+    it "caches nil results" do
+      allow(Hip.logger).to receive(:debug) # Suppress debug logs
+
+      # Mock backtick to return empty output
+      call_count = 0
+      allow(runner).to receive(:`).and_wrap_original do |_method, *_args|
+        call_count += 1
+        ""
+      end
+
+      # First call - returns nil
+      result1 = runner.send(:detect_running_container_project, "app")
+      expect(call_count).to eq(1)
+
+      # Second call - uses cached nil (no additional call)
+      result2 = runner.send(:detect_running_container_project, "app")
+      expect(call_count).to eq(1) # Still 1, not 2
+
+      expect(result1).to be_nil
+      expect(result2).to be_nil
     end
   end
 end

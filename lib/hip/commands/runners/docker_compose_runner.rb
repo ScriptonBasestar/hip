@@ -14,6 +14,10 @@ module Hip
   module Commands
     module Runners
       class DockerComposeRunner < Base
+        # Cache container detection results for 2 seconds to avoid
+        # repeated docker compose ps calls within same execution context
+        CONTAINER_CACHE_TTL = 2
+
         def execute
           Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute >>>>>>>>>>"
           Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute command: #{command}"
@@ -131,7 +135,7 @@ module Hip
           # Check if container is already running and get its actual project name
           actual_project_name = detect_running_container_project(service_name)
           if actual_project_name
-            Hip.logger.debug "Container for service '#{service_name}' is running under project '#{actual_project_name}', switching to exec"
+            Hip.logger.debug "Container for service \"#{service_name}\" is running under project \"#{actual_project_name}\", switching to exec"
             command[:compose][:method] = "exec"
             # exec doesn't support --rm and some run options
             command[:compose][:run_options].reject! { |opt| opt.include?("--rm") }
@@ -153,6 +157,15 @@ module Hip
           #   4. Invalid JSON response → JSON::ParserError → nil
           #   5. Network/permission issues → StandardError → nil
           # - All errors logged at debug level (not user-facing)
+          #
+          # Performance: Results cached for CONTAINER_CACHE_TTL seconds
+          cache_key = "container_project:#{service_name}"
+          if container_cache_has?(cache_key)
+            cached = container_cache_get(cache_key)
+            Hip.logger.debug "Using cached container status for \"#{service_name}\""
+            return cached
+          end
+
           ps_cmd = build_compose_command(["ps", "--format", "json", service_name])
 
           Hip.logger.debug "Checking container status: #{ps_cmd.join(" ")}"
@@ -161,7 +174,8 @@ module Hip
 
           # docker compose ps --format json outputs one JSON object per line
           if output.empty?
-            Hip.logger.debug "No container found for service '#{service_name}'"
+            Hip.logger.debug "No container found for service \"#{service_name}\""
+            container_cache_set(cache_key, nil)
             return nil
           end
 
@@ -171,13 +185,17 @@ module Hip
           state = container_info["State"]
           project = container_info["Project"]
 
-          if state&.downcase == "running"
-            Hip.logger.debug "Container '#{container_info["Name"]}' (#{container_info["ID"]}) state: #{state}, project: #{project}"
+          result = if state&.downcase == "running"
+            Hip.logger.debug "Container \"#{container_info["Name"]}\" (#{container_info["ID"]}) state: #{state}, project: #{project}"
             project
           else
             Hip.logger.debug "Container found but not running: state=#{state}"
             nil
           end
+
+          # Cache the result
+          container_cache_set(cache_key, result)
+          result
         rescue JSON::ParserError => e
           # Malformed JSON from docker compose ps (rare but possible)
           Hip.logger.debug "Failed to parse container status JSON: #{e.message}"
@@ -228,6 +246,35 @@ module Hip
         def detected_project_args
           # Return project name args for detected running container
           ["--project-name", @detected_project_name]
+        end
+
+        # Simple time-based cache for container detection results
+        # Prevents redundant docker compose ps calls within short time windows
+        def container_cache
+          @container_cache ||= {}
+        end
+
+        def container_cache_has?(key)
+          return false unless container_cache[key]
+
+          cached_at, _value = container_cache[key]
+          if Time.now - cached_at < CONTAINER_CACHE_TTL
+            true
+          else
+            container_cache.delete(key)
+            false
+          end
+        end
+
+        def container_cache_get(key)
+          return nil unless container_cache[key]
+
+          _cached_at, value = container_cache[key]
+          value
+        end
+
+        def container_cache_set(key, value)
+          container_cache[key] = [Time.now, value]
         end
       end
     end
