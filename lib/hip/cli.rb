@@ -137,8 +137,21 @@ module Hip
       compose("build", *argv)
     end
 
-    desc "up [OPTIONS] SERVICE", "Run `docker compose up` command"
+    desc "up [OPTIONS] SERVICE", "Run `docker compose up` command (default: -d --wait)"
+    method_option :foreground, aliases: "-f", type: :boolean, default: false,
+      desc: "Run in foreground (disable default -d --wait)"
     def up(*argv)
+      # Apply default options unless --foreground is specified
+      unless options[:foreground]
+        # Get custom up_options from config, or use default [-d, --wait]
+        default_options = Hip.config.exist? && Hip.config.compose[:up_options] || ["-d", "--wait"]
+
+        # Only add default options if not already present
+        default_options.reverse_each do |opt|
+          argv.unshift(opt) unless argv.include?(opt)
+        end
+      end
+
       compose("up", *argv)
     end
 

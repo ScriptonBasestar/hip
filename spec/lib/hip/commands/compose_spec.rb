@@ -13,6 +13,50 @@ describe Hip::Commands::Compose do
     it { expected_exec("docker", "compose run") }
   end
 
+  context "hip up command" do
+    context "when execute without arguments" do
+      before { cli.start "up".shellsplit }
+
+      it "adds default -d --wait options" do
+        expected_exec("docker", ["compose", "up", "-d", "--wait"])
+      end
+    end
+
+    context "when execute with --foreground flag" do
+      before { cli.start "up --foreground".shellsplit }
+
+      it "runs without -d --wait" do
+        expected_exec("docker", ["compose", "up"])
+      end
+    end
+
+    context "when execute with service name" do
+      before { cli.start "up web".shellsplit }
+
+      it "adds default options before service name" do
+        expected_exec("docker", ["compose", "up", "-d", "--wait", "web"])
+      end
+    end
+
+    context "when config contains custom up_options", :config do
+      let(:config) { {compose: {up_options: ["--build", "-d"]}} }
+
+      before { cli.start "up".shellsplit }
+
+      it "uses custom up_options instead of defaults" do
+        expected_exec("docker", ["compose", "up", "--build", "-d"])
+      end
+    end
+
+    context "when -d is already in arguments" do
+      before { cli.start "up -d".shellsplit }
+
+      it "does not duplicate -d option but adds --wait" do
+        expected_exec("docker", ["compose", "up", "--wait", "-d"])
+      end
+    end
+  end
+
   context "when execute with arguments" do
     before { cli.start "compose run --rm bash".shellsplit }
 

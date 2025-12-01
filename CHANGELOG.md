@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Interactive confirmation prompt by default (unless `--force` is used)
   - Helps resolve common `hip up` failures due to existing containers
 
+- **`hip up` smart defaults**: Automatically runs in detached mode with health checks
+  - Default options: `-d --wait` (runs in background, waits for services to be healthy)
+  - Use `--foreground/-f` flag to disable default behavior
+  - Configurable via `compose.up_options` in hip.yml
+  - Example: `compose: { up_options: ["--build", "-d"] }`
+
 ### Changed
 
 - **Makefile structure**: Refactored monolithic `Makefile.dev.mk` into modular `.make/*.mk` directory structure

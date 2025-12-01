@@ -494,6 +494,26 @@ JSON output example:
 }
 ```
 
+### hip up
+
+Start Docker Compose services with smart defaults.
+
+**Default behavior** (v9.1.2+):
+- Runs in detached mode (`-d`)
+- Waits for services to be healthy (`--wait`)
+
+```sh
+hip up          # Equivalent to: docker compose up -d --wait
+hip up web      # Start specific service
+hip up -f       # Run in foreground (disable defaults)
+```
+
+**Custom defaults** via hip.yml:
+```yaml
+compose:
+  up_options: ["--build", "-d"]  # Custom default options
+```
+
 ### hip provision
 
 Run initialization commands from `provision` section of hip.yml.
@@ -503,7 +523,7 @@ Use `hip up` to start containers first, then run `hip provision` for initializat
 
 **Workflow**:
 ```sh
-hip up          # Start containers
+hip up          # Start containers (runs in background with health checks)
 hip provision   # Run initialization scripts
 ```
 

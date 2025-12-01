@@ -157,6 +157,14 @@
         "method": {
           "type": "string",
           "description": "Specifies the Docker Compose method to use"
+        },
+        "up_options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Default options for 'hip up' command",
+          "examples": [["-d", "--wait"], ["--build", "-d"]]
         }
       }
     },
