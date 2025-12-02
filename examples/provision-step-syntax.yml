@@ -1,0 +1,136 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json
+#
+# Example: Provision Step Syntax (v9.2.0+)
+# Use Case: Demonstrates the new step/run/note syntax for cleaner provision scripts
+# Features: Progress indicators, step descriptions, notes, multi-command steps
+#
+# Benefits over legacy syntax:
+#   - No repetitive echo commands
+#   - No quote escaping issues
+#   - Automatic step numbering (📦 [1/4], [2/4], etc.)
+#   - Clear separation of description and commands
+#   - Optional notes for instructions
+#
+# Usage:
+#   hip provision              # Run default setup with progress display
+#   hip provision reset        # Reset and rebuild everything
+#
+# Learn more: https://github.com/ScriptonBasestar/hip
+
+version: '9.2.0'
+
+environment:
+  RAILS_ENV: development
+
+compose:
+  files:
+    - docker-compose.yml
+
+interaction:
+  shell:
+    description: Start a shell
+    service: web
+    command: /bin/bash
+
+  rails:
+    description: Run Rails commands
+    service: web
+    command: bundle exec rails
+
+  bundle:
+    description: Run bundle commands
+    service: web
+    command: bundle
+
+provision:
+  # Default: Full setup with step-based syntax
+  # Output example:
+  #   📦 [1/5] Installing Ruby gems
+  #      → hip bundle install
+  #
+  #   📦 [2/5] Installing Node.js packages
+  #      → hip npm install
+  #
+  default:
+    - step: Installing Ruby gems
+      run: hip bundle install
+
+    - step: Installing Node.js packages
+      run: hip npm install
+
+    - step: Setting up database
+      run:
+        - hip rails db:create
+        - hip rails db:migrate
+        - hip rails db:seed
+
+    - step: Precompiling assets
+      run: hip rails assets:precompile
+
+    - step: Setup complete
+      note: |
+        ✅ Development environment ready!
+
+        Start the server:  hip rails server
+        Open console:      hip rails console
+        Run tests:         hip rspec
+
+  # Reset: Clean rebuild with descriptive steps
+  reset:
+    - step: Cleaning temporary files
+      run:
+        - rm -rf tmp/cache/*
+        - rm -rf log/*.log
+
+    - step: Rebuilding containers
+      note: This may take several minutes on first run
+      run: hip compose build --no-cache
+
+    - step: Reinstalling dependencies
+      run:
+        - hip bundle install
+        - hip npm install
+
+    - step: Recreating database
+      run: hip rails db:drop db:create db:migrate db:seed
+
+    - step: Reset complete
+      note: |
+        ✅ Environment reset!
+
+        All containers rebuilt, dependencies reinstalled.
+        Database recreated with seed data.
+
+  # Mixed: Combine step syntax with legacy formats
+  mixed:
+    # Legacy string format (still works)
+    - echo 'Starting mixed format demo...'
+
+    # Step syntax
+    - step: Running bundle install
+      run: hip bundle install
+
+    # Legacy structured format (still works)
+    - cmd: hip rails db:migrate
+
+    # Step with note only (no commands)
+    - step: Information
+      note: This step demonstrates note-only syntax
+
+  # Test environment setup
+  test:
+    - step: Preparing test environment
+      note: Setting RAILS_ENV=test for all commands
+
+    - step: Installing test dependencies
+      run: RAILS_ENV=test hip bundle install
+
+    - step: Setting up test database
+      run:
+        - RAILS_ENV=test hip rails db:create
+        - RAILS_ENV=test hip rails db:migrate
+
+    - step: Ready for testing
+      note: |
+        Test environment ready!
+        Run: hip rspec

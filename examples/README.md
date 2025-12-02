@@ -66,6 +66,14 @@ If you're new to Hip, start with [`basic.yml`](basic.yml) - it contains the esse
   - Demonstrates best practices for project automation
   - Use when: You need different setup scenarios (development, testing, CI/CD)
 
+- **[provision-step-syntax.yml](provision-step-syntax.yml)** - New step/run/note syntax (v9.2.0+)
+  - Cleaner provision scripts without repetitive echo commands
+  - Automatic step numbering with progress indicators (📦 [1/4])
+  - Multi-command steps with `run:` arrays
+  - Informational notes with `note:` property
+  - No quote escaping needed
+  - Use when: You want readable provision scripts with structured output
+
 ### 🧩 Module System
 
 - **[modules/](modules/)** - Modular configuration example
@@ -199,11 +207,10 @@ interaction:
 
 ### Provision Profiles
 
-**Note**: As of v9.1.0, `provision` focuses on initialization only. Start containers with `hip up` first.
+**Note**: As of v9.1.3, `hip provision` automatically starts containers if needed.
 
 ```yaml
 provision:
-  # Run 'hip up -d' first to start containers
   default:              # 'hip provision' or 'hip provision default'
     - hip bundle install
     - hip rails db:create
@@ -211,17 +218,48 @@ provision:
 
   reset:                # 'hip provision reset'
     - hip compose down --volumes
-    - hip compose up -d
     - hip bundle install
 ```
 
-**Workflow**:
-```bash
-hip up -d      # Start containers
-hip provision  # Initialize application
+### Step Syntax (v9.2.0+)
+
+New structured syntax for cleaner provision scripts:
+
+```yaml
+provision:
+  default:
+    # Named step with single command
+    - step: Installing Ruby gems
+      run: hip bundle install
+
+    # Step with multiple commands
+    - step: Setting up database
+      run:
+        - hip rails db:create
+        - hip rails db:migrate
+
+    # Step with note (no commands)
+    - step: Setup complete
+      note: |
+        Run 'hip rails server' to start
+        Open http://localhost:3000
 ```
 
-See [MIGRATION.md](../docs/MIGRATION.md) for upgrading from earlier versions.
+**Output**:
+```
+📦 [1/3] Installing Ruby gems
+   → hip bundle install
+
+📦 [2/3] Setting up database
+   → hip rails db:create
+   → hip rails db:migrate
+
+📦 [3/3] Setup complete
+   ℹ️  Run 'hip rails server' to start
+   ℹ️  Open http://localhost:3000
+```
+
+See [provision-step-syntax.yml](provision-step-syntax.yml) for complete examples.
 
 ## Validation
 
@@ -298,5 +336,5 @@ Found a bug in an example or have a suggestion for a new one? Please open an iss
 
 ---
 
-**Version**: 9.1.0
+**Version**: 9.2.0
 **Last Updated**: December 2025

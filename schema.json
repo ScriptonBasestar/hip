@@ -263,7 +263,7 @@
     },
     "provision": {
       "type": "object",
-      "description": "Execute commands within provision section. Keys represent provision profiles (e.g., 'default', 'reset'), each containing an array of commands to execute. Commands can be strings (shell commands) or objects (structured commands).",
+      "description": "Execute commands within provision section. Keys represent provision profiles (e.g., 'default', 'reset'), each containing an array of commands to execute. Commands can be strings (shell commands), step objects (structured steps with run/note), or legacy structured commands.",
       "patternProperties": {
         "^[\\w\\-.:/\\s]+$": {
           "type": "array",
@@ -275,7 +275,30 @@
               },
               {
                 "type": "object",
-                "description": "Structured command with explicit type and arguments",
+                "description": "Step-based command with name, run commands, and optional notes",
+                "additionalProperties": false,
+                "properties": {
+                  "step": {
+                    "type": "string",
+                    "description": "Name of the step (displayed with progress indicator)"
+                  },
+                  "run": {
+                    "oneOf": [
+                      { "type": "string" },
+                      { "type": "array", "items": { "type": "string" } }
+                    ],
+                    "description": "Command(s) to execute for this step"
+                  },
+                  "note": {
+                    "type": "string",
+                    "description": "Informational note displayed before/after commands (supports multiline)"
+                  }
+                },
+                "required": ["step"]
+              },
+              {
+                "type": "object",
+                "description": "Legacy structured command with explicit type and arguments",
                 "additionalProperties": false,
                 "properties": {
                   "echo": {
@@ -325,25 +348,26 @@
               }
             ]
           },
-          "description": "Array of commands (strings or structured objects) to execute for this provision profile"
+          "description": "Array of commands (strings, step objects, or legacy structured objects) to execute for this provision profile"
         }
       },
       "additionalProperties": false,
       "examples": [
         {
           "default": [
+            { "step": "Installing dependencies", "run": "bundle install" },
+            { "step": "Setting up database", "run": ["rails db:create", "rails db:migrate"] },
+            { "step": "Complete", "note": "Run 'rails server' to start" }
+          ],
+          "legacy_string": [
             "echo 'Setting up...'",
             "docker compose down --volumes",
-            "sleep 2",
-            { "docker": { "compose": "up -d postgres redis" } }
+            "sleep 2"
           ],
-          "structured": [
-            { "echo": "🚀 Starting development environment..." },
-            { "cmd": "docker compose down --volumes" },
-            { "sleep": 10 },
-            { "docker": { "compose": "up -d postgres redis" } },
-            { "echo": "✅ Setup complete" },
-            { "shell": "if [ -f config.yml ]; then echo 'Config exists'; fi" }
+          "legacy_structured": [
+            { "echo": "🚀 Starting..." },
+            { "cmd": "docker compose up -d" },
+            { "sleep": 10 }
           ]
         }
       ]

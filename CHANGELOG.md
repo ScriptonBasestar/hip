@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.2.0] - 2025-12-02
+
+### Added
+
+- **Provision step syntax**: New `step/run/note` syntax for cleaner provision scripts
+  - `step:` - Named step with automatic progress indicator (📦 [1/4])
+  - `run:` - Single command or array of commands to execute
+  - `note:` - Informational text displayed before commands
+  - No more repetitive echo commands or quote escaping
+  - Backward compatible - legacy formats still work
+  - Example: `examples/provision-step-syntax.yml`
+  - RFC: `docs/proposals/provision-step-syntax.md`
+
+**Before (legacy)**:
+```yaml
+provision:
+  default:
+    - 'echo "📦 Step 1: Installing gems..."'
+    - hip bundle install
+    - 'echo ""'
+    - 'echo "📦 Step 2: Setting up database..."'
+    - hip rails db:create
+```
+
+**After (step syntax)**:
+```yaml
+provision:
+  default:
+    - step: Installing gems
+      run: hip bundle install
+    - step: Setting up database
+      run:
+        - hip rails db:create
+        - hip rails db:migrate
+```
+
 ## [9.1.4] - 2025-12-02
 
 ### Fixed

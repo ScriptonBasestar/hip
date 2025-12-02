@@ -27,6 +27,10 @@ module Hip
         # Auto-start containers if not running
         ensure_containers_running
 
+        # Count steps for progress display
+        @total_steps = count_steps(commands)
+        @current_step = 0
+
         commands.each do |command|
           execute_command(command)
         end
@@ -42,7 +46,9 @@ module Hip
         # If not, automatically run `hip up -d --wait`
         Hip.logger.debug "Checking if containers are running..."
 
-        unless any_containers_running?
+        if any_containers_running?
+          Hip.logger.debug "Containers already running, proceeding with provision"
+        else
           Hip.logger.info "No containers running. Starting containers with 'hip up -d --wait'..."
           puts "⚙️  Starting containers before provisioning..."
           puts ""
@@ -54,8 +60,6 @@ module Hip
 
           puts ""
           Hip.logger.info "Containers started successfully"
-        else
-          Hip.logger.debug "Containers already running, proceeding with provision"
         end
       end
 
@@ -109,6 +113,13 @@ module Hip
       end
 
       def execute_structured_command(cmd_hash)
+        # Check for step-based syntax first
+        if cmd_hash.key?(:step) || cmd_hash.key?("step")
+          execute_step(cmd_hash)
+          return
+        end
+
+        # Legacy structured command format
         key, value = cmd_hash.first
 
         case key.to_s
@@ -124,6 +135,42 @@ module Hip
           execute_docker(value)
         else
           raise Hip::Error, "Unknown provision command type: #{key}"
+        end
+      end
+
+      def count_steps(commands)
+        commands.count do |cmd|
+          cmd.is_a?(Hash) && (cmd.key?(:step) || cmd.key?("step"))
+        end
+      end
+
+      def execute_step(step_config)
+        step_name = step_config[:step] || step_config["step"]
+        run_cmds = step_config[:run] || step_config["run"]
+        note = step_config[:note] || step_config["note"]
+
+        @current_step += 1
+
+        # Print step header with progress
+        puts ""
+        if @total_steps > 0
+          puts "📦 [#{@current_step}/#{@total_steps}] #{step_name}"
+        else
+          puts "📦 #{step_name}"
+        end
+
+        # Print note if present (before commands)
+        note&.to_s&.each_line do |line|
+          puts "   ℹ️  #{line.rstrip}"
+        end
+
+        # Execute commands if present
+        return unless run_cmds
+
+        commands = run_cmds.is_a?(Array) ? run_cmds : [run_cmds]
+        commands.each do |cmd|
+          puts "   → #{cmd}"
+          exec_subprocess(cmd)
         end
       end
 

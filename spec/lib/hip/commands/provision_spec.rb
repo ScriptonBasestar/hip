@@ -127,6 +127,102 @@ describe Hip::Commands::Provision, :config do
     end
   end
 
+  describe "step-based syntax" do
+    context "with step and run (single command)" do
+      let(:commands) { {default: [{step: "Installing gems", run: "bundle install"}]} }
+
+      before { cli.start ["provision"] }
+
+      it { expected_subprocess("bundle install", []) }
+    end
+
+    context "with step and run (multiple commands)" do
+      let(:commands) do
+        {
+          default: [
+            {step: "Setting up database", run: ["rails db:create", "rails db:migrate"]}
+          ]
+        }
+      end
+
+      before { cli.start ["provision"] }
+
+      it { expected_subprocess("rails db:create", []) }
+      it { expected_subprocess("rails db:migrate", []) }
+    end
+
+    context "with step and note only (no run)" do
+      let(:commands) do
+        {
+          default: [
+            {step: "Complete", note: "Run 'rails server' to start"}
+          ]
+        }
+      end
+
+      it "does not raise error" do
+        expect { cli.start ["provision"] }.not_to raise_error
+      end
+    end
+
+    context "with step, run, and note" do
+      let(:commands) do
+        {
+          default: [
+            {
+              step: "Installing dependencies",
+              note: "This may take a few minutes",
+              run: "bundle install"
+            }
+          ]
+        }
+      end
+
+      before { cli.start ["provision"] }
+
+      it { expected_subprocess("bundle install", []) }
+    end
+
+    context "with multiple steps" do
+      let(:commands) do
+        {
+          default: [
+            {step: "Step 1", run: "echo one"},
+            {step: "Step 2", run: "echo two"},
+            {step: "Step 3", run: "echo three"}
+          ]
+        }
+      end
+
+      before { cli.start ["provision"] }
+
+      it { expected_subprocess("echo one", []) }
+      it { expected_subprocess("echo two", []) }
+      it { expected_subprocess("echo three", []) }
+    end
+
+    context "with mixed step and legacy formats" do
+      let(:commands) do
+        {
+          default: [
+            "echo 'Legacy string'",
+            {step: "New step", run: "bundle install"},
+            {echo: "Legacy echo"}
+          ]
+        }
+      end
+
+      before { cli.start ["provision"] }
+
+      it { expected_subprocess("echo 'Legacy string'", []) }
+      it { expected_subprocess("bundle install", []) }
+
+      it "executes legacy echo command" do
+        expect(exec_subprocess_runner).to have_received(:call).with(match(/echo.*Legacy.*echo/), kind_of(Hash))
+      end
+    end
+  end
+
   context "with mixed command formats" do
     let(:commands) do
       {
