@@ -110,6 +110,28 @@ module Hip
       config
     end
 
+    # Get raw config hash (for migration analysis)
+    def raw_config
+      return {} unless exist?
+
+      data = if Gem::Version.new(Psych::VERSION) >= Gem::Version.new("4.0.0")
+        YAML.safe_load(ERB.new(File.read(file_path)).result, aliases: true)
+      else
+        YAML.safe_load(ERB.new(File.read(file_path)).result, [], [], true)
+      end
+      data || {}
+    end
+
+    # Get version from config
+    def version
+      config[:version]
+    end
+
+    # Get config file path
+    def config_path
+      file_path&.to_s
+    end
+
     TOP_LEVEL_KEYS.each do |key|
       define_method(key) do
         # Return default value instead of raising error

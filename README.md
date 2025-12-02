@@ -659,6 +659,72 @@ You can skip validation by setting `HIP_SKIP_VALIDATION` environment variable.
 
 Add `# yaml-language-server: $schema=https://raw.githubusercontent.com/ScriptonBasestar/hip/refs/heads/master/schema.json` to the top of your hip.yml to get schema validation in VSCode. Read more about [YAML Language Server](https://github.com/redhat-developer/vscode-yaml?tab=readme-ov-file#associating-schemas).
 
+### hip migrate
+
+`hip migrate` generates an LLM-friendly migration guide when you need to upgrade your `hip.yml` to use newer features or fix deprecated configurations.
+
+**Use Cases:**
+- Upgrading from older Hip versions (e.g., 8.x → 9.x)
+- Identifying deprecated features in your configuration
+- Learning about new features available in latest version
+- Preparing migration instructions for AI assistants (Claude, ChatGPT)
+
+**Usage:**
+```sh
+# Generate migration guide for current config
+hip migrate
+
+# Target specific version
+hip migrate --to 9.2.0
+
+# Show brief summary (not yet implemented)
+hip migrate --summary
+```
+
+**Output includes:**
+- Current vs target version comparison
+- Deprecated features with migration examples
+- New features you can adopt
+- Step-by-step migration checklist
+- References to schema, examples, and changelog
+
+**Example output:**
+```markdown
+# Hip Configuration Migration Guide
+
+## Current Configuration
+- File: /path/to/hip.yml
+- Current Version: 8.1.0
+- Latest Version: 9.2.0
+- Migration Required: YES
+
+## Breaking Changes & Deprecations
+
+### 1. compose_run_options (Deprecated)
+**Location**: `interaction.rails`
+**Current usage**:
+```yaml
+compose_run_options: ["service-ports", "rm"]
+```
+**Migrate to**:
+```yaml
+compose:
+  run_options: ["service-ports", "rm"]
+```
+
+## New Features Available
+- env_file support (v9.1.3+)
+- Provision step/run/note syntax (v9.2.0+)
+
+## Migration Checklist
+- [ ] Update version
+- [ ] Replace deprecated features
+- [ ] Run `hip validate`
+```
+
+**Perfect for AI-assisted migration:**
+Copy the output and paste it to Claude Code or ChatGPT with your `hip.yml` file for automated migration assistance.
+
 ### hip manifest
 
 Outputs a complete command manifest with metadata about all available commands, subcommands, and runners. This is particularly useful for:

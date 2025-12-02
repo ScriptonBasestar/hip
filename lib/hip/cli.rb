@@ -11,7 +11,7 @@ require "hip/run_vars"
 
 module Hip
   class CLI < Thor
-    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down clean run provision ssh infra console validate manifest devcontainer claude]
+    TOP_LEVEL_COMMANDS = %w[help version ls compose up stop down clean run provision ssh infra console validate manifest devcontainer claude migrate]
 
     class << self
       # Hackery. Take the run method away from Thor so that we can redefine it.
@@ -86,6 +86,7 @@ module Hip
 
           Configuration:
             hip validate          Validate hip.yml schema
+            hip migrate           Generate migration guide for hip.yml upgrade
             hip manifest          Output complete command manifest
 
           Integration:
@@ -243,6 +244,22 @@ module Hip
     rescue Hip::Error => e
       warn "Validation failed: #{e.message}"
       exit 1
+    end
+
+    desc "migrate [OPTIONS]", "Generate migration guide for hip.yml version upgrade"
+    method_option :to, type: :string, desc: "Target version (default: latest)"
+    method_option :summary, type: :boolean, default: false, desc: "Show summary only"
+    method_option :help, aliases: "-h", type: :boolean, desc: "Display usage information"
+    def migrate
+      if options[:help]
+        invoke :help, ["migrate"]
+      else
+        require_relative "commands/migrate"
+        Hip::Commands::Migrate.new(
+          to: options[:to],
+          summary: options[:summary]
+        ).execute
+      end
     end
 
     desc "manifest [OPTIONS]", "Output complete command manifest"
