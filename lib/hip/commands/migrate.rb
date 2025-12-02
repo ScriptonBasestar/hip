@@ -17,7 +17,7 @@ module Hip
 
       def initialize(to: nil, summary: false)
         @target_version = to || LATEST_VERSION
-        @summary_mode = summary
+        @summary_mode = summary # TODO: --summary not implemented yet (future enhancement)
       end
 
       def execute
