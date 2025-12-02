@@ -82,6 +82,16 @@ If you're new to Hip, start with [`basic.yml`](basic.yml) - it contains the esse
   - **[.hip/testing.yml](modules/.hip/testing.yml)** - Testing framework module
   - Use when: Large projects with shared configurations across teams
 
+### 🔄 Configuration Migration
+
+- **[MIGRATE.md](MIGRATE.md)** - Hip configuration upgrade guide
+  - Step-by-step migration walkthrough (v8.x → v9.x)
+  - Common migration scenarios with before/after examples
+  - AI-assisted migration with Claude/ChatGPT
+  - Troubleshooting deprecated features
+  - Best practices for safe upgrades
+  - Use when: Upgrading Hip versions or adopting new features
+
 ### 🔐 Environment Variables
 
 - **[env-file-basic.yml](env-file-basic.yml)** - Basic .env file usage

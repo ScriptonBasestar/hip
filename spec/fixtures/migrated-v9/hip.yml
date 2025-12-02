@@ -1,0 +1,58 @@
+version: '9.2.0'
+
+compose:
+  files:
+    - docker-compose.yml
+
+interaction:
+  rails:
+    description: Run Rails commands
+    service: web
+    command: bundle exec rails
+    compose:
+      run_options:  # MIGRATED from compose_run_options
+        - service-ports
+        - rm
+
+  npm:
+    description: Run npm commands
+    service: frontend
+    command: npm
+    compose:
+      run_options:  # MIGRATED from compose_run_options
+        - rm
+
+  shell:
+    description: Open shell
+    service: web
+    command: /bin/bash
+
+provision:
+  # MIGRATED to step/run/note syntax
+  default:
+    - step: Installing backend dependencies
+      run: bundle install
+
+    - step: Installing frontend dependencies
+      run: npm install
+
+    - step: Setting up database
+      run:
+        - rails db:create
+        - rails db:migrate
+
+    - step: Setup complete
+      note: |
+        ✅ Development environment ready!
+
+  reset:
+    - step: Cleaning containers
+      run: docker-compose down --volumes
+
+    - step: Starting fresh
+      run: docker-compose up -d
+
+    - step: Reinstalling dependencies
+      run:
+        - bundle install
+        - npm install

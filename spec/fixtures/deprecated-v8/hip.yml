@@ -1,0 +1,46 @@
+version: '8.1.0'
+
+compose:
+  files:
+    - docker-compose.yml
+
+interaction:
+  rails:
+    description: Run Rails commands
+    service: web
+    command: bundle exec rails
+    compose_run_options:  # DEPRECATED: should use compose.run_options
+      - service-ports
+      - rm
+
+  npm:
+    description: Run npm commands
+    service: frontend
+    command: npm
+    compose_run_options:  # DEPRECATED
+      - rm
+
+  shell:
+    description: Open shell
+    service: web
+    command: /bin/bash
+
+provision:
+  default:
+    - "echo '📦 Step 1: Installing backend dependencies...'"
+    - bundle install
+    - "echo '📦 Step 2: Installing frontend dependencies...'"
+    - npm install
+    - "echo '📦 Step 3: Setting up database...'"
+    - rails db:create
+    - rails db:migrate
+    - "echo '✅ Setup complete!'"
+
+  reset:
+    - "echo 'Stopping containers...'"
+    - docker-compose down --volumes
+    - "echo 'Starting fresh...'"
+    - docker-compose up -d
+    - "echo 'Reinstalling...'"
+    - bundle install
+    - npm install
