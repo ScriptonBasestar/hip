@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.4] - 2025-12-02
+
+### Fixed
+
+- **`hip provision` continuation bug**: Fixed issue where provision scripts were not executed after auto-starting containers
+  - Root cause: `Compose#execute` used `Kernel.exec` which replaces the current process
+  - Solution: Added `subprocess: true` option to run compose commands as child processes
+  - Now `hip provision` correctly starts containers AND runs provision scripts in one command
+
+### Changed
+
+- **`Compose` class refactoring**: Improved code reuse across the codebase
+  - Added `subprocess:` option - when `true`, uses `Kernel.system` instead of `Kernel.exec`
+  - Added `build_command` method - returns full command array for external use
+  - Added `build_argv` method - returns args with files and options
+  - `DockerComposeRunner`: Now reuses `Compose#build_command` (~40 lines removed)
+  - `DevContainer::Provision`: Now uses `Compose` class instead of direct docker commands
+  - `Provision#execute_docker_compose`: Now uses `Compose` class for consistency
+
 ## [9.1.3] - 2025-12-02
 
 ### Added
