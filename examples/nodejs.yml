@@ -14,7 +14,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '9.0.0'
+version: '9.2.0'
 
 environment:
   NODE_ENV: development
@@ -114,32 +114,57 @@ interaction:
     command: npm run typecheck
 
 provision:
-  # Note: Run 'hip up' first to start containers
+  # Note: Containers will auto-start if needed (since v9.1.3)
   # Default setup
   default:
-    - hip npm install
-    - hip npm run build
-    - echo "✅ Setup complete! Run 'hip npm run dev' to start"
+    - step: Installing dependencies
+      run: hip npm install
+
+    - step: Building project
+      run: hip npm run build
+
+    - step: Setup complete
+      note: |
+        ✅ Setup complete!
+        Run 'hip npm run dev' to start
 
   # Clean install
   reset:
-    - rm -rf node_modules package-lock.json
-    - hip npm install
-    - hip npm run build
+    - step: Cleaning dependencies
+      run: rm -rf node_modules package-lock.json
+
+    - step: Reinstalling dependencies
+      run: hip npm install
+
+    - step: Rebuilding project
+      run: hip npm run build
 
   # Update dependencies
   update:
-    - hip npm update
-    - hip npm audit fix
-    - hip npm run build
+    - step: Updating dependencies
+      run: hip npm update
+
+    - step: Fixing vulnerabilities
+      run: hip npm audit fix
+
+    - step: Rebuilding project
+      run: hip npm run build
 
   # Production build
   production:
-    - hip npm ci
-    - hip npm run build
-    - hip npm prune --production
+    - step: Installing production dependencies
+      run: hip npm ci
+
+    - step: Building for production
+      run: hip npm run build
+
+    - step: Pruning dev dependencies
+      run: hip npm prune --production
 
   # Test setup
   test:
-    - NODE_ENV=test hip npm install
-    - NODE_ENV=test hip npm run build
+    - step: Installing test dependencies
+      run: NODE_ENV=test hip npm install
+
+    - step: Building test environment
+      run: NODE_ENV=test hip npm run build

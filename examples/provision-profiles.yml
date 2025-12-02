@@ -15,7 +15,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '9.0.0'
+version: '9.2.0'
 
 environment:
   RAILS_ENV: development
@@ -53,69 +53,119 @@ interaction:
       RAILS_ENV: test
 
 provision:
-  # Note: Run 'hip up' first to start containers
+  # Note: Containers will auto-start if needed (since v9.1.3)
   # Default: Full setup for new developers
   default:
-    - hip bundle install
-    - hip rails db:create
-    - hip rails db:migrate
-    - hip rails db:seed
-    - echo "✅ Setup complete! Run 'hip rails server' to start the app"
+    - step: Installing dependencies
+      run: hip bundle install
+
+    - step: Setting up database
+      run:
+        - hip rails db:create
+        - hip rails db:migrate
+        - hip rails db:seed
+
+    - step: Setup complete
+      note: |
+        ✅ Setup complete!
+        Run 'hip rails server' to start the app
 
   # Reset: Nuclear option - rebuild everything from scratch
   reset:
-    - rm -rf tmp/ log/*.log
-    - hip compose build --no-cache
-    - hip bundle install
-    - hip rails db:drop db:create db:migrate db:seed
-    - hip rails assets:clobber assets:precompile
-    - echo "✅ Complete reset done!"
+    - step: Cleaning temporary files
+      run:
+        - rm -rf tmp/ log/*.log
+
+    - step: Rebuilding containers
+      run: hip compose build --no-cache
+
+    - step: Reinstalling dependencies
+      run: hip bundle install
+
+    - step: Recreating database
+      run: hip rails db:drop db:create db:migrate db:seed
+
+    - step: Rebuilding assets
+      run: hip rails assets:clobber assets:precompile
+
+    - step: Reset complete
+      note: Complete reset done!
 
   # Seed: Re-seed database without destroying data
   seed:
-    - hip rails db:seed
-    - echo "✅ Database seeded"
+    - step: Seeding database
+      run: hip rails db:seed
 
   # Update: Pull latest changes and update dependencies
   update:
-    - git pull origin main
-    - hip compose pull
-    - hip bundle install
-    - hip rails db:migrate
-    - hip rails assets:precompile
-    - echo "✅ Updated to latest version"
+    - step: Pulling latest changes
+      run:
+        - git pull origin main
+        - hip compose pull
+
+    - step: Updating dependencies
+      run: hip bundle install
+
+    - step: Running migrations
+      run: hip rails db:migrate
+
+    - step: Precompiling assets
+      run: hip rails assets:precompile
+
+    - step: Update complete
+      note: Updated to latest version
 
   # Test: Setup test environment
   test:
-    - RAILS_ENV=test hip bundle install
-    - RAILS_ENV=test hip rails db:create db:migrate
-    - echo "✅ Test environment ready. Run 'hip rspec' to run tests"
+    - step: Installing test dependencies
+      run: RAILS_ENV=test hip bundle install
+
+    - step: Setting up test database
+      run: RAILS_ENV=test hip rails db:create db:migrate
+
+    - step: Test environment ready
+      note: Run 'hip rspec' to run tests
 
   # CI: Continuous Integration setup
   ci:
-    - hip bundle install --jobs 4 --retry 3
-    - hip rails db:create db:schema:load
-    - hip rails assets:precompile
-    - echo "✅ CI environment ready"
+    - step: Installing dependencies
+      run: hip bundle install --jobs 4 --retry 3
+
+    - step: Loading database schema
+      run: hip rails db:create db:schema:load
+
+    - step: Precompiling assets
+      run: hip rails assets:precompile
 
   # Deploy: Production deployment preparation
   deploy:
-    - hip compose build
-    - hip rails db:migrate
-    - hip rails assets:precompile
-    - hip rails assets:clean
-    - echo "✅ Ready for deployment"
+    - step: Building containers
+      run: hip compose build
+
+    - step: Running migrations
+      run: hip rails db:migrate
+
+    - step: Managing assets
+      run:
+        - hip rails assets:precompile
+        - hip rails assets:clean
+
+    - step: Ready for deployment
+      note: Deployment preparation complete
 
   # Quick: Fast setup for minor updates
   quick:
-    - hip bundle install
-    - hip rails db:migrate
-    - echo "✅ Quick setup complete"
+    - step: Installing dependencies
+      run: hip bundle install
+
+    - step: Running migrations
+      run: hip rails db:migrate
 
   # Clean: Clean up temporary files and caches
   clean:
-    - rm -rf tmp/cache/*
-    - rm -rf public/assets
-    - rm -rf log/*.log
-    - hip rails tmp:clear
-    - echo "✅ Cleaned up temporary files"
+    - step: Cleaning temporary files
+      run:
+        - rm -rf tmp/cache/*
+        - rm -rf public/assets
+        - rm -rf log/*.log
+        - hip rails tmp:clear

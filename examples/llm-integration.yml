@@ -46,7 +46,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '9.1.0'
+version: '9.2.0'
 
 # Environment variables
 environment:

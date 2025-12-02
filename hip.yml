@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=./schema.json
 
-version: '8'
+version: '9.2.0'
 
 compose:
   files:
@@ -48,28 +48,44 @@ interaction:
     command: /bin/bash -c
 
 provision:
-  # Note: Run 'hip up -d' first to start containers
+  # Note: Containers will auto-start if needed (since v9.1.3)
   default:
-    - echo: "🚀 Setting up Hip development environment..."
-    - cmd: cp -f lefthook-local.dip_example.yml lefthook-local.yml
-    - cmd: rm -rf Gemfile.lock
-    - echo: "📦 Installing dependencies..."
-    - cmd: hip bundle install
-    - echo: "✅ Setup complete!"
+    - step: Preparing development environment
+      run:
+        - cp -f lefthook-local.dip_example.yml lefthook-local.yml
+        - rm -rf Gemfile.lock
+
+    - step: Installing dependencies
+      run: hip bundle install
+
+    - step: Setup complete
+      note: |
+        ✅ Hip development environment ready!
+
+        Available commands:
+          hip shell      - Open Bash shell in app container
+          hip rspec      - Run RSpec tests
+          hip rubocop    - Run RuboCop linter
 
   # Reset profile includes container management for full cleanup
   reset:
-    - echo: "🔄 Resetting environment..."
-    - docker:
-        compose: down --volumes
-    - docker:
-        compose: up -d
-    - cmd: rm -rf Gemfile.lock
-    - echo: "📦 Installing dependencies..."
-    - cmd: hip bundle install
-    - echo: "✅ Reset complete!"
+    - step: Stopping containers and removing volumes
+      run: hip compose down --volumes
 
-  # Legacy format example (for testing)
+    - step: Starting fresh containers
+      run: hip compose up -d
+
+    - step: Reinstalling dependencies
+      run:
+        - rm -rf Gemfile.lock
+        - hip bundle install
+
+    - step: Reset complete
+      note: |
+        ✅ Environment reset!
+        All containers rebuilt and dependencies reinstalled.
+
+  # Legacy format example (for testing backward compatibility)
   legacy_format:
     - "echo 'This is the legacy string format'"
     - "rm -rf Gemfile.lock"

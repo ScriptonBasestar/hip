@@ -6,7 +6,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '9.0.0'
+version: '9.2.0'
 
 # Advanced env_file configuration
 env_file:
@@ -53,8 +53,10 @@ interaction:
 
 provision:
   default:
-    - hip rails db:create
-    - hip rails db:migrate
+    - step: Setting up database
+      run:
+        - hip rails db:create
+        - hip rails db:migrate
 
 # Example file structure:
 # ---------------------------------------------------

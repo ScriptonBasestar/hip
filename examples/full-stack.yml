@@ -15,7 +15,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '9.0.0'
+version: '9.2.0'
 
 environment:
   RAILS_ENV: development
@@ -138,24 +138,46 @@ interaction:
     command: bundle exec rake
 
 provision:
-  # Note: Run 'hip up' first to start containers
+  # Note: Containers will auto-start if needed (since v9.1.3)
   default:
-    - hip compose build
-    - hip rails db:create
-    - hip rails db:migrate
-    - hip rails db:seed
-    - hip npm install
-    - hip validate
+    - step: Building containers
+      run: hip compose build
+
+    - step: Setting up database
+      run:
+        - hip rails db:create
+        - hip rails db:migrate
+        - hip rails db:seed
+
+    - step: Installing Node.js dependencies
+      run: hip npm install
+
+    - step: Validating configuration
+      run: hip validate
+
   reset:
-    - rm -rf tmp/ log/*.log
-    - hip compose build --no-cache
-    - hip rails db:drop db:create db:migrate db:seed
+    - step: Cleaning temporary files
+      run: rm -rf tmp/ log/*.log
+
+    - step: Rebuilding containers
+      run: hip compose build --no-cache
+
+    - step: Recreating database
+      run: hip rails db:drop db:create db:migrate db:seed
+
   seed:
-    - hip rails db:seed
+    - step: Seeding database
+      run: hip rails db:seed
+
   deploy:
-    - hip compose build
-    - hip rails db:migrate
-    - hip rails assets:precompile
+    - step: Building containers
+      run: hip compose build
+
+    - step: Running migrations
+      run: hip rails db:migrate
+
+    - step: Precompiling assets
+      run: hip rails assets:precompile
 
 kubectl:
   namespace: myapp-development

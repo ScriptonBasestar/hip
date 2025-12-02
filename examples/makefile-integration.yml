@@ -1,7 +1,7 @@
 # hip.yml - Example configuration for Makefile integration
 # This demonstrates Hip commands used in Makefile.dev.mk examples
 
-version: '8.2'
+version: '9.2.0'
 
 environment:
   COMPOSE_EXT: development

@@ -18,7 +18,7 @@
 #
 # Learn more: https://github.com/ScriptonBasestar/hip
 
-version: '9.0.0'
+version: '9.2.0'
 
 # Kubernetes configuration
 kubectl:
@@ -86,17 +86,27 @@ interaction:
 provision:
   # Deploy new version
   deploy:
-    - kubectl set image deployment/web web=myapp:latest
-    - kubectl rollout status deployment/web
-    - hip rails db:migrate
+    - step: Updating container image
+      run: kubectl set image deployment/web web=myapp:latest
+
+    - step: Waiting for rollout
+      run: kubectl rollout status deployment/web
+
+    - step: Running migrations
+      run: hip rails db:migrate
 
   # Rollback deployment
   rollback:
-    - kubectl rollout undo deployment/web
-    - kubectl rollout status deployment/web
+    - step: Rolling back deployment
+      run: kubectl rollout undo deployment/web
+
+    - step: Waiting for rollback
+      run: kubectl rollout status deployment/web
 
   # Check status
   status:
-    - kubectl get pods
-    - kubectl get services
-    - kubectl get deployments
+    - step: Checking cluster status
+      run:
+        - kubectl get pods
+        - kubectl get services
+        - kubectl get deployments
