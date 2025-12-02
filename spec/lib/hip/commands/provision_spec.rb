@@ -197,11 +197,13 @@ describe Hip::Commands::Provision, :config do
         # Mock container check to return false (no containers running)
         allow_any_instance_of(Hip::Commands::Provision).to receive(:any_containers_running?).and_return(false)
         # Mock Compose command to prevent actual execution
-        allow(Hip::Commands::Compose).to receive(:new).and_return(double(execute: true))
+        compose_double = instance_double(Hip::Commands::Compose)
+        allow(Hip::Commands::Compose).to receive(:new).and_return(compose_double)
+        allow(compose_double).to receive(:execute).and_return(true)
       end
 
       it "automatically starts containers with 'up -d --wait'" do
-        expect(Hip::Commands::Compose).to receive(:new).with("up", "-d", "--wait")
+        expect(Hip::Commands::Compose).to receive(:new).with("up", "-d", "--wait", subprocess: true)
         cli.start ["provision"]
       end
     end
@@ -213,7 +215,7 @@ describe Hip::Commands::Provision, :config do
       end
 
       it "skips starting containers" do
-        expect(Hip::Commands::Compose).not_to receive(:new)
+        expect(Hip::Command).not_to receive(:exec_subprocess).with(/up -d --wait/)
         cli.start ["provision"]
       end
     end

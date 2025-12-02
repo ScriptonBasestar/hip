@@ -166,7 +166,9 @@ module Hip
             return cached
           end
 
-          ps_cmd = build_compose_command(["ps", "--format", "json", service_name])
+          # Reuse Compose#build_command for consistent command construction
+          compose = Commands::Compose.new("ps", "--format", "json", service_name)
+          ps_cmd = compose.build_command
 
           Hip.logger.debug "Checking container status: #{ps_cmd.join(" ")}"
 
@@ -204,45 +206,6 @@ module Hip
           # Covers: Errno::ENOENT (docker not found), command execution failures, etc.
           Hip.logger.debug "Error checking container status: #{e.message}"
           nil
-        end
-
-        def build_compose_command(args)
-          # Build compose command exactly like Hip::Commands::Compose#execute
-          #
-          # Constructs docker compose command with proper file paths and options:
-          # - Base: ["docker", "compose"]
-          # - Files: --file /path/to/compose.yml (from hip.yml compose.files)
-          # - Project: --project-name <name> (only if @detected_project_name set)
-          # - Args: additional arguments (e.g., ["ps", "--format", "json"])
-          cmd = ["docker", "compose"]
-          cmd.concat(compose_file_args)
-          cmd.concat(compose_project_args)
-          cmd.concat(args)
-          cmd
-        end
-
-        def compose_file_args
-          files = Hip.config.compose[:files]
-          return [] unless files.is_a?(Array)
-
-          files.each_with_object([]) do |file_path, memo|
-            file_path = Pathname.new(file_path)
-            file_path = Hip.config.file_path.parent.join(file_path).expand_path if file_path.relative?
-            next unless file_path.exist?
-
-            memo << "--file"
-            memo << file_path.to_s
-          end
-        end
-
-        def compose_project_args
-          # Include project name from config for accurate container detection
-          # This is necessary because docker compose ps without --project-name
-          # fails to find containers when executed from a different directory
-          project_name = Hip.config.compose[:project_name]
-          return [] unless project_name
-
-          ["--project-name", project_name]
         end
 
         def detected_project_args

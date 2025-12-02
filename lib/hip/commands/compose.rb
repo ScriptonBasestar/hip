@@ -10,11 +10,17 @@ module Hip
     class Compose < Hip::Command
       DOCKER_EMBEDDED_DNS = "127.0.0.11"
 
-      attr_reader :argv, :config, :shell
+      attr_reader :argv, :config, :shell, :subprocess
 
-      def initialize(*argv, shell: true)
+      # @param argv [Array] Command arguments
+      # @param shell [Boolean] Use shell execution (default: true)
+      # @param subprocess [Boolean] Run as subprocess instead of exec (default: false)
+      #   - false: Uses exec_program (Kernel.exec) - replaces current process
+      #   - true: Uses exec_subprocess (Kernel.system) - runs as child process and returns
+      def initialize(*argv, shell: true, subprocess: false)
         @argv = argv.compact
         @shell = shell
+        @subprocess = subprocess
         @config = ::Hip.config.compose || {}
       end
 
@@ -24,17 +30,34 @@ module Hip
 
         set_infra_env
 
-        compose_argv = Array(find_files) + Array(cli_options) + argv
-
         if (override_command = compose_command_override)
           override_command, *override_args = override_command.split(" ")
-          exec_program(override_command, override_args.concat(compose_argv), shell: shell)
+          run_command(override_command, override_args.concat(build_argv))
         else
-          exec_program("docker", compose_argv.unshift("compose"), shell: shell)
+          run_command("docker", build_argv.unshift("compose"))
         end
       end
 
+      # Build the full command array for external use (e.g., capturing output)
+      # @return [Array<String>] Full docker compose command with all options
+      def build_command
+        ["docker", "compose"] + Array(find_files) + Array(cli_options) + argv
+      end
+
+      # Build argv with files and options
+      def build_argv
+        Array(find_files) + Array(cli_options) + argv
+      end
+
       private
+
+      def run_command(cmd, args)
+        if subprocess
+          exec_subprocess(cmd, args, shell: shell)
+        else
+          exec_program(cmd, args, shell: shell)
+        end
+      end
 
       def find_files
         return unless (files = config[:files])

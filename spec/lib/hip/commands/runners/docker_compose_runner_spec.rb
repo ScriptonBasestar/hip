@@ -399,49 +399,8 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
     end
   end
 
-  # Test compose command building
-  describe "#build_compose_command" do
-    let(:runner) { described_class.new(command, [], **{}) }
-    let(:command) do
-      {
-        service: "app",
-        command: "bash",
-        shell: true,
-        compose: {method: "run", run_options: [], profiles: []},
-        environment: {}
-      }
-    end
-
-    before do
-      allow(Hip.config).to receive_messages(compose: {files: ["docker-compose.yml", "docker-compose.dev.yml"],
-                                                      project_name: "test-project"}, file_path: Pathname.new("/test/hip.yml"))
-    end
-
-    it "includes docker compose base command" do
-      result = runner.send(:build_compose_command, ["ps"])
-      expect(result[0..1]).to eq(["docker", "compose"])
-    end
-
-    it "includes file arguments" do
-      allow_any_instance_of(Pathname).to receive(:exist?).and_return(true)
-      result = runner.send(:build_compose_command, ["ps"])
-      expect(result).to include("--file")
-      expect(result).to include("/test/docker-compose.yml")
-      expect(result).to include("/test/docker-compose.dev.yml")
-    end
-
-    it "includes provided args" do
-      result = runner.send(:build_compose_command, ["ps", "--format", "json"])
-      expect(result).to include("ps")
-      expect(result).to include("--format")
-      expect(result).to include("json")
-    end
-
-    it "does not include project name by default" do
-      result = runner.send(:build_compose_command, ["ps"])
-      expect(result).not_to include("--project-name")
-    end
-  end
+  # NOTE: build_compose_command tests moved to spec/lib/hip/commands/compose_spec.rb
+  # DockerComposeRunner now uses Compose#build_command for consistency
 
   # Test caching functionality
   describe "container detection caching" do

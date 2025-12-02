@@ -2,6 +2,7 @@
 
 require_relative "../../command"
 require_relative "../../devcontainer"
+require_relative "../compose"
 
 module Hip
   module Commands
@@ -35,7 +36,11 @@ module Hip
 
           commands.each do |cmd|
             puts "  → #{cmd}"
-            exec_subprocess("docker", ["compose", "exec", "-T", service, "sh", "-c", cmd])
+            # Use Compose with subprocess: true to run as child process
+            Commands::Compose.new(
+              "exec", "-T", service, "sh", "-c", cmd,
+              subprocess: true
+            ).execute
           end
         end
       end

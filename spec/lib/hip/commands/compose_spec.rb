@@ -208,4 +208,59 @@ describe Hip::Commands::Compose do
       it { expected_exec("bar-compose", "run") }
     end
   end
+
+  describe "#build_command" do
+    context "with basic arguments" do
+      let(:compose) { described_class.new("ps", "--format", "json") }
+
+      it "returns full docker compose command array" do
+        expect(compose.build_command).to start_with("docker", "compose")
+        expect(compose.build_command).to include("ps", "--format", "json")
+      end
+    end
+
+    context "with config containing files and project_name", :config do
+      let(:config) { {compose: {files: ["docker-compose.yml"], project_name: "test-project"}} }
+      let(:compose) { described_class.new("ps") }
+      let(:compose_file) { fixture_path("empty", "docker-compose.yml") }
+
+      before do
+        allow_any_instance_of(Pathname).to receive(:exist?) do |obj|
+          obj.to_s == compose_file || File.exist?(obj.to_s)
+        end
+      end
+
+      it "includes file arguments" do
+        expect(compose.build_command).to include("--file")
+      end
+
+      it "includes project name" do
+        expect(compose.build_command).to include("--project-name", "test-project")
+      end
+    end
+  end
+
+  describe "subprocess option" do
+    context "when subprocess: false (default)" do
+      let(:compose) { described_class.new("ps") }
+
+      it "uses exec_program" do
+        expect(Hip::Command).to receive(:exec_program)
+        compose.execute
+      end
+    end
+
+    context "when subprocess: true" do
+      let(:compose) { described_class.new("ps", subprocess: true) }
+
+      before do
+        allow(Hip::Command).to receive(:exec_subprocess).and_return(true)
+      end
+
+      it "uses exec_subprocess" do
+        expect(Hip::Command).to receive(:exec_subprocess)
+        compose.execute
+      end
+    end
+  end
 end

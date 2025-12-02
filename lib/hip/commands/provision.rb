@@ -47,10 +47,10 @@ module Hip
           puts "⚙️  Starting containers before provisioning..."
           puts ""
 
-          # Use Compose command to start containers
+          # Use Compose with subprocess: true to run as child process
+          # This allows provision to continue after containers start
           require_relative "compose"
-          compose_args = ["up", "-d", "--wait"]
-          Commands::Compose.new(*compose_args).execute
+          Commands::Compose.new("up", "-d", "--wait", subprocess: true).execute
 
           puts ""
           Hip.logger.info "Containers started successfully"
@@ -62,14 +62,14 @@ module Hip
       def any_containers_running?
         # Use docker compose ps to check if any containers are running
         # Returns true if at least one container is in "running" state
-        #
-        # This is a simple check - we don't need to verify specific services,
-        # just ensure that the docker compose stack is up
-        ps_cmd = build_compose_ps_command
+        require_relative "compose"
 
-        Hip.logger.debug "Checking container status: #{ps_cmd.join(" ")}"
+        # Build command using Compose and capture output
+        compose = Commands::Compose.new("ps", "--format", "json")
+        cmd = compose.build_command
 
-        output = `#{ps_cmd.shelljoin} 2>/dev/null`.strip
+        Hip.logger.debug "Checking container status: #{cmd.join(" ")}"
+        output = `#{cmd.shelljoin} 2>/dev/null`.strip
 
         if output.empty?
           Hip.logger.debug "No containers found"
@@ -91,38 +91,6 @@ module Hip
       rescue => e
         Hip.logger.debug "Error checking container status: #{e.message}"
         false
-      end
-
-      def build_compose_ps_command
-        # Build docker compose ps command with proper file paths and project name
-        cmd = ["docker", "compose"]
-        cmd.concat(compose_file_args)
-        cmd.concat(compose_project_args)
-        cmd.concat(["ps", "--format", "json"])
-        cmd
-      end
-
-      def compose_file_args
-        # Get compose files from config
-        files = Hip.config.compose[:files]
-        return [] unless files.is_a?(Array)
-
-        files.each_with_object([]) do |file_path, memo|
-          file_path = Pathname.new(file_path)
-          file_path = Hip.config.file_path.parent.join(file_path).expand_path if file_path.relative?
-          next unless file_path.exist?
-
-          memo << "--file"
-          memo << file_path.to_s
-        end
-      end
-
-      def compose_project_args
-        # Get project name from config
-        project_name = Hip.config.compose[:project_name]
-        return [] unless project_name
-
-        ["--project-name", project_name]
       end
 
       def execute_command(command)
@@ -204,18 +172,18 @@ module Hip
       end
 
       def execute_docker_compose(compose_cmd)
-        if compose_cmd.is_a?(Array)
-          # Array of arguments: join with spaces
-          cmdline = "docker compose #{compose_cmd.join(" ")}"
+        # Convert to array of arguments
+        args = if compose_cmd.is_a?(Array)
+          compose_cmd
         elsif compose_cmd.is_a?(String)
-          # String: use as-is
-          cmdline = "docker compose #{compose_cmd}"
+          compose_cmd.split
         else
           raise Hip::Error, "docker.compose must be a string or array"
         end
 
-        Hip.logger.debug "Executing docker compose: #{cmdline}"
-        exec_subprocess(cmdline)
+        Hip.logger.debug "Executing docker compose: #{args.join(" ")}"
+        # Use Compose with subprocess: true to run as child process
+        Commands::Compose.new(*args, subprocess: true).execute
       end
 
       def auto_generate_claude_files
