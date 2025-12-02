@@ -2,10 +2,16 @@
 
 require "hip/cli"
 require "hip/commands/provision"
+require "hip/commands/compose"
 
 describe Hip::Commands::Provision, :config do
   let(:config) { {provision: commands} }
   let(:cli) { Hip::CLI }
+
+  # Mock container check to skip auto-up by default in all tests
+  before do
+    allow_any_instance_of(Hip::Commands::Provision).to receive(:any_containers_running?).and_return(true)
+  end
 
   context "when has no any commands" do
     let(:commands) { {} }
@@ -174,6 +180,45 @@ describe Hip::Commands::Provision, :config do
     end
   end
 
+  describe "auto-start containers" do
+    let(:commands) do
+      {
+        default: [
+          {echo: "Starting initialization..."},
+          {cmd: "bundle install"}
+        ]
+      }
+    end
+
+    let(:provision_instance) { Hip::Commands::Provision.new([]) }
+
+    context "when no containers are running" do
+      before do
+        # Mock container check to return false (no containers running)
+        allow_any_instance_of(Hip::Commands::Provision).to receive(:any_containers_running?).and_return(false)
+        # Mock Compose command to prevent actual execution
+        allow(Hip::Commands::Compose).to receive(:new).and_return(double(execute: true))
+      end
+
+      it "automatically starts containers with 'up -d --wait'" do
+        expect(Hip::Commands::Compose).to receive(:new).with("up", "-d", "--wait")
+        cli.start ["provision"]
+      end
+    end
+
+    context "when containers are already running" do
+      before do
+        # Mock container check to return true (containers running)
+        allow_any_instance_of(Hip::Commands::Provision).to receive(:any_containers_running?).and_return(true)
+      end
+
+      it "skips starting containers" do
+        expect(Hip::Commands::Compose).not_to receive(:new)
+        cli.start ["provision"]
+      end
+    end
+  end
+
   describe "workflow integration" do
     context "when provision expects containers to be running" do
       let(:commands) do
@@ -194,11 +239,6 @@ describe Hip::Commands::Provision, :config do
         expected_subprocess("bundle install", [])
         expected_subprocess("rails db:create", [])
         expected_subprocess("rails db:migrate", [])
-      end
-
-      it "does not include docker compose up/down commands" do
-        expect(exec_subprocess_runner).not_to have_received(:call)
-          .with(match(/docker compose (up|down)/), anything)
       end
     end
 

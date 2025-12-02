@@ -528,14 +528,24 @@ compose:
 
 Run initialization commands from `provision` section of hip.yml.
 
-**Note**: `provision` only runs initialization scripts (database setup, dependencies, etc.).
-Use `hip up` to start containers first, then run `hip provision` for initialization.
+**Auto-Start Containers** (v9.1.3+):
+`hip provision` now automatically starts containers if they're not running. You can run `hip provision` directly without running `hip up` first:
 
-**Workflow**:
 ```sh
-hip up          # Start containers (runs in background with health checks)
+# Simple workflow - just run provision
+hip provision   # Automatically starts containers if needed, then runs initialization
+
+# Or traditional workflow (still works)
+hip up -d       # Start containers manually
 hip provision   # Run initialization scripts
 ```
+
+**Smart Container Detection** (v9.1.0+):
+Hip automatically detects running containers and switches execution modes:
+- No containers running → Starts containers with `docker compose up -d --wait`, then runs provision
+- Container not running → `docker compose run` (creates new container)
+- Container already running → `docker compose exec` (uses existing container)
+- This ensures stateful operations (gem installation, database migrations) work correctly in provision workflows
 
 **Migration**: If upgrading from earlier versions, see [MIGRATION.md](docs/MIGRATION.md) for updating your `hip.yml`.
 

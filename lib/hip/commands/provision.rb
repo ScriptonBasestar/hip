@@ -24,6 +24,9 @@ module Hip
           raise Hip::Error, "Provision key '#{provision_key}' not found!"
         end
 
+        # Auto-start containers if not running
+        ensure_containers_running
+
         commands.each do |command|
           execute_command(command)
         end
@@ -33,6 +36,94 @@ module Hip
       end
 
       private
+
+      def ensure_containers_running
+        # Check if any containers are running for this project
+        # If not, automatically run `hip up -d --wait`
+        Hip.logger.debug "Checking if containers are running..."
+
+        unless any_containers_running?
+          Hip.logger.info "No containers running. Starting containers with 'hip up -d --wait'..."
+          puts "⚙️  Starting containers before provisioning..."
+          puts ""
+
+          # Use Compose command to start containers
+          require_relative "compose"
+          compose_args = ["up", "-d", "--wait"]
+          Commands::Compose.new(*compose_args).execute
+
+          puts ""
+          Hip.logger.info "Containers started successfully"
+        else
+          Hip.logger.debug "Containers already running, proceeding with provision"
+        end
+      end
+
+      def any_containers_running?
+        # Use docker compose ps to check if any containers are running
+        # Returns true if at least one container is in "running" state
+        #
+        # This is a simple check - we don't need to verify specific services,
+        # just ensure that the docker compose stack is up
+        ps_cmd = build_compose_ps_command
+
+        Hip.logger.debug "Checking container status: #{ps_cmd.join(" ")}"
+
+        output = `#{ps_cmd.shelljoin} 2>/dev/null`.strip
+
+        if output.empty?
+          Hip.logger.debug "No containers found"
+          return false
+        end
+
+        # Parse JSON output and check for running containers
+        require "json"
+        running_count = output.lines.count do |line|
+          container_info = JSON.parse(line)
+          container_info["State"]&.downcase == "running"
+        end
+
+        Hip.logger.debug "Found #{running_count} running container(s)"
+        running_count > 0
+      rescue JSON::ParserError => e
+        Hip.logger.debug "Failed to parse container status: #{e.message}"
+        false
+      rescue => e
+        Hip.logger.debug "Error checking container status: #{e.message}"
+        false
+      end
+
+      def build_compose_ps_command
+        # Build docker compose ps command with proper file paths and project name
+        cmd = ["docker", "compose"]
+        cmd.concat(compose_file_args)
+        cmd.concat(compose_project_args)
+        cmd.concat(["ps", "--format", "json"])
+        cmd
+      end
+
+      def compose_file_args
+        # Get compose files from config
+        files = Hip.config.compose[:files]
+        return [] unless files.is_a?(Array)
+
+        files.each_with_object([]) do |file_path, memo|
+          file_path = Pathname.new(file_path)
+          file_path = Hip.config.file_path.parent.join(file_path).expand_path if file_path.relative?
+          next unless file_path.exist?
+
+          memo << "--file"
+          memo << file_path.to_s
+        end
+      end
+
+      def compose_project_args
+        # Get project name from config
+        project_name = Hip.config.compose[:project_name]
+        return [] unless project_name
+
+        ["--project-name", project_name]
+      end
 
       def execute_command(command)
         case command

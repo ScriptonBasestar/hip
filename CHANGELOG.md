@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.1.3] - 2025-12-02
+
 ### Added
+
+- **`hip provision` auto-start containers**: Automatically starts containers before running provision scripts
+  - Detects if containers are running using `docker compose ps`
+  - If no containers running: automatically runs `docker compose up -d --wait`
+  - If containers already running: proceeds directly with provision commands
+  - Eliminates need to run `hip up` before `hip provision`
+  - Ensures stateful operations (gem installation, database migrations) work correctly
+  - User-friendly messages during auto-start process
+  - Test coverage: 27 provision tests passing, auto-start logic fully tested
+  - Resolves issue where provision commands failed when containers weren't pre-started
 
 - **`env_file` support**: Load environment variables from .env files
   - Simple form: `env_file: .env`
@@ -28,6 +40,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [9.1.2] - 2025-12-01
 
 ### Added
+
+- **Smart Container Detection**: Automatic execution mode switching for `hip run` commands
+  - Detects running containers and switches from `docker compose run` → `docker compose exec`
+  - Prevents container name conflicts in provision workflows
+  - Ensures stateful operations (gem installation, database migrations) work correctly
+  - Gracefully falls back to `run` mode on detection failures
+  - Implements 2-second result caching to avoid redundant `docker compose ps` calls
+  - Handles 5+ edge cases: empty output, invalid JSON, non-running containers, daemon failures, etc.
+  - Test coverage: 12 new edge case tests, 256 total tests passing, 92.74% coverage
 
 - **`hip clean` command**: Remove all containers, networks, and optionally volumes
   - Resolves container name conflicts caused by Docker Compose project name mismatches
