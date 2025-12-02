@@ -236,11 +236,13 @@ module Hip
         end
 
         def compose_project_args
-          # For ps command: don't specify project name - let docker compose
-          # auto-detect from compose files and directory context
-          # This avoids issues when project_name in hip.yml doesn't match
-          # the actual running containers
-          []
+          # Include project name from config for accurate container detection
+          # This is necessary because docker compose ps without --project-name
+          # fails to find containers when executed from a different directory
+          project_name = Hip.config.compose[:project_name]
+          return [] unless project_name
+
+          ["--project-name", project_name]
         end
 
         def detected_project_args
