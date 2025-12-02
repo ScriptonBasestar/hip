@@ -158,6 +158,13 @@ _hip_completion() {
       fi
       ;;
 
+    migrate)
+      # Complete migrate options
+      if [[ $cur == -* ]]; then
+        COMPREPLY=($(compgen -W "--to --summary --help -h" -- "$cur"))
+      fi
+      ;;
+
     validate)
       # Complete validate options
       if [[ $cur == -* ]]; then

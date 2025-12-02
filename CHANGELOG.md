@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.0] - 2025-12-02
+
+### Added
+
+- **`hip migrate` command**: Generate LLM-friendly migration guides for hip.yml upgrades
+  - Automatically detects deprecated features (compose_run_options)
+  - Identifies legacy provision format (echo commands)
+  - Recommends new features (env_file, step/run/note syntax)
+  - Generates comprehensive markdown migration guide with:
+    - Current vs target version comparison
+    - Before/after examples for each issue
+    - Step-by-step migration checklist
+    - References to schema, examples, and changelog
+  - Perfect for AI-assisted migration with Claude Code or ChatGPT
+  - Usage: `hip migrate`, `hip migrate --to 9.0.0`
+  - Documentation: `examples/MIGRATE.md` (533 lines with 3 real-world scenarios)
+  - Test coverage: 21 tests (10 unit + 11 integration)
+
 ## [9.2.0] - 2025-12-02
 
 ### Added
