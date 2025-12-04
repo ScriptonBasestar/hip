@@ -100,7 +100,7 @@ RSpec.describe "Hip Migration Integration", type: :integration do
     it "shows up-to-date message" do
       output = capture_stdout { Hip::Commands::Migrate.new.execute }
 
-      expect(output).to include("✅ Your hip.yml is already at version 9.2.0")
+      expect(output).to include("✅ Your hip.yml is already at version 9.2.1")
     end
   end
 
