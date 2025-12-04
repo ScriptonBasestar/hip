@@ -42,6 +42,9 @@ Start here for basic understanding:
    - `lib/hip/commands/runners/docker_compose_runner.rb` (service: key)
    - `lib/hip/commands/runners/kubectl_runner.rb` (pod: key)
    - `lib/hip/commands/runners/local_runner.rb` (neither)
+4. Utilities:
+   - `lib/hip/container_utils.rb` - Container status checking (used by docker_compose_runner)
+   - `lib/hip/debug_logger.rb` - Debug logging (used by all runners)
 
 **Runner selection:** command[:runner] → explicit | command[:service] → Docker | command[:pod] → Kubectl | else → Local
 
@@ -114,6 +117,10 @@ Start here for basic understanding:
 6. `lib/hip/interaction_tree.rb` - hip.yml command resolution
 7. Appropriate runner file
 
+**Utilities:**
+- `lib/hip/debug_logger.rb` - Centralized debug logging (method_entry, log_execution, log_context)
+- `lib/hip/container_utils.rb` - Docker container status detection with caching
+
 ### Understanding Architecture
 
 **Goal:** High-level understanding of system design
@@ -178,6 +185,8 @@ lib/hip/
 │       ├── kubectl_runner.rb
 │       └── local_runner.rb
 ├── config.rb               # Configuration parser
+├── container_utils.rb      # Container status utilities (2-sec cache)
+├── debug_logger.rb         # Centralized debug logging
 ├── devcontainer.rb         # DevContainer integration
 ├── environment.rb          # Environment variables
 ├── interaction_tree.rb     # Command hierarchy parser
