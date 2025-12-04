@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.2.1] - 2025-12-04
+
+### Added
+
+- **Container name conflict detection**: Improved container conflict handling
+  - Added `ContainerUtils` module for centralized container management
+  - Detects container name conflicts from previous provisioning runs
+  - Displays helpful warnings to prevent container startup issues
+  - Better error messages for troubleshooting
+
+### Changed
+
+- **Code organization**: Refactored shared utilities for better maintainability
+  - Added `DebugLogger` module for centralized debug logging
+  - Improved code reuse across Docker/Kubernetes runners
+  - Enhanced module structure for future extensibility
+
+### Fixed
+
+- Improved container conflict detection when using `hip up`
+- Better handling of stale containers from previous runs
+
 ## [9.3.0] - 2025-12-02
 
 ### Added
