@@ -10,6 +10,7 @@ require "hip/errors"
 require "hip/config"
 require "hip/environment"
 require "hip/debug_logger"
+require "hip/container_utils"
 require "logger"
 
 module Hip

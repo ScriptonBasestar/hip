@@ -65,37 +65,8 @@ module Hip
       end
 
       def any_containers_running?
-        # Use docker compose ps to check if any containers are running
-        # Returns true if at least one container is in "running" state
-        require_relative "compose"
-
-        # Build command using Compose and capture output
-        compose = Commands::Compose.new("ps", "--format", "json")
-        cmd = compose.build_command
-
-        DebugLogger.log("Checking container status: #{cmd.join(" ")}")
-        output = `#{cmd.shelljoin} 2>/dev/null`.strip
-
-        if output.empty?
-          DebugLogger.log("No containers found")
-          return false
-        end
-
-        # Parse JSON output and check for running containers
-        require "json"
-        running_count = output.lines.count do |line|
-          container_info = JSON.parse(line)
-          container_info["State"]&.downcase == "running"
-        end
-
-        DebugLogger.log("Found #{running_count} running container(s)")
-        running_count > 0
-      rescue JSON::ParserError => e
-        DebugLogger.log_error("any_containers_running?", e)
-        false
-      rescue => e
-        DebugLogger.log_error("any_containers_running?", e)
-        false
+        # Delegate to ContainerUtils for centralized container status checking
+        ContainerUtils.any_containers_running?
       end
 
       def execute_command(command)

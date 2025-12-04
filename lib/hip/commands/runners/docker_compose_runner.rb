@@ -3,7 +3,7 @@
 # @file: lib/hip/commands/runners/docker_compose_runner.rb
 # @purpose: Execute commands via Docker Compose (run/exec/up methods)
 # @flow: Run -> DockerComposeRunner.execute -> Compose command construction
-# @dependencies: Base, Hip::Commands::Compose
+# @dependencies: Base, Hip::Commands::Compose, Hip::ContainerUtils
 # @key_methods: execute (builds compose args with env, ports, profiles)
 # @config_keys: command[:service], command[:compose][:method], command[:compose][:run_options]
 
@@ -14,10 +14,6 @@ module Hip
   module Commands
     module Runners
       class DockerComposeRunner < Base
-        # Cache container detection results for 2 seconds to avoid
-        # repeated docker compose ps calls within same execution context
-        CONTAINER_CACHE_TTL = 2
-
         def execute
           DebugLogger.method_entry("DockerComposeRunner#execute", command: command)
 
@@ -114,24 +110,14 @@ module Hip
 
         def auto_detect_compose_method!
           # Auto-detect if container is already running and switch from 'run' to 'exec'
-          #
-          # This prevents container name conflicts when:
-          # - Container already exists with same name
-          # - Project name in hip.yml differs from actual running container's project
-          # - User runs commands while containers are still up
-          #
-          # Behavior:
-          # - Only operates on 'run' method (exec/up unchanged)
-          # - Returns early if no service specified
-          # - On detection success: switches to 'exec', removes incompatible flags
-          # - On detection failure: keeps 'run' method (safe fallback)
+          # Uses ContainerUtils for container status detection
           return unless command[:compose][:method] == "run"
 
           service_name = command[:service]
           return unless service_name
 
           # Check if container is already running and get its actual project name
-          actual_project_name = detect_running_container_project(service_name)
+          actual_project_name = ContainerUtils.service_running_project(service_name)
           if actual_project_name
             DebugLogger.log("Container for service \"#{service_name}\" running under project \"#{actual_project_name}\", switching to exec")
             command[:compose][:method] = "exec"
@@ -142,100 +128,8 @@ module Hip
           end
         end
 
-        def detect_running_container_project(service_name)
-          # Use docker compose ps to check if service container is running
-          # and return the actual project name
-          #
-          # Error Handling:
-          # - Returns nil on any error (graceful degradation to 'run' mode)
-          # - Expected error scenarios:
-          #   1. Docker daemon not running → StandardError → nil
-          #   2. Compose files not found → empty output → nil
-          #   3. Service doesn't exist → empty output → nil
-          #   4. Invalid JSON response → JSON::ParserError → nil
-          #   5. Network/permission issues → StandardError → nil
-          # - All errors logged at debug level (not user-facing)
-          #
-          # Performance: Results cached for CONTAINER_CACHE_TTL seconds
-          cache_key = "container_project:#{service_name}"
-          if container_cache_has?(cache_key)
-            cached = container_cache_get(cache_key)
-            DebugLogger.log("Using cached container status for \"#{service_name}\"")
-            return cached
-          end
-
-          # Reuse Compose#build_command for consistent command construction
-          compose = Commands::Compose.new("ps", "--format", "json", service_name)
-          ps_cmd = compose.build_command
-
-          DebugLogger.log("Checking container status: #{ps_cmd.join(" ")}")
-
-          output = `#{ps_cmd.shelljoin} 2>/dev/null`.strip
-
-          # docker compose ps --format json outputs one JSON object per line
-          if output.empty?
-            DebugLogger.log("No container found for service \"#{service_name}\"")
-            container_cache_set(cache_key, nil)
-            return nil
-          end
-
-          # Parse first line as JSON (could be multiple containers, we check the first)
-          require "json"
-          container_info = JSON.parse(output.lines.first)
-          state = container_info["State"]
-          project = container_info["Project"]
-
-          result = if state&.downcase == "running"
-            DebugLogger.log("Container \"#{container_info["Name"]}\" state: #{state}, project: #{project}")
-            project
-          else
-            DebugLogger.log("Container found but not running: state=#{state}")
-            nil
-          end
-
-          # Cache the result
-          container_cache_set(cache_key, result)
-          result
-        rescue JSON::ParserError => e
-          DebugLogger.log_error("detect_running_container_project", e)
-          nil
-        rescue => e
-          DebugLogger.log_error("detect_running_container_project", e)
-          nil
-        end
-
         def detected_project_args
-          # Return project name args for detected running container
           ["--project-name", @detected_project_name]
-        end
-
-        # Simple time-based cache for container detection results
-        # Prevents redundant docker compose ps calls within short time windows
-        def container_cache
-          @container_cache ||= {}
-        end
-
-        def container_cache_has?(key)
-          return false unless container_cache[key]
-
-          cached_at, _value = container_cache[key]
-          if Time.now - cached_at < CONTAINER_CACHE_TTL
-            true
-          else
-            container_cache.delete(key)
-            false
-          end
-        end
-
-        def container_cache_get(key)
-          return nil unless container_cache[key]
-
-          _cached_at, value = container_cache[key]
-          value
-        end
-
-        def container_cache_set(key, value)
-          container_cache[key] = [Time.now, value]
         end
       end
     end
