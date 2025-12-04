@@ -70,7 +70,7 @@ module Hip
       end
 
       def lookup_runner
-        Hip.logger.debug "Hip.Commands.Run#lookup_runner command: #{command}"
+        DebugLogger.method_entry("Run#lookup_runner", command: command)
         if (runner = command[:runner])
           camelized_runner = runner.split("_").collect(&:capitalize).join
           Runners.const_get("#{camelized_runner}Runner")
@@ -86,22 +86,20 @@ module Hip
       def load_interaction_env_file
         require "hip/env_file_loader"
 
-        Hip.logger.debug "Loading interaction-level env_file: #{command[:env_file].inspect}"
+        DebugLogger.log("Loading interaction-level env_file: #{command[:env_file].inspect}")
 
-        # Load env_file variables
         env_file_vars = Hip::EnvFileLoader.load(
           command[:env_file],
           base_path: Hip.config.file_path.parent,
           interpolate: true
         )
 
-        # Merge into Hip.env (interaction-level env_file overrides top-level)
         Hip.env.merge(env_file_vars)
 
-        Hip.logger.debug "Loaded #{env_file_vars.size} variables from interaction env_file"
+        DebugLogger.log("Loaded #{env_file_vars.size} variables from interaction env_file")
       rescue Hip::Error => e
         raise e
-      rescue StandardError => e
+      rescue => e
         raise Hip::Error, "Failed to load interaction env_file: #{e.message}"
       end
     end

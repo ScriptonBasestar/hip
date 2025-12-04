@@ -19,14 +19,14 @@ module Hip
         CONTAINER_CACHE_TTL = 2
 
         def execute
-          Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute >>>>>>>>>>"
-          Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute command: #{command}"
+          DebugLogger.method_entry("DockerComposeRunner#execute", command: command)
 
           # Auto-detect if container is running and switch to exec
           auto_detect_compose_method!
 
-          Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute compose_profiles: #{compose_profiles}"
-          Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#execute compose_arguments: #{compose_arguments}"
+          DebugLogger.log_context("DockerComposeRunner#execute",
+            compose_profiles: compose_profiles,
+            compose_arguments: compose_arguments)
 
           # Build compose command with detected project name if needed
           compose_cmd_args = []
@@ -57,16 +57,14 @@ module Hip
           compose_argv = command[:compose][:run_options].dup
 
           if command[:compose][:method] == "run"
-            Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#compose_arguments - if run"
+            DebugLogger.log("DockerComposeRunner#compose_arguments - run method")
             compose_argv.concat(run_vars)
             compose_argv.concat(published_ports)
             compose_argv << "--rm"
           elsif command[:compose][:method] == "exec"
-            # default exec
-            Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#compose_arguments - elsif exec"
+            DebugLogger.log("DockerComposeRunner#compose_arguments - exec method")
           else
-            # none
-            Hip.logger.debug "Hip.Commands.Runners.DockerComposeRunner#compose_arguments - else none"
+            DebugLogger.log("DockerComposeRunner#compose_arguments - other method")
           end
 
           compose_argv << "--user #{command.fetch(:user)}" if command[:user]
@@ -135,7 +133,7 @@ module Hip
           # Check if container is already running and get its actual project name
           actual_project_name = detect_running_container_project(service_name)
           if actual_project_name
-            Hip.logger.debug "Container for service \"#{service_name}\" is running under project \"#{actual_project_name}\", switching to exec"
+            DebugLogger.log("Container for service \"#{service_name}\" running under project \"#{actual_project_name}\", switching to exec")
             command[:compose][:method] = "exec"
             # exec doesn't support --rm and some run options
             command[:compose][:run_options].reject! { |opt| opt.include?("--rm") }
@@ -162,7 +160,7 @@ module Hip
           cache_key = "container_project:#{service_name}"
           if container_cache_has?(cache_key)
             cached = container_cache_get(cache_key)
-            Hip.logger.debug "Using cached container status for \"#{service_name}\""
+            DebugLogger.log("Using cached container status for \"#{service_name}\"")
             return cached
           end
 
@@ -170,13 +168,13 @@ module Hip
           compose = Commands::Compose.new("ps", "--format", "json", service_name)
           ps_cmd = compose.build_command
 
-          Hip.logger.debug "Checking container status: #{ps_cmd.join(" ")}"
+          DebugLogger.log("Checking container status: #{ps_cmd.join(" ")}")
 
           output = `#{ps_cmd.shelljoin} 2>/dev/null`.strip
 
           # docker compose ps --format json outputs one JSON object per line
           if output.empty?
-            Hip.logger.debug "No container found for service \"#{service_name}\""
+            DebugLogger.log("No container found for service \"#{service_name}\"")
             container_cache_set(cache_key, nil)
             return nil
           end
@@ -188,10 +186,10 @@ module Hip
           project = container_info["Project"]
 
           result = if state&.downcase == "running"
-            Hip.logger.debug "Container \"#{container_info["Name"]}\" (#{container_info["ID"]}) state: #{state}, project: #{project}"
+            DebugLogger.log("Container \"#{container_info["Name"]}\" state: #{state}, project: #{project}")
             project
           else
-            Hip.logger.debug "Container found but not running: state=#{state}"
+            DebugLogger.log("Container found but not running: state=#{state}")
             nil
           end
 
@@ -199,12 +197,10 @@ module Hip
           container_cache_set(cache_key, result)
           result
         rescue JSON::ParserError => e
-          # Malformed JSON from docker compose ps (rare but possible)
-          Hip.logger.debug "Failed to parse container status JSON: #{e.message}"
+          DebugLogger.log_error("detect_running_container_project", e)
           nil
         rescue => e
-          # Covers: Errno::ENOENT (docker not found), command execution failures, etc.
-          Hip.logger.debug "Error checking container status: #{e.message}"
+          DebugLogger.log_error("detect_running_container_project", e)
           nil
         end
 

@@ -11,9 +11,10 @@ module Hip
       end
 
       def execute
-        Hip.logger.debug "Hip.Commands.Provision#execute >>>>>>>"
         provision_key = @argv.first || :default
-        Hip.logger.debug "Hip.Commands.Provision #{Hip.config.provision}"
+        DebugLogger.method_entry("Provision#execute",
+          provision_key: provision_key,
+          provision_config: Hip.config.provision)
 
         # If provision is empty or key not found, just return without error
         return if Hip.config.provision.empty?
@@ -44,12 +45,12 @@ module Hip
       def ensure_containers_running
         # Check if any containers are running for this project
         # If not, automatically run `hip up -d --wait`
-        Hip.logger.debug "Checking if containers are running..."
+        DebugLogger.log("Checking if containers are running...")
 
         if any_containers_running?
-          Hip.logger.debug "Containers already running, proceeding with provision"
+          DebugLogger.log("Containers already running, proceeding with provision")
         else
-          Hip.logger.info "No containers running. Starting containers with 'hip up -d --wait'..."
+          DebugLogger.log("No containers running. Starting with 'hip up -d --wait'...")
           puts "⚙️  Starting containers before provisioning..."
           puts ""
 
@@ -59,7 +60,7 @@ module Hip
           Commands::Compose.new("up", "-d", "--wait", subprocess: true).execute
 
           puts ""
-          Hip.logger.info "Containers started successfully"
+          DebugLogger.log("Containers started successfully")
         end
       end
 
@@ -72,11 +73,11 @@ module Hip
         compose = Commands::Compose.new("ps", "--format", "json")
         cmd = compose.build_command
 
-        Hip.logger.debug "Checking container status: #{cmd.join(" ")}"
+        DebugLogger.log("Checking container status: #{cmd.join(" ")}")
         output = `#{cmd.shelljoin} 2>/dev/null`.strip
 
         if output.empty?
-          Hip.logger.debug "No containers found"
+          DebugLogger.log("No containers found")
           return false
         end
 
@@ -87,25 +88,23 @@ module Hip
           container_info["State"]&.downcase == "running"
         end
 
-        Hip.logger.debug "Found #{running_count} running container(s)"
+        DebugLogger.log("Found #{running_count} running container(s)")
         running_count > 0
       rescue JSON::ParserError => e
-        Hip.logger.debug "Failed to parse container status: #{e.message}"
+        DebugLogger.log_error("any_containers_running?", e)
         false
       rescue => e
-        Hip.logger.debug "Error checking container status: #{e.message}"
+        DebugLogger.log_error("any_containers_running?", e)
         false
       end
 
       def execute_command(command)
         case command
         when String
-          # Legacy string format: raw shell command
-          Hip.logger.debug "Executing raw command: #{command}"
+          DebugLogger.log("Executing raw command: #{command}")
           exec_subprocess(command)
         when Hash
-          # Structured command format
-          Hip.logger.debug "Executing structured command: #{command}"
+          DebugLogger.log("Executing structured command: #{command}")
           execute_structured_command(command)
         else
           raise Hip::Error, "Invalid command format: #{command.inspect}. Expected String or Hash."
@@ -175,36 +174,34 @@ module Hip
       end
 
       def execute_echo(text)
-        # Escape special characters in text
         escaped_text = Shellwords.escape(text.to_s)
         cmdline = "echo #{escaped_text}"
-        Hip.logger.debug "Executing echo: #{cmdline}"
+        DebugLogger.log("Executing echo: #{cmdline}")
         exec_subprocess(cmdline)
       end
 
       def execute_cmd(cmd)
         raise Hip::Error, "cmd value must be a string" unless cmd.is_a?(String)
 
-        Hip.logger.debug "Executing cmd: #{cmd}"
+        DebugLogger.log("Executing cmd: #{cmd}")
         exec_subprocess(cmd)
       end
 
       def execute_shell(script)
         raise Hip::Error, "shell value must be a string" unless script.is_a?(String)
 
-        Hip.logger.debug "Executing shell script"
+        DebugLogger.log("Executing shell script")
         exec_subprocess(script)
       end
 
       def execute_sleep(seconds)
-        # Convert to integer or float
         sleep_duration = if seconds.is_a?(String)
           Float(seconds)
         else
           seconds
         end
 
-        Hip.logger.debug "Sleeping for #{sleep_duration} seconds"
+        DebugLogger.log("Sleeping for #{sleep_duration} seconds")
         ::Kernel.sleep(sleep_duration)
       end
 
@@ -228,8 +225,7 @@ module Hip
           raise Hip::Error, "docker.compose must be a string or array"
         end
 
-        Hip.logger.debug "Executing docker compose: #{args.join(" ")}"
-        # Use Compose with subprocess: true to run as child process
+        DebugLogger.log("Executing docker compose: #{args.join(" ")}")
         Commands::Compose.new(*args, subprocess: true).execute
       end
 
@@ -237,16 +233,13 @@ module Hip
         return unless Hip.config.exist?
 
         claude_guide = ".claude/ctx/hip-project-guide.md"
-
-        # Only generate if .claude directory doesn't exist or guide is missing
         return if File.exist?(claude_guide)
 
-        Hip.logger.debug "Auto-generating Claude Code integration files..."
+        DebugLogger.log("Auto-generating Claude Code integration files...")
         require_relative "claude/setup"
         Hip::Commands::Claude::Setup.new({}).execute
       rescue => e
-        # Don't fail provision if Claude file generation fails
-        Hip.logger.debug "Failed to auto-generate Claude files: #{e.message}"
+        DebugLogger.log_error("auto_generate_claude_files", e)
       end
     end
   end

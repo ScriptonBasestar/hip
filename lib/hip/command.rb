@@ -16,26 +16,13 @@ module Hip
 
     class ProgramRunner
       def self.call(cmdline, env: {}, **options)
-        Hip.logger.debug "Hip.Command.ProgramRunner#self.call >>>>>>>>>>"
-        Hip.logger.debug "Hip.Command.ProgramRunner#self.call cmdline: #{cmdline}"
-        Hip.logger.debug "Hip.Command.ProgramRunner#self.call env: #{env}"
-        Hip.logger.debug "Hip.Command.ProgramRunner#self.call options: #{options}"
-
-        # Show command in debug mode before exec replaces the process
-        if Hip.debug?
-          warn "\n" + "=" * 80
-          warn "🔍 DEBUG: Executing command (via exec)"
-          warn "=" * 80
-          warn "Command: #{cmdline.is_a?(Array) ? cmdline.join(" ") : cmdline}"
-          warn "=" * 80 + "\n"
-        end
+        DebugLogger.method_entry("Command.ProgramRunner#call",
+          cmdline: cmdline, env: env, options: options)
+        DebugLogger.log_execution(cmdline, via: "exec")
 
         if cmdline.is_a?(Array)
-          Hip.logger.debug "Hip.Command.ProgramRunner#self.call if"
           ::Kernel.exec(env, cmdline[0], *cmdline.drop(1), **options)
         else
-          Hip.logger.debug "Hip.Command.ProgramRunner#self.call else"
-          # provision 오류시 뭘 할 수 있나?
           ::Kernel.exec(env, cmdline, **options)
         end
       end
@@ -43,8 +30,8 @@ module Hip
 
     class SubprocessRunner
       def self.call(cmdline, env: {}, panic: true, **options)
-        Hip.logger.debug "Hip.Command.SubprocessRunner#self.call >>>>>>>>>>"
-        Hip.logger.debug "Hip.Command.SubprocessRunner#self.call cmdline: #{cmdline}"
+        DebugLogger.method_entry("Command.SubprocessRunner#call",
+          cmdline: cmdline, panic: panic)
         status = ::Kernel.system(env, cmdline, **options)
 
         if !status && panic
@@ -67,24 +54,15 @@ module Hip
       private
 
       def run(runner, cmd, argv = [], shell: true, **options)
-        Hip.logger.debug "Hip.Command#run >>>>>>>>>>"
+        DebugLogger.method_entry("Command#run", cmd: cmd, argv: argv, shell: shell)
+
         cmd = Hip.env.interpolate(cmd)
         argv = [argv] if argv.is_a?(String)
         argv = argv.map { |arg| Hip.env.interpolate(arg) }
         cmdline = [cmd, *argv].compact
         cmdline = cmdline.join(" ").strip if shell
 
-        # Show command to users in debug mode
-        if Hip.debug?
-          puts "\n" + "=" * 80
-          puts "🔍 DEBUG: Executing command"
-          puts "=" * 80
-          puts "Command: #{cmdline}"
-          puts "=" * 80 + "\n"
-        end
-
-        Hip.logger.debug "Hip.Command#run cmdline: #{cmdline}"
-        Hip.logger.debug "Hip.Command#run env vars: #{Hip.env.vars.inspect}"
+        DebugLogger.log_context("Command#run", cmdline: cmdline, env_vars: Hip.env.vars)
 
         runner.call(cmdline, env: Hip.env.vars, **options)
       end
