@@ -141,14 +141,14 @@ describe Hip::ComposeFileParser do
     end
 
     it "resolves relative paths from hip.yml directory" do
-      compose_config = { files: ["docker-compose.yml"] }
+      compose_config = {files: ["docker-compose.yml"]}
       parser = described_class.new(compose_config)
 
       expect(parser.compose_files.first.to_s).to include("container_name_conflict/docker-compose.yml")
     end
 
     it "filters out non-existent files" do
-      compose_config = { files: ["docker-compose.yml", "nonexistent.yml"] }
+      compose_config = {files: ["docker-compose.yml", "nonexistent.yml"]}
       parser = described_class.new(compose_config)
 
       expect(parser.compose_files.size).to eq(1)
@@ -163,14 +163,14 @@ describe Hip::ComposeFileParser do
     end
 
     it "returns all services from compose file" do
-      compose_config = { files: ["docker-compose.yml"] }
+      compose_config = {files: ["docker-compose.yml"]}
       parser = described_class.new(compose_config)
 
       expect(parser.services.keys).to contain_exactly("app", "postgres", "redis")
     end
 
     it "caches parsed services" do
-      compose_config = { files: ["docker-compose.yml"] }
+      compose_config = {files: ["docker-compose.yml"]}
       parser = described_class.new(compose_config)
 
       services1 = parser.services

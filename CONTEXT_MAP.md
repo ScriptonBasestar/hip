@@ -119,7 +119,8 @@ Start here for basic understanding:
 
 **Utilities:**
 - `lib/hip/debug_logger.rb` - Centralized debug logging (method_entry, log_execution, log_context)
-- `lib/hip/container_utils.rb` - Docker container status detection with caching
+- `lib/hip/container_utils.rb` - Docker container status detection with caching, container_name conflict detection
+- `lib/hip/compose_file_parser.rb` - Parse docker-compose.yml files for container_name extraction
 
 ### Understanding Architecture
 
@@ -184,8 +185,9 @@ lib/hip/
 │       ├── docker_compose_runner.rb
 │       ├── kubectl_runner.rb
 │       └── local_runner.rb
+├── compose_file_parser.rb  # Docker-compose.yml parsing (container_name detection)
 ├── config.rb               # Configuration parser
-├── container_utils.rb      # Container status utilities (2-sec cache)
+├── container_utils.rb      # Container status utilities (2-sec cache, conflict detection)
 ├── debug_logger.rb         # Centralized debug logging
 ├── devcontainer.rb         # DevContainer integration
 ├── environment.rb          # Environment variables

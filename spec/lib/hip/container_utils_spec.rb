@@ -166,8 +166,7 @@ describe Hip::ContainerUtils do
     context "when compose files have container_name" do
       before do
         config_path = fixtures_base_path.join("container_name_conflict/hip.yml")
-        allow(Hip.config).to receive(:file_path).and_return(config_path)
-        allow(Hip.config).to receive(:compose).and_return({
+        allow(Hip.config).to receive_messages(file_path: config_path, compose: {
           files: ["docker-compose.yml"],
           project_name: "test-project"
         })
@@ -195,8 +194,7 @@ describe Hip::ContainerUtils do
     context "when compose files have no container_name" do
       before do
         config_path = fixtures_base_path.join("no_container_name/hip.yml")
-        allow(Hip.config).to receive(:file_path).and_return(config_path)
-        allow(Hip.config).to receive(:compose).and_return({
+        allow(Hip.config).to receive_messages(file_path: config_path, compose: {
           files: ["docker-compose.yml"]
         })
       end
@@ -234,8 +232,7 @@ describe Hip::ContainerUtils do
     context "when container_name is detected with project_name" do
       before do
         config_path = fixtures_base_path.join("container_name_conflict/hip.yml")
-        allow(Hip.config).to receive(:file_path).and_return(config_path)
-        allow(Hip.config).to receive(:compose).and_return({
+        allow(Hip.config).to receive_messages(file_path: config_path, compose: {
           files: ["docker-compose.yml"],
           project_name: "test-project"
         })
@@ -266,8 +263,7 @@ describe Hip::ContainerUtils do
     context "when container_name is detected without project_name" do
       before do
         config_path = fixtures_base_path.join("container_name_conflict/hip.yml")
-        allow(Hip.config).to receive(:file_path).and_return(config_path)
-        allow(Hip.config).to receive(:compose).and_return({
+        allow(Hip.config).to receive_messages(file_path: config_path, compose: {
           files: ["docker-compose.yml"]
         })
       end
@@ -281,8 +277,7 @@ describe Hip::ContainerUtils do
     context "when no container_name is detected" do
       before do
         config_path = fixtures_base_path.join("no_container_name/hip.yml")
-        allow(Hip.config).to receive(:file_path).and_return(config_path)
-        allow(Hip.config).to receive(:compose).and_return({
+        allow(Hip.config).to receive_messages(file_path: config_path, compose: {
           files: ["docker-compose.yml"]
         })
       end
