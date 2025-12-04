@@ -1,0 +1,7 @@
+services:
+  app:
+    image: ruby:3.3
+  postgres:
+    image: postgres:16
+  redis:
+    image: redis:7

@@ -238,9 +238,27 @@ module Hip
     end
 
     desc "validate", "Validate the hip.yml file against the schema"
+    method_option :verbose, aliases: "-v", type: :boolean, default: false,
+      desc: "Show detailed validation output including container_name warnings"
     def validate
       Hip.config.validate
       puts "hip.yml is valid"
+
+      # Check for container_name usage and report
+      detection = ContainerUtils.detect_container_name_usage
+      if detection && detection[:services].any?
+        puts ""
+        if options[:verbose]
+          warn ContainerUtils.send(:format_container_name_warning, detection)
+        else
+          warn "WARNING: container_name detected in compose files"
+          warn "  Services: #{detection[:services].keys.join(", ")}"
+          if detection[:project_name]
+            warn "  project_name: \"#{detection[:project_name]}\" (potential conflict)"
+          end
+          warn "  Run 'hip validate --verbose' for details"
+        end
+      end
     rescue Hip::Error => e
       warn "Validation failed: #{e.message}"
       exit 1

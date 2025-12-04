@@ -1,0 +1,9 @@
+services:
+  app:
+    image: ruby:3.3
+    container_name: fixed_app_container
+  postgres:
+    image: postgres:16
+    container_name: fixed_postgres_container
+  redis:
+    image: redis:7

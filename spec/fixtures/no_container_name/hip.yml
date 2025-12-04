@@ -1,0 +1,11 @@
+version: 9.0.0
+
+compose:
+  files:
+    - docker-compose.yml
+  project_name: test-project
+
+interaction:
+  shell:
+    service: app
+    command: /bin/bash

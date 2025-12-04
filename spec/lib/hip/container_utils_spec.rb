@@ -152,4 +152,149 @@ describe Hip::ContainerUtils do
       described_class.service_running_project("app")
     end
   end
+
+  describe ".detect_container_name_usage" do
+    def fixtures_base_path
+      Pathname.new(File.expand_path("../../fixtures", __dir__))
+    end
+
+    before do
+      described_class.clear_cache
+      allow(Hip.env).to receive(:interpolate) { |v| v }
+    end
+
+    context "when compose files have container_name" do
+      before do
+        config_path = fixtures_base_path.join("container_name_conflict/hip.yml")
+        allow(Hip.config).to receive(:file_path).and_return(config_path)
+        allow(Hip.config).to receive(:compose).and_return({
+          files: ["docker-compose.yml"],
+          project_name: "test-project"
+        })
+      end
+
+      it "returns detection result with services" do
+        result = described_class.detect_container_name_usage
+
+        expect(result).not_to be_nil
+        expect(result[:services]).to eq({
+          "app" => "fixed_app_container",
+          "postgres" => "fixed_postgres_container"
+        })
+        expect(result[:project_name]).to eq("test-project")
+      end
+
+      it "caches the result" do
+        result1 = described_class.detect_container_name_usage
+        result2 = described_class.detect_container_name_usage
+
+        expect(result1).to equal(result2)
+      end
+    end
+
+    context "when compose files have no container_name" do
+      before do
+        config_path = fixtures_base_path.join("no_container_name/hip.yml")
+        allow(Hip.config).to receive(:file_path).and_return(config_path)
+        allow(Hip.config).to receive(:compose).and_return({
+          files: ["docker-compose.yml"]
+        })
+      end
+
+      it "returns nil" do
+        result = described_class.detect_container_name_usage
+
+        expect(result).to be_nil
+      end
+    end
+
+    context "when compose config is empty" do
+      before do
+        allow(Hip.config).to receive(:compose).and_return({})
+      end
+
+      it "returns nil" do
+        result = described_class.detect_container_name_usage
+
+        expect(result).to be_nil
+      end
+    end
+  end
+
+  describe ".warn_container_name_usage" do
+    def fixtures_base_path
+      Pathname.new(File.expand_path("../../fixtures", __dir__))
+    end
+
+    before do
+      described_class.clear_cache
+      allow(Hip.env).to receive(:interpolate) { |v| v }
+    end
+
+    context "when container_name is detected with project_name" do
+      before do
+        config_path = fixtures_base_path.join("container_name_conflict/hip.yml")
+        allow(Hip.config).to receive(:file_path).and_return(config_path)
+        allow(Hip.config).to receive(:compose).and_return({
+          files: ["docker-compose.yml"],
+          project_name: "test-project"
+        })
+      end
+
+      it "outputs warning to stderr" do
+        expect { described_class.warn_container_name_usage }
+          .to output(/WARNING: container_name detected/).to_stderr
+      end
+
+      it "includes project_name in warning" do
+        expect { described_class.warn_container_name_usage }
+          .to output(/Hip project_name: "test-project"/).to_stderr
+      end
+
+      it "includes service names in warning" do
+        expect { described_class.warn_container_name_usage }
+          .to output(/app: "fixed_app_container"/).to_stderr
+      end
+
+      it "returns true" do
+        # Suppress stderr output
+        allow($stderr).to receive(:write)
+        expect(described_class.warn_container_name_usage).to be true
+      end
+    end
+
+    context "when container_name is detected without project_name" do
+      before do
+        config_path = fixtures_base_path.join("container_name_conflict/hip.yml")
+        allow(Hip.config).to receive(:file_path).and_return(config_path)
+        allow(Hip.config).to receive(:compose).and_return({
+          files: ["docker-compose.yml"]
+        })
+      end
+
+      it "outputs warning with auto-detection note" do
+        expect { described_class.warn_container_name_usage }
+          .to output(/auto-detection.*works normally/).to_stderr
+      end
+    end
+
+    context "when no container_name is detected" do
+      before do
+        config_path = fixtures_base_path.join("no_container_name/hip.yml")
+        allow(Hip.config).to receive(:file_path).and_return(config_path)
+        allow(Hip.config).to receive(:compose).and_return({
+          files: ["docker-compose.yml"]
+        })
+      end
+
+      it "returns false" do
+        expect(described_class.warn_container_name_usage).to be false
+      end
+
+      it "does not output anything" do
+        expect { described_class.warn_container_name_usage }
+          .not_to output.to_stderr
+      end
+    end
+  end
 end

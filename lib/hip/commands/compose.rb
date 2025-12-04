@@ -26,6 +26,12 @@ module Hip
 
       def execute
         DebugLogger.method_entry("Compose#execute", argv: argv, shell: shell)
+
+        # Check for container_name usage and warn unless suppressed
+        unless ENV["HIP_IGNORE_CONFLICTS"]
+          ContainerUtils.warn_container_name_usage
+        end
+
         Hip.env["HIP_DNS"] ||= find_dns
 
         set_infra_env

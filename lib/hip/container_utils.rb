@@ -3,8 +3,8 @@
 # @file: lib/hip/container_utils.rb
 # @purpose: Centralized Docker container status checking utilities
 # @flow: Commands (Provision, DockerComposeRunner) -> ContainerUtils -> docker compose ps
-# @dependencies: Hip::Commands::Compose, Hip::DebugLogger
-# @key_methods: any_containers_running?, service_running_project
+# @dependencies: Hip::Commands::Compose, Hip::DebugLogger, Hip::ComposeFileParser
+# @key_methods: any_containers_running?, service_running_project, detect_container_name_usage, warn_container_name_usage
 
 require "json"
 
@@ -18,6 +18,9 @@ module Hip
   #
   # @example Get project name for a running service
   #   project = Hip::ContainerUtils.service_running_project("app")
+  #
+  # @example Detect container_name usage and show warning
+  #   Hip::ContainerUtils.warn_container_name_usage
   module ContainerUtils
     # Cache TTL in seconds for container status checks
     CACHE_TTL = 2
@@ -80,9 +83,114 @@ module Hip
       # Useful for testing or when containers have been modified
       def clear_cache
         @cache = {}
+        @session_cache = {}
+      end
+
+      # Detect container_name usage in compose files
+      # Returns details about services with fixed container names
+      #
+      # @return [Hash, nil] Detection result or nil if no container_name found
+      #   - :services [Hash<String, String>] service_name => container_name
+      #   - :project_name [String, nil] project_name from hip.yml if set
+      #   - :compose_files [Array<String>] paths to compose files
+      def detect_container_name_usage
+        cache_key = "container_name_usage"
+        return session_cache_get(cache_key) if session_cache_has?(cache_key)
+
+        result = check_container_name_usage
+        session_cache_set(cache_key, result)
+        result
+      end
+
+      # Display warning if container_name is detected in compose files
+      # Warning is always shown (unless HIP_IGNORE_CONFLICTS is set)
+      #
+      # @return [Boolean] true if warning was displayed
+      def warn_container_name_usage
+        detection = detect_container_name_usage
+        return false unless detection && detection[:services].any?
+
+        warn format_container_name_warning(detection)
+        true
       end
 
       private
+
+      # Check compose files for container_name usage
+      def check_container_name_usage
+        compose_config = Hip.config.compose
+        return nil if compose_config.nil? || compose_config.empty?
+
+        require_relative "compose_file_parser"
+        parser = ComposeFileParser.new(compose_config)
+        services_with_names = parser.services_with_container_name
+
+        return nil if services_with_names.empty?
+
+        {
+          services: services_with_names,
+          project_name: compose_config[:project_name],
+          compose_files: parser.compose_files.map(&:to_s)
+        }
+      end
+
+      # Format the warning message for container_name detection
+      def format_container_name_warning(detection)
+        lines = []
+        lines << "=" * 80
+        lines << "WARNING: container_name detected in docker-compose files"
+        lines << "=" * 80
+        lines << ""
+
+        if detection[:project_name]
+          lines << "Hip project_name: \"#{detection[:project_name]}\""
+        end
+
+        lines << "Services with fixed container_name:"
+        detection[:services].each do |service, name|
+          lines << "  - #{service}: \"#{name}\""
+        end
+
+        lines << ""
+        if detection[:project_name]
+          lines << "Problem:"
+          lines << "  - \"container name already in use\" errors may occur when running"
+          lines << "    multiple instances or restarting containers"
+          lines << ""
+          lines << "Note: Hip auto-detection (run -> exec) works normally with container_name."
+          lines << ""
+          lines << "Options:"
+          lines << "  1. Remove container_name from docker-compose.yml (recommended)"
+          lines << "  2. Set HIP_IGNORE_CONFLICTS=1 to suppress this warning"
+        else
+          lines << "Note: Fixed container names may cause \"container name already in use\" errors"
+          lines << "when running multiple instances. Hip auto-detection (run -> exec) works normally."
+          lines << ""
+          lines << "Options:"
+          lines << "  1. Remove container_name from docker-compose.yml (recommended)"
+          lines << "  2. Set HIP_IGNORE_CONFLICTS=1 to suppress this warning"
+        end
+
+        lines << "=" * 80
+        lines.join("\n")
+      end
+
+      # Session-level cache (no TTL, cleared only on reset)
+      def session_cache
+        @session_cache ||= {}
+      end
+
+      def session_cache_has?(key)
+        session_cache.key?(key)
+      end
+
+      def session_cache_get(key)
+        session_cache[key]
+      end
+
+      def session_cache_set(key, value)
+        session_cache[key] = value
+      end
 
       # Fetch container statuses from docker compose ps
       #
