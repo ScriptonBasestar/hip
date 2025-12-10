@@ -181,8 +181,8 @@ RSpec.describe Hip::EnvFileLoader do
 
     context "with escape sequences in double quotes" do
       before do
-        File.write(base_path.join(".env"), 'WITH_NEWLINE="line1\nline2"' + "\n" +
-                                            'WITH_TAB="col1\tcol2"' + "\n" +
+        File.write(base_path.join(".env"), 'WITH_NEWLINE="line1\nline2"' + "\n" \
+                                            'WITH_TAB="col1\tcol2"' + "\n" \
                                             'WITH_QUOTE="say \"hello\""' + "\n")
       end
 

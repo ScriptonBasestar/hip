@@ -3,6 +3,7 @@
 require "spec_helper"
 require "hip/commands/migrate"
 
+# rubocop:disable RSpec/DescribeClass
 RSpec.describe "Hip Migration Integration", type: :integration do
   describe "deprecated v8 configuration", :env do
     let(:env) { {"HIP_FILE" => fixture_path("deprecated-v8", "hip.yml")} }
@@ -148,3 +149,4 @@ RSpec.describe "Hip Migration Integration", type: :integration do
     $stdout = original_stdout
   end
 end
+# rubocop:enable RSpec/DescribeClass

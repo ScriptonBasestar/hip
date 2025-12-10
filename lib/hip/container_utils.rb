@@ -158,18 +158,14 @@ module Hip
           lines << "    multiple instances or restarting containers"
           lines << ""
           lines << "Note: Hip auto-detection (run -> exec) works normally with container_name."
-          lines << ""
-          lines << "Options:"
-          lines << "  1. Remove container_name from docker-compose.yml (recommended)"
-          lines << "  2. Set HIP_IGNORE_CONFLICTS=1 to suppress this warning"
         else
           lines << "Note: Fixed container names may cause \"container name already in use\" errors"
           lines << "when running multiple instances. Hip auto-detection (run -> exec) works normally."
-          lines << ""
-          lines << "Options:"
-          lines << "  1. Remove container_name from docker-compose.yml (recommended)"
-          lines << "  2. Set HIP_IGNORE_CONFLICTS=1 to suppress this warning"
         end
+        lines << ""
+        lines << "Options:"
+        lines << "  1. Remove container_name from docker-compose.yml (recommended)"
+        lines << "  2. Set HIP_IGNORE_CONFLICTS=1 to suppress this warning"
 
         lines << "=" * 80
         lines.join("\n")

@@ -245,7 +245,7 @@ describe Hip::Commands::Compose do
       let(:compose) { described_class.new("ps") }
 
       it "uses exec_program" do
-        expect(Hip::Command).to receive(:exec_program)
+        expect(Hip::Command).to receive(:exec_program) # rubocop:disable RSpec/MessageSpies
         compose.execute
       end
     end
@@ -258,7 +258,7 @@ describe Hip::Commands::Compose do
       end
 
       it "uses exec_subprocess" do
-        expect(Hip::Command).to receive(:exec_subprocess)
+        expect(Hip::Command).to receive(:exec_subprocess) # rubocop:disable RSpec/MessageSpies
         compose.execute
       end
     end

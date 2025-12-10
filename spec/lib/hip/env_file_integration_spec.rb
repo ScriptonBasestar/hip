@@ -3,6 +3,7 @@
 require "spec_helper"
 require "tmpdir"
 
+# rubocop:disable RSpec/DescribeClass
 RSpec.describe "env_file integration" do
   let(:tmpdir) { Dir.mktmpdir }
   let(:project_dir) { Pathname.new(tmpdir) }
@@ -284,3 +285,4 @@ RSpec.describe "env_file integration" do
     end
   end
 end
+# rubocop:enable RSpec/DescribeClass

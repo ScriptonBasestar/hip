@@ -110,7 +110,7 @@ describe Hip::ContainerUtils do
       result1 = described_class.service_running_project("app")
 
       # Reset the mock to verify second call doesn't hit it
-      expect(described_class).not_to receive(:`).with(/app/)
+      expect(described_class).not_to receive(:`).with(/app/) # rubocop:disable RSpec/MessageSpies
 
       # Second call should use cache
       result2 = described_class.service_running_project("app")
@@ -148,7 +148,9 @@ describe Hip::ContainerUtils do
       described_class.clear_cache
 
       # Should query again
+      # rubocop:disable RSpec/MessageSpies, RSpec/StubbedMock
       expect(described_class).to receive(:`).and_return(json_output)
+      # rubocop:enable RSpec/MessageSpies, RSpec/StubbedMock
       described_class.service_running_project("app")
     end
   end

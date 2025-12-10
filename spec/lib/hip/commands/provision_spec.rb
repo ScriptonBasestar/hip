@@ -10,7 +10,7 @@ describe Hip::Commands::Provision, :config do
 
   # Mock container check to skip auto-up by default in all tests
   before do
-    allow_any_instance_of(Hip::Commands::Provision).to receive(:any_containers_running?).and_return(true)
+    allow_any_instance_of(described_class).to receive(:any_containers_running?).and_return(true)
   end
 
   context "when has no any commands" do
@@ -286,12 +286,12 @@ describe Hip::Commands::Provision, :config do
       }
     end
 
-    let(:provision_instance) { Hip::Commands::Provision.new([]) }
+    let(:provision_instance) { described_class.new([]) }
 
     context "when no containers are running" do
       before do
         # Mock container check to return false (no containers running)
-        allow_any_instance_of(Hip::Commands::Provision).to receive(:any_containers_running?).and_return(false)
+        allow_any_instance_of(described_class).to receive(:any_containers_running?).and_return(false)
         # Mock Compose command to prevent actual execution
         compose_double = instance_double(Hip::Commands::Compose)
         allow(Hip::Commands::Compose).to receive(:new).and_return(compose_double)
@@ -299,7 +299,7 @@ describe Hip::Commands::Provision, :config do
       end
 
       it "automatically starts containers with 'up -d --wait'" do
-        expect(Hip::Commands::Compose).to receive(:new).with("up", "-d", "--wait", subprocess: true)
+        expect(Hip::Commands::Compose).to receive(:new).with("up", "-d", "--wait", subprocess: true) # rubocop:disable RSpec/MessageSpies
         cli.start ["provision"]
       end
     end
@@ -307,11 +307,11 @@ describe Hip::Commands::Provision, :config do
     context "when containers are already running" do
       before do
         # Mock container check to return true (containers running)
-        allow_any_instance_of(Hip::Commands::Provision).to receive(:any_containers_running?).and_return(true)
+        allow_any_instance_of(described_class).to receive(:any_containers_running?).and_return(true)
       end
 
       it "skips starting containers" do
-        expect(Hip::Command).not_to receive(:exec_subprocess).with(/up -d --wait/)
+        expect(Hip::Command).not_to receive(:exec_subprocess).with(/up -d --wait/) # rubocop:disable RSpec/MessageSpies
         cli.start ["provision"]
       end
     end
