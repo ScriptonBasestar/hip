@@ -212,7 +212,7 @@ RSpec.describe "env_file integration" do
 
       # Simulate running "hip rails console"
       require "hip/commands/run"
-      cmd = Hip::Commands::Run.new("rails", "console", explain: true)
+      Hip::Commands::Run.new("rails", "console", explain: true)
 
       expect(Hip.env["DATABASE_NAME"]).to eq("myapp_dev")
       expect(Hip.env["RAILS_ENV"]).to eq("development")
@@ -223,7 +223,7 @@ RSpec.describe "env_file integration" do
 
       # Simulate running "hip rspec"
       require "hip/commands/run"
-      cmd = Hip::Commands::Run.new("rspec", explain: true)
+      Hip::Commands::Run.new("rspec", explain: true)
 
       expect(Hip.env["DATABASE_NAME"]).to eq("myapp_test") # From .env.test
       expect(Hip.env["RAILS_LOG_LEVEL"]).to eq("error") # From .env.test
