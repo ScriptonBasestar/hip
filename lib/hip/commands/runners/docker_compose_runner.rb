@@ -70,13 +70,16 @@ module Hip
 
           unless (cmd = command[:command]).empty?
             if command[:shell]
-              compose_argv << cmd
+              # Wrap shell commands with sh -c to ensure they execute inside container
+              # This prevents shell operators (&&, |, ;) from being interpreted by host shell
+              # Include command_args in the escaped string so they execute inside container
+              full_cmd = [cmd, *command_args].compact.join(" ")
+              compose_argv.concat(["sh", "-c", Shellwords.escape(full_cmd)])
             else
               compose_argv.concat(cmd.shellsplit)
+              compose_argv.concat(command_args)
             end
           end
-
-          compose_argv.concat(command_args)
 
           compose_argv
         end

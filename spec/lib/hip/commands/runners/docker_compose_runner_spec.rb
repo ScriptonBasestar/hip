@@ -39,43 +39,43 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
   context "when publish ports" do
     before { cli.start "run --publish 3:3 -p 5:5 rails s".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--publish=3:3", "--publish=5:5", "--rm", "app", "rails", "s"]) }
+    it { expected_exec("docker", ["compose", "run", "--publish=3:3", "--publish=5:5", "--rm", "app", "sh", "-c", "rails\\ s"]) }
   end
 
   context "when publish is part of a command" do
     before { cli.start "run rails s --publish=3000:3000".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--rm", "app", "rails", "s", "--publish\\=3000:3000"]) }
+    it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rails\\ s\\ --publish\\\\\\=3000:3000"]) }
   end
 
   context "when run psql command without db name" do
     before { cli.start "run psql".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--rm", "postgres", "psql", "-h", "postgres", "db_dev"]) }
+    it { expected_exec("docker", ["compose", "run", "--rm", "postgres", "sh", "-c", "psql\\ -h\\ postgres\\ db_dev"]) }
   end
 
   context "when run psql command with db name" do
     before { cli.start "run psql db_test".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--rm", "postgres", "psql", "-h", "postgres", "db_test"]) }
+    it { expected_exec("docker", ["compose", "run", "--rm", "postgres", "sh", "-c", "psql\\ -h\\ postgres\\ db_test"]) }
   end
 
   context "when run rails command" do
     before { cli.start "run rails".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--rm", "app", "rails"]) }
+    it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rails"]) }
   end
 
   context "when run rails command with subcommand" do
     before { cli.start "run rails console".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--rm", "app", "rails", "console"]) }
+    it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rails\\ console"]) }
   end
 
   context "when run rails command with arguments" do
     before { cli.start "run rails g migration add_index --force".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--rm", "app", "rails", "g", "migration", "add_index", "--force"]) }
+    it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rails\\ g\\ migration\\ add_index\\ --force"]) }
   end
 
   # backward compatibility
@@ -101,7 +101,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
     before { cli.start "run rails server".shellsplit }
 
-    it { expected_exec("docker", ["compose", "up", "app", "rails", "server"]) }
+    it { expected_exec("docker", ["compose", "up", "app", "sh", "-c", "rails\\ server"]) }
   end
 
   context "when config with compose: method" do
@@ -109,7 +109,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
     before { cli.start "run rails server".shellsplit }
 
-    it { expected_exec("docker", ["compose", "up", "app", "rails", "server"]) }
+    it { expected_exec("docker", ["compose", "up", "app", "sh", "-c", "rails\\ server"]) }
   end
 
   context "when run vars" do
@@ -124,7 +124,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
       before { cli.start "FOO=foo run rails server".shellsplit }
 
-      it { expected_exec("docker", ["compose", "up", "app", "rails", "server"]) }
+      it { expected_exec("docker", ["compose", "up", "app", "sh", "-c", "rails\\ server"]) }
     end
   end
 
@@ -133,7 +133,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
     before { cli.start "run rspec".shellsplit }
 
-    it { expected_exec("docker", ["compose", "run", "--rm", "app", "rspec"], env: hash_including("RAILS_ENV" => "test")) }
+    it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rspec"], env: hash_including("RAILS_ENV" => "test")) }
   end
 
   context "when config with profiles" do
@@ -159,19 +159,19 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
     context "and run rails server" do
       before { cli.start "run rails s".shellsplit }
 
-      it { expected_exec("docker", ["compose", "run", "--rm", "app", "rails", "server"]) }
+      it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rails\\ server"]) }
     end
 
     context "when run rails command with other subcommand" do
       before { cli.start "run rails console".shellsplit }
 
-      it { expected_exec("docker", ["compose", "run", "--rm", "app", "rails", "console"]) }
+      it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rails\\ console"]) }
     end
 
     context "when run rails command with arguments" do
       before { cli.start "run rails s foo --bar".shellsplit }
 
-      it { expected_exec("docker", ["compose", "run", "--rm", "app", "rails", "server", "foo", "--bar"]) }
+      it { expected_exec("docker", ["compose", "run", "--rm", "app", "sh", "-c", "rails\\ server\\ foo\\ --bar"]) }
     end
 
     context "when config with compose_run_options" do
@@ -179,7 +179,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
       before { cli.start "run rails s".shellsplit }
 
-      it { expected_exec("docker", ["compose", "run", "--foo", "-bar", "--baz=qux", "--rm", "app", "rails", "s"]) }
+      it { expected_exec("docker", ["compose", "run", "--foo", "-bar", "--baz=qux", "--rm", "app", "sh", "-c", "rails\\ s"]) }
     end
 
     context "when config with compose_method" do
@@ -200,7 +200,7 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
 
       it do
         expected_exec("docker",
-          ["compose", "run", "--rm", "app", "rake", "db:drop", "db:tests:prepare", "db:migrate"],
+          ["compose", "run", "--rm", "app", "sh", "-c", "rake\\ db:drop\\ db:tests:prepare\\ db:migrate"],
           env: hash_including("RAILS_ENV" => "test"))
       end
     end
@@ -281,9 +281,101 @@ describe Hip::Commands::Runners::DockerComposeRunner, :config do
     end
 
     it "does not check container status" do
-      expect(Hip::ContainerUtils).not_to receive(:service_running_project)
+      allow(Hip::ContainerUtils).to receive(:service_running_project)
       runner.send(:auto_detect_compose_method!)
+      expect(Hip::ContainerUtils).not_to have_received(:service_running_project)
       expect(command[:compose][:method]).to eq("exec")
+    end
+  end
+
+  context "when shell mode with compound commands" do
+    let(:commands) do
+      {
+        multiline: {
+          service: "app",
+          command: 'echo "Installing..." && bundle install && echo "Done!"'
+        }
+      }
+    end
+
+    before { cli.start "run multiline".shellsplit }
+
+    it "wraps command with sh -c and escapes for shell safety" do
+      expected_exec("docker",
+        ["compose", "run", "--rm", "app", "sh", "-c", Shellwords.escape('echo "Installing..." && bundle install && echo "Done!"')])
+    end
+  end
+
+  context "when shell mode with pipes" do
+    let(:commands) do
+      {
+        pipeline: {
+          service: "app",
+          command: "cat file.txt | grep error | wc -l"
+        }
+      }
+    end
+
+    before { cli.start "run pipeline".shellsplit }
+
+    it "wraps command with sh -c and escapes" do
+      expected_exec("docker",
+        ["compose", "run", "--rm", "app", "sh", "-c", Shellwords.escape("cat file.txt | grep error | wc -l")])
+    end
+  end
+
+  context "when shell mode with semicolons" do
+    let(:commands) do
+      {
+        sequential: {
+          service: "app",
+          command: "cd /app; bundle install; pnpm install"
+        }
+      }
+    end
+
+    before { cli.start "run sequential".shellsplit }
+
+    it "wraps command with sh -c and escapes" do
+      expected_exec("docker",
+        ["compose", "run", "--rm", "app", "sh", "-c", Shellwords.escape("cd /app; bundle install; pnpm install")])
+    end
+  end
+
+  context "when shell mode with simple command" do
+    let(:commands) do
+      {
+        simple: {
+          service: "app",
+          command: "bundle install"
+        }
+      }
+    end
+
+    before { cli.start "run simple".shellsplit }
+
+    it "wraps simple command with sh -c for consistency" do
+      expected_exec("docker",
+        ["compose", "run", "--rm", "app", "sh", "-c", Shellwords.escape("bundle install")])
+    end
+  end
+
+  context "when exec method with compound commands" do
+    let(:commands) do
+      {
+        deps: {
+          service: "app",
+          command: 'echo "📦 Installing..." && bundle install && pnpm install',
+          compose: {method: "exec"}
+        }
+      }
+    end
+
+    before { cli.start "run deps".shellsplit }
+
+    it "wraps command with sh -c and escapes for exec" do
+      expected_exec("docker",
+        ["compose", "exec", "app", "sh", "-c", Shellwords.escape('echo "📦 Installing..." && bundle install && pnpm install')])
     end
   end
 end

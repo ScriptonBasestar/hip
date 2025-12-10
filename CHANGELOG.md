@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [9.3.0] - 2025-12-10
+
+### Changed
+
+- **BREAKING**: Shell mode commands now properly wrapped with `sh -c` for compound command support
+  - Commands with shell operators (`&&`, `|`, `;`) now execute entirely inside containers
+  - Previously, shell operators were interpreted by host shell, causing commands to run partially on host
+  - This fixes issues like "Could not locate Gemfile" when running provision with compound commands
+  - All shell mode commands are now wrapped with `sh -c` and properly escaped with `Shellwords.escape`
+  - Migration: If you have custom runners or test expectations that rely on old behavior, update them to expect `sh -c` wrapping
+
 ## [9.2.1] - 2025-12-04
 
 ### Added
