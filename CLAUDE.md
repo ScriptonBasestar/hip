@@ -32,22 +32,11 @@ else → LocalRunner
 ## Development Commands
 
 ```bash
-# Setup
-bundle install                # Install dependencies
-
-# Testing
-bundle exec rspec             # Run all tests (90% coverage required)
-bundle exec rubocop           # Lint (must pass)
-bundle exec rubocop -a        # Auto-fix
-
-# Build
-rake build                    # Build gem
-rake install:local            # Install locally
-
-# Using Hip on itself
-hip shell                     # Open container bash
-hip rspec <args>             # Run specs in container
-hip rubocop <args>           # Lint in container
+bundle install               # Setup dependencies
+bundle exec rspec            # Test (90% coverage enforced)
+bundle exec rubocop [-a]     # Lint [auto-fix]
+rake build / install:local   # Build/install gem
+hip shell/rspec/rubocop      # Run in container
 ```
 
 ---
@@ -56,14 +45,12 @@ hip rubocop <args>           # Lint in container
 
 ### Components
 
-| Component | File | Purpose |
-|-----------|------|---------|
-| CLI Entry | `lib/hip/cli.rb` | Thor routing, TOP_LEVEL_COMMANDS dispatch |
-| Config | `lib/hip/config.rb` | hip.yml parsing, modules, schema validation |
-| Command Dispatch | `lib/hip/commands/run.rb` | InteractionTree lookup, runner selection |
-| Runners | `lib/hip/commands/runners/` | Docker/Kubectl/Local execution strategies |
-| Environment | `lib/hip/environment.rb` | Variable interpolation ($VAR, ${VAR}) |
-| Command Tree | `lib/hip/interaction_tree.rb` | Parse hip.yml interaction: hierarchy |
+- **CLI**: `lib/hip/cli.rb` - Thor routing, TOP_LEVEL_COMMANDS
+- **Config**: `lib/hip/config.rb` - hip.yml parsing, modules, validation
+- **Dispatch**: `lib/hip/commands/run.rb` - InteractionTree → runner
+- **Runners**: `lib/hip/commands/runners/` - Docker/Kubectl/Local strategies
+- **Environment**: `lib/hip/environment.rb` - $VAR interpolation
+- **Tree**: `lib/hip/interaction_tree.rb` - interaction: hierarchy
 
 ### Configuration System
 
@@ -79,135 +66,66 @@ hip rubocop <args>           # Lint in container
 
 ### Design Patterns
 
-- **Command Pattern**: Each CLI command = separate class
-- **Strategy Pattern**: Runners = execution strategies
-- **Template Method**: `Hip::Command` base class with shared logic
-- **Configuration as Code**: hip.yml defines declarative commands
+Command (CLI classes), Strategy (Runners), Template Method (Hip::Command), Configuration as Code (hip.yml)
 
 ---
 
 ## Extending Hip
 
 ### Add Command
-
-1. Create `lib/hip/commands/my_command.rb` inheriting `Hip::Command`
-2. Register in `lib/hip/cli.rb`:
-   ```ruby
-   desc "my-cmd", "Description"
-   def my_cmd(*argv)
-     require_relative "commands/my_command"
-     Hip::Commands::MyCommand.new(*argv).execute
-   end
-   ```
-3. Add tests: `spec/lib/hip/commands/my_command_spec.rb`
+1. `lib/hip/commands/my_command.rb` inherit `Hip::Command`
+2. Register in `lib/hip/cli.rb`: desc + method → .execute
+3. Test: `spec/lib/hip/commands/my_command_spec.rb`
 
 ### Add Runner
+1. `lib/hip/commands/runners/my_runner.rb` inherit Base, impl #execute
+2. Update `lib/hip/commands/run.rb` lookup_runner logic
+3. Test with FakeFS fixtures
 
-1. Create `lib/hip/commands/runners/my_runner.rb` inheriting `Base`
-2. Implement `#execute` method
-3. Update `lib/hip/commands/run.rb` `lookup_runner` logic
-4. Add tests with FakeFS fixtures
-
-### Modify hip.yml Schema
-
-1. Edit `schema.json` with new properties
-2. Update `lib/hip/config.rb` if new top-level key
-3. Add validation tests
-4. Create example in `examples/`
+### Modify Schema
+1. Edit `schema.json` + `lib/hip/config.rb` (if top-level key)
+2. Add tests + example in `examples/`
 
 ---
 
 ## Testing
 
-Uses **FakeFS** for fast, isolated filesystem mocking.
+**FakeFS** for filesystem mocking. Fixtures: `spec/fixtures/*.yml`. Coverage: 90% enforced.
 
-**Patterns:**
-- Fixture-based: `spec/fixtures/*.yml` samples
-- Command: Verify shell command construction
-- Runner: Mock execution, verify arguments
-- Config: Schema validation, merging logic
-
-**Commands:**
 ```bash
-bundle exec rspec spec/lib/hip/config_spec.rb       # Config tests
-bundle exec rspec spec/lib/hip/commands/            # All commands
-bundle exec rspec --tag focus                       # Focused tests
+bundle exec rspec spec/lib/hip/{config,commands}/   # Targeted
+bundle exec rspec --tag focus                       # Focused
 ```
 
 ---
 
 ## Constraints
 
-### Ruby Version
-- **Current**: Ruby >= 3.3 (v9.1.0)
-- **CI**: Ruby 3.3, 3.4
-
-### Quality Gates
-- **Coverage**: SimpleCov 90% minimum (enforced)
-- **Schema**: All hip.yml must validate against schema.json
-- **Linting**: RuboCop must pass
-
-### Naming
-- Gem: "hip"
-- Module: `Hip::`
-- Binary: `hip`
-- Config: `hip.yml`, `hip.override.yml`, `.hip/`
+**Ruby**: >= 3.3 (CI: 3.3, 3.4) | **Coverage**: 90% | **Lint**: RuboCop | **Schema**: schema.json
+**Naming**: gem/bin: "hip", module: `Hip::`, config: `hip.yml`, `hip.override.yml`, `.hip/`
 
 ---
 
 ## Common Patterns
 
-### Dynamic Command Routing
+### Dynamic Routing
 
-`hip shell` → CLI.start detects "shell" not in TOP_LEVEL_COMMANDS → prepends "run" → becomes `hip run shell`
+`hip shell` → auto-prepends "run" if not in TOP_LEVEL_COMMANDS → `hip run shell` (requires hip.yml entry)
 
-Only works if "shell" defined in hip.yml interaction: section.
+### Environment Variables
 
-### Environment Interpolation
-
-Commands support `$VAR` and `${VAR}`:
-- `$HIP_OS` → linux, darwin, etc.
-- `$HIP_WORK_DIR_REL_PATH` → relative path to hip.yml directory
-- `$HIP_CURRENT_USER` → current user UID
+`$VAR` / `${VAR}`: `$HIP_OS` (platform), `$HIP_WORK_DIR_REL_PATH` (rel path), `$HIP_CURRENT_USER` (UID)
 
 ### Module System
 
-```yaml
-# hip.yml
-modules:
-  - ruby
-  - postgres
-
-# .hip/ruby.yml
-interaction:
-  bundle:
-    service: app
-    command: bundle
-
-# .hip/postgres.yml
-interaction:
-  psql:
-    service: db
-    command: psql
-```
-
-All merged, overrides win.
+`hip.yml` → modules: [ruby, postgres] → loads `.hip/ruby.yml`, `.hip/postgres.yml` → merged (overrides win)
 
 ---
 
 ## Key CLI Commands
 
-| Command | Purpose |
-|---------|---------|
-| `hip run CMD` | Execute interaction command |
-| `hip ls` | List available commands |
-| `hip up [SERVICE]` | Start containers (docker compose up) |
-| `hip down` | Stop and remove containers |
-| `hip provision [PROFILE]` | Run initialization scripts (after up) |
-| `hip compose CMD` | Docker Compose wrapper |
-| `hip validate` | Validate hip.yml schema |
-| `hip devcontainer` | VSCode DevContainer integration |
-| `hip claude:setup` | Generate Claude Code files |
+`hip run CMD` | `hip ls` | `hip up/down [SVC]` | `hip provision [PROF]` | `hip compose CMD`
+`hip validate` (schema) | `hip devcontainer` (VSCode) | `hip claude:setup` (CodeGen)
 
 ---
 
