@@ -35,7 +35,7 @@ module Hip
         end
 
         # Merge interaction-level environment variables
-        Hip.env.merge(command[:environment])
+        Hip.env.merge_vars!(command[:environment])
       end
 
       def execute
@@ -94,7 +94,7 @@ module Hip
           interpolate: true
         )
 
-        Hip.env.merge(env_file_vars)
+        Hip.env.merge_vars!(env_file_vars)
 
         DebugLogger.log("Loaded #{env_file_vars.size} variables from interaction env_file")
       rescue Hip::Error => e

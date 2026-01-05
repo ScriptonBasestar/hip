@@ -27,17 +27,23 @@ module Hip
       end
 
       # Then merge default_vars (which can override env_file if priority is 'before_environment')
-      merge(default_vars || {})
+      merge_vars!(default_vars || {})
 
       # Apply delayed env_file vars if priority is 'after_environment'
       merge_env_file_vars(@delayed_env_file_vars) if @delayed_env_file_vars
     end
 
-    def merge(new_vars)
+    def merge_vars!(new_vars)
       new_vars.each do |key, value|
         key = key.to_s
         @vars[key] = ENV.fetch(key) { interpolate(value.to_s) }
       end
+      self
+    end
+
+    def merge(new_vars)
+      Hip.logger.warn("Environment#merge is deprecated; use merge_vars! instead") unless Hip.test?
+      merge_vars!(new_vars)
     end
 
     def [](name)

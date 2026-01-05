@@ -29,7 +29,7 @@ RSpec.describe "env_file integration" do
     context "with simple env_file configuration" do
       let(:hip_yml) do
         <<~YAML
-          version: '9.0.0'
+          version: '#{Hip::VERSION}'
           env_file: .env
           environment:
             RAILS_ENV: development
@@ -55,7 +55,7 @@ RSpec.describe "env_file integration" do
     context "with priority: before_environment" do
       let(:hip_yml) do
         <<~YAML
-          version: '9.0.0'
+          version: '#{Hip::VERSION}'
           env_file:
             files: .env
             priority: before_environment
@@ -84,7 +84,7 @@ RSpec.describe "env_file integration" do
     context "with priority: after_environment" do
       let(:hip_yml) do
         <<~YAML
-          version: '9.0.0'
+          version: '#{Hip::VERSION}'
           env_file:
             files: .env
             priority: after_environment
@@ -113,7 +113,7 @@ RSpec.describe "env_file integration" do
     context "with multiple env files" do
       let(:hip_yml) do
         <<~YAML
-          version: '9.0.0'
+          version: '#{Hip::VERSION}'
           env_file:
             - .env.defaults
             - .env
@@ -139,7 +139,7 @@ RSpec.describe "env_file integration" do
     context "with required files" do
       let(:hip_yml) do
         <<~YAML
-          version: '9.0.0'
+          version: '#{Hip::VERSION}'
           env_file:
             - path: .env.required
               required: true
@@ -178,7 +178,7 @@ RSpec.describe "env_file integration" do
   describe "interaction-level env_file" do
     let(:hip_yml) do
       <<~YAML
-        version: '9.0.0'
+        version: '#{Hip::VERSION}'
         env_file: .env
         environment:
           RAILS_ENV: development
@@ -240,7 +240,7 @@ RSpec.describe "env_file integration" do
   describe "variable interpolation" do
     let(:hip_yml) do
       <<~YAML
-        version: '9.0.0'
+        version: '#{Hip::VERSION}'
         env_file: .env
         environment:
           APP_NAME: myapp
@@ -267,7 +267,7 @@ RSpec.describe "env_file integration" do
   describe "system ENV override" do
     let(:hip_yml) do
       <<~YAML
-        version: '9.0.0'
+        version: '#{Hip::VERSION}'
         env_file: .env
         environment:
           LOG_LEVEL: info

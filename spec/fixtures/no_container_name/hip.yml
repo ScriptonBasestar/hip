@@ -1,4 +1,4 @@
-version: 9.0.0
+version: "<%= Hip::VERSION %>"
 
 compose:
   files:
