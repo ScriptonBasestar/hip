@@ -1,0 +1,21 @@
+{
+  "name": "hip",
+  "version": "1.0.0",
+  "description": "Hip CLI integration for Claude Code - Docker Compose and Kubernetes workflow automation",
+  "author": {
+    "name": "archmagece",
+    "url": "https://github.com/archmagece"
+  },
+  "homepage": "https://github.com/archmagece/hip",
+  "repository": "https://github.com/archmagece/hip",
+  "license": "MIT",
+  "keywords": [
+    "docker",
+    "docker-compose",
+    "kubernetes",
+    "kubectl",
+    "devcontainer",
+    "cli",
+    "automation"
+  ]
+}

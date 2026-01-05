@@ -1,0 +1,15 @@
+{
+  "name": "hip-marketplace",
+  "description": "Hip CLI plugins for Claude Code",
+  "owner": {
+    "name": "archmagece",
+    "url": "https://github.com/archmagece"
+  },
+  "plugins": [
+    {
+      "name": "hip",
+      "source": "./hip-plugin",
+      "description": "Hip CLI integration - Docker Compose and Kubernetes workflow automation"
+    }
+  ]
+}
