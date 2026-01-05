@@ -149,7 +149,7 @@ hip validate -c examples/basic.yml
 All examples follow this general structure:
 
 ```yaml
-version: '8.2.8'              # Minimum required dip version
+version: '9.1.0'              # Minimum required hip version
 
 environment:                  # Environment variables
   VAR_NAME: value

@@ -2,12 +2,12 @@
 # This module provides static analysis and security scanning tools
 #
 # Provided commands:
-# - dip rubocop       # Ruby style checker
-# - dip brakeman      # Rails security scanner
-# - dip bundle-audit  # Check for vulnerable dependencies
-# - dip reek          # Code smell detector
+# - hip rubocop       # Ruby style checker
+# - hip brakeman      # Rails security scanner
+# - hip bundle-audit  # Check for vulnerable dependencies
+# - hip reek          # Code smell detector
 
-version: '8.2.8'
+version: '9.2.0'
 
 interaction:
   # RuboCop - Ruby style checker
@@ -53,6 +53,6 @@ interaction:
 provision:
   # Security audit - run all security checks
   security-audit:
-    - dip bundle-audit
-    - dip brakeman
+    - hip bundle-audit
+    - hip brakeman
     - echo "✅ Security audit complete"

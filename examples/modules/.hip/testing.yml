@@ -2,12 +2,12 @@
 # This module provides comprehensive testing tools
 #
 # Provided commands:
-# - dip rspec         # Run RSpec tests
-# - dip minitest      # Run Minitest tests
-# - dip coverage      # Generate coverage report
-# - dip ci            # Run full CI test suite
+# - hip rspec         # Run RSpec tests
+# - hip minitest      # Run Minitest tests
+# - hip coverage      # Generate coverage report
+# - hip ci            # Run full CI test suite
 
-version: '8.2.8'
+version: '9.2.0'
 
 interaction:
   # RSpec - Behavior-driven testing framework
@@ -66,16 +66,16 @@ interaction:
 provision:
   # Setup test environment
   test-setup:
-    - RAILS_ENV=test dip bundle install
-    - RAILS_ENV=test dip rails db:create db:schema:load
+    - RAILS_ENV=test hip bundle install
+    - RAILS_ENV=test hip rails db:create db:schema:load
     - echo "✅ Test environment ready"
 
   # Run full CI test suite
   ci:
     - hip provision test-setup
-    - dip rspec
+    - hip rspec
     - echo "✅ CI tests complete"
 
   # Reset test database
   test-reset:
-    - RAILS_ENV=test dip rails db:drop db:create db:schema:load
+    - RAILS_ENV=test hip rails db:drop db:create db:schema:load

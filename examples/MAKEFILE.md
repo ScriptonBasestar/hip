@@ -17,7 +17,7 @@ gem specific_install https://github.com/ScriptonBasestar/hip.git
 Create a `hip.yml` file in your project root. See [makefile-integration.yml](makefile-integration.yml) for a complete example.
 
 ```yaml
-version: '8.2'
+version: '9.1'
 
 compose:
   files:
@@ -77,28 +77,6 @@ Once integrated, you can use these commands:
 | `make hip-provision` | Run provisioning scripts |
 | `make hip-dev` | Full dev cycle (down, clean, up, provision) |
 | `make hip-restart` | Quick restart |
-
-## Migrating from DIP to Hip
-
-Hip is a fork of DIP (Docker Interact Process) with the same functionality. Migration is straightforward:
-
-**Simple replacement:**
-- Command: `dip` → `hip`
-- Config file: `dip.yml` → `hip.yml`
-- Makefile targets: `dip-*` → `hip-*`
-
-**Example:**
-```makefile
-# Old DIP targets (deprecated)
-# dip-up:     dip up -d
-# dip-console: dip rails console
-
-# New Hip targets (active)
-hip-up:      hip compose up -d
-hip-console: hip rails console
-```
-
-All DIP commands and configurations work identically in Hip.
 
 ## Example Workflows
 
