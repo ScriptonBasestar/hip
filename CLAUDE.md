@@ -199,7 +199,7 @@ spec/
 **Execution Mocking Pattern:**
 ```ruby
 # Specs use shared context to stub execution
-shared_context "dip command", :runner do
+shared_context "hip command", :runner do
   let(:program_runner) { spy("program runner") }
   before { stub_const("Hip::Command::ProgramRunner", program_runner) }
 end
