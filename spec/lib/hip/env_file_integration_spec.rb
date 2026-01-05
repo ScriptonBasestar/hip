@@ -8,15 +8,19 @@ RSpec.describe "env_file integration" do
   let(:tmpdir) { Dir.mktmpdir }
   let(:project_dir) { Pathname.new(tmpdir) }
   let(:hip_yml_path) { project_dir.join("hip.yml") }
-  let(:original_dir) { Dir.pwd }
 
-  before do
+  around do |example|
+    original_dir = Dir.pwd
+    original_hip_file = ENV["HIP_FILE"]
+
     FileUtils.mkdir_p(project_dir)
     Dir.chdir(project_dir)
-  end
+    ENV["HIP_FILE"] = hip_yml_path.to_s
 
-  after do
-    Dir.chdir(original_dir) if original_dir
+    example.run
+  ensure
+    Dir.chdir(original_dir)
+    ENV["HIP_FILE"] = original_hip_file
     FileUtils.rm_rf(tmpdir) if tmpdir && File.exist?(tmpdir)
     Hip.reset!
   end
