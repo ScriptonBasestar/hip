@@ -74,6 +74,7 @@ module Hip
         shell: entry.fetch(:shell, true),
         default_args: entry[:default_args].to_s.strip,
         environment: entry[:environment] || {},
+        env_file: entry[:env_file],
         compose: {
           method: entry.dig(:compose, :method) || entry[:compose_method] || "run",
           profiles: Array(entry.dig(:compose, :profiles)),

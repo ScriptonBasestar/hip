@@ -155,7 +155,8 @@ RSpec.describe "env_file integration" do
         end
 
         it "raises error" do
-          expect { Hip.reset! }.to raise_error(Hip::Error, /Required environment file not found/)
+          Hip.reset!
+          expect { Hip.env["REQUIRED_KEY"] }.to raise_error(Hip::Error, /Required environment file not found/)
         end
       end
 
